@@ -117,7 +117,7 @@ The role of internal representation conversion is to make sure that the data exc
 
 ## APPLICATIONS IN TCP/IP
 
-Host TCP/IP implementations typically provide a range of applications that provide users with access to the data handled by the transport-layer protocols. These applications use a number of protocols that are not part of TCP/IP proper, but are used with TCP/IP. These protocols include the Hyper-Text Transfer Protocol (HTTP) used by Web browsers, the Simple Message Transfer Protocol (SMTP) used for email, and many others.
+Host TCP/IP implementations typically provide a range of applications that provide users with access to the data handled by the transport-layer protocols. These applications use a number of protocols that are not part of TCP/IP proper, but are used with TCP/IP. These protocols include the Hyper-Text Transfer Protocol (HTTP) used by Web browsers, the Simple Message Transfer Protocol (SMTP) used for email, the [Secure SHell (SSH)](ssh.md) for ... and many others.
 
 Some protocols provide separate layers for sessions, internal representation conversion, and application services. In practice, these are seldom implemented independently.
 
