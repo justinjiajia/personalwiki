@@ -89,3 +89,36 @@ The transport layer, in contrast, can make sure the whole message, often strung 
 This function of the transport layer involves some method of flow control and error control (error detection and error correction) at the transport layer. The transport-layer protocol that performs all of these functions is TCP.
 
 In many cases, the content of the packet forms a complete unit all by itself, called a datagram.  Self-contained datagrams are not concerned with sequencing or flow control, and these functions are absent in the User Datagram Protocol (UDP) at the transport layer.
+
+
+
+
+## THE APPLICATION LAYER
+
+the TCP/IP protocol stack really stops at the transport layer (where TCP and UDP are). It is up to the application programmer to decide what should happen at the client and server level at that point, although there are individual RFCs for guidance, such as for FTP
+
+Although it is common to gather these TCP/IP applications into their own
+layer, there really is no such thing in TCP/IP as an application layer to act as
+some kind of “glue” between the application’s user and the network.
+
+
+There are two major tasks that the application often needs to accomplish: **session support** and **conversion of internal representation**.
+
+
+### SESSION SUPPORT
+
+A session is a type of dialog controller between two processes that establishes, maintains, and synchronizes (controls) the interaction (dialog). A session decides if the communication can be half-duplex (both ends take turns sending) or fullduplex (both ends can send whenever they want). It also keeps a kind of “history” of the interaction between endpoints, so that when things go wrong or when the two communicate again, some information does not have to be resent. In practical terms, the session consists of all “state variables” necessary to construct the history of the connection between the two devices. It is more difficult, but not impossible, to implement sessions in a connectionless environment because there is no easy way to associate the variables with a convenient label.
+
+
+### INTERNAL REPRESENTATION CONVERSION
+
+
+The role of internal representation conversion is to make sure that the data exchange over the network is useful to the receivers. If the internal representation of data differs on the two systems (integer size, bit order in memory, etc.), the application layer translates between the formats so the application program does not have to. This layer can also provide encryption and compression functions, although it is more common to implement these last two functions separately from the network
+
+## APPLICATIONS IN TCP/IP
+
+Host TCP/IP implementations typically provide a range of applications that provide users with access to the data handled by the transport-layer protocols. These applications use a number of protocols that are not part of TCP/IP proper, but are used with TCP/IP. These protocols include the Hyper-Text Transfer Protocol (HTTP) used by Web browsers, the Simple Message Transfer Protocol (SMTP) used for email, and many others.
+
+Some protocols provide separate layers for sessions, internal representation conversion, and application services. In practice, these are seldom implemented independently.
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/protocols_layers.PNG)
