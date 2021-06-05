@@ -91,7 +91,10 @@ This function of the transport layer involves some method of flow control and er
 In many cases, the content of the packet forms a complete unit all by itself, called a datagram.  Self-contained datagrams are not concerned with sequencing or flow control, and these functions are absent in the User Datagram Protocol (UDP) at the transport layer.
 
 
+The transport-layer protocol that should process the information inside the packet is indicated by the value in the protocol field of the IPv4 header. Inside the transport layer data unit, the receiving application is indicated by the port number in the transport layer header
 
+
+Another important application layer concept in TCP/IP is the *socket*. A socket is the combination of the IP address and port number. This combination will uniquely identify an application.
 
 ## THE APPLICATION LAYER
 
