@@ -17,7 +17,7 @@ The TCP/IP protocol stack models a series of protocol layers for networks and sy
  The Internet protocol suite is based on these five layers. TCP/IP says most about the network and transport layers, and a lot about the application layer. TCP/IP also defines how to interface the network layer with the data link and physical layers, but is not directly concerned with these two layers themselves.
 
 
- Not all systems on a network need to implement all five layers of TCP/IP. Devices using the TCP/IP protocol stack fall into two general categories: a host or end system (ES) and an intermediate node (often a router) or an intermediate system (IS). The intermediate nodes usually only involve the first three layers of TCP/IP
+
 
  TCP/IP LAYERS IN BRIEF
 
@@ -25,11 +25,13 @@ The TCP/IP protocol stack models a series of protocol layers for networks and sy
 
  - Data Link Layer: Organizes the bit stream into a data unit called a “frame” and delivers the frame to an adjacent system.  
 
- - Network Layer: Delivers data in the form of a packet from source to destination, across as many links as necessary, to non-adjacent systems.
+ - Network Layer or Internetwork Layer (IP): Delivers data in the form of a packet from source to destination, across as many links as necessary, to non-adjacent systems.
 
  - Transport Layer: Concerned with process-to-process delivery of information.
 
  - Application Layer: Concerned with differences in internal representation, user interfaces, and anything else that the user requires
+
+Not all systems on a network need to implement all five layers of TCP/IP. Devices using the TCP/IP protocol stack fall into two general categories: a host or end system (ES) and an intermediate node (often a router) or an intermediate system (IS). The intermediate nodes usually only involve the first three layers of TCP/IP.
 
 
 ## ENCAPSULATION
@@ -38,3 +40,52 @@ The figure below showing how devices are only physically connected at the lowest
 
 
 ![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/protocols_interfaces.PNG)
+
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/encapsulation_headers.PNG)
+
+    - The data link layer adds both a header and a trailer to the data it receives from the network layer.
+
+
+
+## The Link layer
+
+The Link layer needs to solve two basic problems when dealing with shared local area networks.
+
+
+- How to send data using a shared medium, how to encode and send data across the link. E.g.,
+    - If the link is wireless, engineers must agree on which radio frequencies are to be used to transmit data and how the digital data is to be encoded in the radio signal.
+    - For wired connections, they must agree on what voltage to use on the wire and how fast to send the bits across the wire.
+    - For Link layer technologies that use fiber optics, they must agree on the frequencies of light to be used and how fast to send the data.
+
+- How to cooperate with other computers that might want to send data at the same time.    
+
+
+# The Network Layer
+
+Not all destination systems are directly reachable by the sender (directly
+reachable systems are called **adjacent systems**, and adjacent systems are always “one hop away” from the sender; . A **hop** is the usual term used on the Internet or a router network to indicate the forwarding of a packet between one router and another or between a host and router)).
+
+The biggest difference between the network layer and the data link layer is that the data link layer is in charge of data delivery between adjacent systems (directly connected systems one hop away), while the network layer delivers data to systems that are not directly connected to the source.
+
+There can be many different types of data link and physical layers on the network, depending on the variety of the link types, but the network layer is essentially the same on all systems, end systems, and intermediate systems alike
+
+
+## THE TRANSPORT LAYER
+
+
+The transport layer breaks up a message at the sender into packets (each labeled “TL data” for transport-layer data and “TH” for transport-layer header) if necessary and reassemble the message at the receiver from the various segments that make up a message.
+
+
+![](https://github.com/justinjiajia/img/blob/master/personalwiki/transport_layer_segments.PNG)
+
+
+Process-to-process delivery is the task of the transport layer.
+
+The network layer forwards each and every packet independently, and does not recognize any relationship between the packets. (Is this a file transfer or email packet? The network layer does not care.)
+
+The transport layer, in contrast, can make sure the whole message, often strung out in a sequence of packets, arrives in order (packets can be delivered out of sequence) and intact (there are no errors in the entire message).
+
+This function of the transport layer involves some method of flow control and error control (error detection and error correction) at the transport layer. The transport-layer protocol that performs all of these functions is TCP.
+
+In many cases, the content of the packet forms a complete unit all by itself, called a datagram.  Self-contained datagrams are not concerned with sequencing or flow control, and these functions are absent in the User Datagram Protocol (UDP) at the transport layer.
