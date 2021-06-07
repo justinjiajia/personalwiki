@@ -21,7 +21,8 @@ These are split as
 A user types at a terminal (a physical teletype). This terminal is connected through a pair of wires to a UART (Universal Asynchronous Receiver and Transmitter) on the computer. The operating system contains a UART driver which manages the physical transmission of bytes, including parity checks and flow control. In a naïve system, the UART driver would then deliver the incoming bytes directly to some application process.
 
 
-![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case1.PNG)
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case1.png)
+
 
 
 But such an approach would lack the following essential features:
