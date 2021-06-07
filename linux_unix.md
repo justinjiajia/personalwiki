@@ -40,10 +40,22 @@ A diagram of the described boot process follows, showing subtle differences for 
 4 Since the original publication of this e-text, the init process has been replaced in some Linux distributions by the systemd process, also having PID 1. This has become somewhat controversial, and has been described as a violation of the Unix philosophy. More on the systemd process here. [Wikipedia contributors]
 
 
+## tty and pseudo-tty
+
+A Unix *tty* (pronounced as it's spelled, T-T-Y) is a software abstraction representing a computer terminal, originally an abbreviation for “teletype.” As part of an interactive session with a Unix machine, a *tty* is allocated to process keyboard input, limit screen output to a given number of rows and columns, and handle other terminal-related activities
+
+Since most terminal-like connections don’t involve an actual hardware terminal, but rather a window, a software construct called a pseudo-tty (or pty, pronounced P-T-Y) handles this sort of connection.
 
 
+The *init* program runs programs similar to *getty* for networked
+connections. For example, *sshd*, *telnetd*, and *rlogind* answer connection requests via *ssh*, *telnet*, and *rlogin*, respectively. Instead of being tied directly to a specific, physical terminal or modem line, these programs connect users' shells to *pseudo-ttys* or *PTY* (a pseudo-terminal). 
 
- If you connect via a program like ssh, you’ll be assigned a pseudo-terminal or pseudo-tty, in Unix parlance. That’s why when you typed in who you saw entries like ptty3 or pty1. In both instances, there is the program that reads your account and password information, and the program that validates it and invokes whatever login programs are needed for you to “log in” if everything checks out and is correct. As soon as someone types in some characters followed by the Enter key, the login program finishes the process of logging in
+  That’s why when you typed in *who* you saw entries like ptty3 or pty1. In both instances, there is the program that reads your account and password information, and the program that validates it and invokes whatever login programs are needed for you to “log in” if everything checks out and is correct. As soon as someone types in some characters followed by the Enter key, the login program finishes the process of logging in
+
+
+  When a client requests an SSH connection, the server doesn’t necessarily allocate a
+  pty for the client. It does so, of course, if the client requests an interactive terminal
+  session, e.g., just ssh host
 
 
 
