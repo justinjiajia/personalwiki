@@ -50,19 +50,19 @@ Together, a particular triplet of UART driver, line discipline instance and TTY 
 
 The physical line in the previous diagram could of course be a long-distance phone line:
 
-![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case2.PNG)
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case2.png)
 
 
 This does not change much, except that the system now has to handle a modem hangup situation as well.
 
 Let's move on to a typical desktop system. This is how the Linux console works:
 
-![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case3.PNG)
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case3.png)
 
 The TTY driver and line discipline behave just like in the previous examples, but there is no UART or physical terminal involved anymore. Instead, a video terminal (a complex state machine including a frame buffer of characters and graphical character attributes) is emulated in software, and rendered to a VGA display.
 
 The console subsystem is somewhat rigid. Things get more flexible (and abstract) if we move the terminal emulation into userland. This is how xterm(1) and its clones work:
 
-![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case4.PNG)
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case4.png)
 
 To facilitate moving the terminal emulation into userland, while still keeping the TTY subsystem (session management and line discipline) intact, the pseudo terminal or pty was invented. And as you may have guessed, things get even more complicated when you start running pseudo terminals inside pseudo terminals, à la screen(1) or ssh(1).
