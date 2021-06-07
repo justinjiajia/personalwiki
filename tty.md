@@ -10,7 +10,18 @@ At some point, “terminals” became CRT screens,
 
 and then eventually, just windows inside a graphical user interface.
 
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/putty1.jpg)
 
+This is where we are now. Terminals still behave almost exactly the same way they did when they were invented in the 1960s.
+
+Whenever you start a program on your computer it is attached to a terminal. By default, it is attached to the terminal in which you started it. Your operating system knows how to route inputs and outputs to your program, and not to some other program or device, because your program is attached to your terminal. In fact, there are likely hundreds of terminals currently attached in your operating system, attached to various devices and programs. Go ahead, have a look.
+
+Type at the command prompt:
+
+
+```shell
+$ ls /dev/tty*
+```
 
 ![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/Terminal1.png)
 
