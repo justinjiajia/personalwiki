@@ -45,10 +45,8 @@ Together, a particular triplet of UART driver, line discipline instance and TTY 
 
 
 
-
-
-
 The physical line in the previous diagram could of course be a long-distance phone line:
+
 
 ![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case2.png)
 
@@ -56,6 +54,7 @@ The physical line in the previous diagram could of course be a long-distance pho
 This does not change much, except that the system now has to handle a modem hangup situation as well.
 
 Let's move on to a typical desktop system. This is how the Linux console works:
+
 
 ![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case3.png)
 
