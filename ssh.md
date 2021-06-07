@@ -1,4 +1,8 @@
 
+references:
+
+https://web.mit.edu/rhel-doc/5/RHEL-5-manual/Deployment_Guide-en-US/ch-openssh.html
+
 # SECURE SHELL
 
 SSH is not really a Unix shell, such as the Bourne shell or BASH or other Unix interfaces. It’s really a protocol that runs, like most things, over IPv4 or IPv6. Yet the use of the word “shell” in SSH is a good one because there is a lot more to SSH than just remote access. Perhaps the term “secure suite” would have been better, but SSH is what it is.
@@ -78,10 +82,12 @@ use different host keys.
 
 
 The SSH protocol works on top of the packet-level protocol, and proceeds in the following phases:
+
 -	The client opens a connection to the server. (Note that an attacker may cause the connection to actually go to a different machine.)
 
 - The server sends its public RSA host key and another public RSA key (''server key'') that changes every hour. The client compares the received host key against its own database of known host keys.
-At present, SSH is not able to validate keys for hosts that it does not already know. It will normally accept the key of an unknown host and store it in its database for future reference.
+At present, SSH is not able to validate keys for hosts that it does not already know. The first time a key is received, the user is
+prompted about whether or not to accept it. Once the key of an unknown host is accepted,  it is cached in a “known hosts” file for future reference.
 
 -	The client generates a 256 bit random number using a cryptographically strong random number generator, and chooses an encryption algorithm from those supported by the server (normally IDEA or three-key 3DES). The client encrypts the random number (session key) with RSA using both the host key and the server key, and sends the encrypted key to the server.
 
