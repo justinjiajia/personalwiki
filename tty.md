@@ -1,5 +1,18 @@
 
+A terminal is a device for providing input to a program and printing output from the same program. The original terminals used paper! This device is called a teletype.
 
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/teletype.jpg)
+
+At some point, “terminals” became CRT screens,
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/DEC_VT100_terminal.jpg)
+
+and then eventually, just windows inside a graphical user interface.
+
+
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/Terminal1.png)
 
 the number in parentheses shown after Unix command names in manpages mean?
 the section that the man page for the command is assigned to.
@@ -18,7 +31,9 @@ These are split as
 
 
 
-A user types at a terminal (a physical teletype). This terminal is connected through a pair of wires to a UART (Universal Asynchronous Receiver and Transmitter) on the computer. The operating system contains a UART driver which manages the physical transmission of bytes, including parity checks and flow control. In a naïve system, the UART driver would then deliver the incoming bytes directly to some application process.
+A user types at a terminal (a physical teletype). This terminal is connected through a pair of wires to a UART (Universal Asynchronous Receiver and Transmitter) on the computer. The operating system contains a UART driver which manages the physical transmission of bytes, including parity checks and flow control.
+
+In a naïve system, the UART driver would then deliver the incoming bytes directly to some application process.
 
 
 ![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/tty_case1.png)
@@ -37,7 +52,9 @@ But such an approach would lack the following essential features:
 
 - Session management.
 
-    - The user probably wants to run several programs simultaneously, and interact with them one at a time. If a program goes into an endless loop, the user may want to kill it or suspend it. Programs that are started in the background should be able to execute until they try to write to the terminal, at which point they should be suspended. Likewise, user input should be directed to the foreground program only. The operating system implements these features in the TTY driver (drivers/char/tty_io.c).
+    - The user probably wants to run several programs simultaneously, and interact with them one at a time. If a program goes into an endless loop, the user may want to kill it or suspend it. Programs that are started in the background should be able to execute until they try to write to the terminal, at which point they should be suspended.
+
+    Likewise, user input should be directed to the foreground program only. The operating system implements these features in the **TTY driver** (drivers/char/tty_io.c).
 
     An operating system process is "alive" (has an execution context), which means that it can perform actions. The TTY driver is not alive; in object oriented terminology, the TTY driver is a passive object. It has some data fields and some methods, but the only way it can actually do something is when one of its methods gets called from the context of a process or a kernel interrupt handler. The line discipline is likewise a passive entity.
 
