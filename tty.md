@@ -2,8 +2,11 @@
 references:
 
 https://williams-cs.github.io/cs331-f19-www/assets/misc/pseudoterminals.html
+
 https://www.linusakesson.net/programming/tty/
+
 https://blog.bachi.net/?p=9034
+
 https://dev.to/napicella/linux-terminals-tty-pty-and-shell-192e
 
 
