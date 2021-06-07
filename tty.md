@@ -143,6 +143,44 @@ Linux mounts a special file system dev/pts on /dev (the 's' presumably standing 
 A pty is a pseudo-terminal - it’s a software implementation that appears to the attached program like a terminal, but instead of communicating directly with a “real” terminal, it transfers the input and output to another program. For example, when you ssh in to a machine and run ls, the ls command is sending its output to a pseudo-terminal, the other side of which is attached to the SSH daemon. A pts is the slave part of a pty. A ptmx is the master part of a pty.
 
 
+
+
+Jobs and sessions
+Job control is what happens when you press ^Z to suspend a program, or when you start a program in the background using &. A job is the same as a process group. Internal shell commands like jobs, fg and bg can be used to manipulate the existing jobs within a session. Each session is managed by a session leader, the shell, which is cooperating tightly with the kernel using a complex protocol of signals and system calls.
+
+The following example illustrates the relationship between processes, jobs and sessions:
+
+The following shell interactions...
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/exampleterm.png)
+
+...correspond to these processes...
+
+
+![](https://raw.githubusercontent.com/justinjiajia/img/master/personalwiki/examplediagram.png)
+
+...and these kernel structures.
+
+> TTY Driver (/dev/pts/0).
+Size: 45x13
+Controlling process group: (101)
+Foreground process group: (103)
+UART configuration (ignored, since this is an xterm):
+  Baud rate, parity, word length and much more.
+Line discipline configuration:
+  cooked/raw mode, linefeed correction,
+  meaning of interrupt characters etc.
+Line discipline state:
+  edit buffer (currently empty),
+  cursor position within buffer etc.
+pipe0
+Readable end (connected to PID 104 as file descriptor 0)
+Writable end (connected to PID 103 as file descriptor 1)
+Buffer
+
+
+
+
 Let's see what happens when...
 
 
