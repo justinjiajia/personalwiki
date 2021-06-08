@@ -10,6 +10,33 @@ https://blog.bachi.net/?p=9034
 https://dev.to/napicella/linux-terminals-tty-pty-and-shell-192e
 
 
+https://developpaper.com/overview-of-linux-tty-pts-differences/
+
+https://blog.csdn.net/leshami/article/details/77101939
+
+
+TTY history
+
+Before the advent of multitasking computers
+
+Before computers came out, people had been using a device called teletype, which was used to transmit information to each other. It looked like this:
+
+
+
+>+----------+   Physical Line        +----------+
+>| teletype |<--------------------->| teletype |
+>+----------+                       +----------+
+
+Two teletypes are connected by wires. There may be devices like modems at both ends of the line (they are ignored here). When you type the keyboard on one end of the teletype, the corresponding data will be sent to the teletype at the other end. I don’t know what the specific functions are. (it occurred to me that the picture was typed at one end and printed at the other end.)
+
+These are old antiques. I haven’t touched them at all, so I can only speculate simply.
+
+
+什么是终端(Terminal)
+早期的计算机都属于大中型计算机，是个庞然大物，占用很大的空间，属于公用产品，好比现在的共享单车，大家一起用。不像现在的电脑，可以人手一部，直接操作。那肿么办呢，如何对这些计算机进行控制与操作呢。那就搞个终端设备来操作。因此一台计算机上有很多种不同的终端设备也和正常。也就是说终端就是为主机提供了人机接口，每个人都通过终端使用主机的资源。终端有字符终端和图形终端两种。同时这些大型计算机还配有控制台。控制台是一种特殊的人机接口, 是人控制主机的第一人机接口。而主机对于控制台的信任度高于其他终端。控制台可以类比为我们操作系统的超级管理员，可以禁用某个用户的权限，禁用用户登陆等等。而普通终端就相当于一个普通用户
+
+
+
 A terminal is a device for providing input to a program and printing output from the same program. The original terminals used paper! This device is called a teletype.
 
 
@@ -165,23 +192,63 @@ The following shell interactions...
 ...and these kernel structures.
 
 > TTY Driver (/dev/pts/0).
-Size: 45x13
-Controlling process group: (101)
-Foreground process group: (103)
-UART configuration (ignored, since this is an xterm):
+
+> Size: 45x13
+
+> Controlling process group: (101)
+
+> Foreground process group: (103)
+
+> UART configuration (ignored, since this is an xterm):
   Baud rate, parity, word length and much more.
-Line discipline configuration:
+
+>Line discipline configuration:
   cooked/raw mode, linefeed correction,
   meaning of interrupt characters etc.
-Line discipline state:
+
+> Line discipline state:
   edit buffer (currently empty),
   cursor position within buffer etc.
-pipe0
-Readable end (connected to PID 104 as file descriptor 0)
-Writable end (connected to PID 103 as file descriptor 1)
+
+
+>pipe0
+
+>Readable end (connected to PID 104 as file descriptor 0)
+
+>Writable end (connected to PID 103 as file descriptor 1)
 Buffer
 
 
+- TTY has a very important attribute called foreground process group, which records the current front-end process group.
+
+- When the tty driver, e.g., pts/0 receives the input, it will check which front-end process group is, and then put the input into the input cache of the leader of the process group, so that the corresponding leader process can get the user’s input through the read function
+
+- When a process in the current process group writes data to the TTY device, TTY will output the data to the output device
+When executing different commands in the shell, the front-end process group is constantly changing, and the shell is responsible for updating this change to the TTY device
+
+
+在讨论TTY设备是如何被创建及配置之前，我们先来看看TTY是如何被进程使用的：
+
+```shell
+#  prints the file name of the terminal connected to standard input of the current bash
+$ tty
+/dev/pts/0
+
+# list all processes that opened the file /dev/pts/0
+$ lsof /dev/pts/0
+COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+bash    72527 ubuntu    0u   CHR  136,0      0t0    3 /dev/pts/0
+bash    72527 ubuntu    1u   CHR  136,0      0t0    3 /dev/pts/0
+bash    72527 ubuntu    2u   CHR  136,0      0t0    3 /dev/pts/0
+bash    72527 ubuntu  255u   CHR  136,0      0t0    3 /dev/pts/0
+lsof    72549 ubuntu    0u   CHR  136,0      0t0    3 /dev/pts/0
+lsof    72549 ubuntu    1u   CHR  136,0      0t0    3 /dev/pts/0
+lsof    72549 ubuntu    2u   CHR  136,0      0t0    3 /dev/pts/0
+
+
+```
+
+From the above lsof, we can see that stdin (0U), stdout (1U) and stderr (2U) of the currently running Bash and lsof processes are bound to /dev/pts/0.
 
 
 Let's see what happens when...
@@ -211,3 +278,107 @@ you type something in a terminal emulator in the user land like XTerm or any any
 the tty driver copies the characters to the master(no, the line discipline does not intervene on the way back)
 
 - XTerm reads in a loop the bytes from the pty master and redraws the UI
+
+
+
+## SSH远程访问
+
+
+这里的Terminal可能是任何地方的程序，比如windows上的putty，所以不讨论客户端的Terminal程序是怎么和键盘、显示器交互的。由于Terminal要和ssh服务器打交道，所以肯定要实现ssh的客户端功能。
+
+这里将建立连接和收发数据分两条线路解释，为了描述简洁，we use sshd whenever we need to refer to the ssh server program
+
+
+Establishing a connection
+
+1. Terminal request establishes connection with sshd
+
+2. If the verification passes, sshd will create a new session
+
+
+3. Call API (POSIX_ Openpt ()) requests ptmx to create a PTS. After successful creation, sshd will get the FD associated with ptmx and associate the FD with the session.
+
+```shell
+# pty (pseudo terminal device) is composed of two parts. ptmx is the master side and pts is the slave side
+# the process can call the API to request ptmx to create a pts, and then it will get a read-write FD connected to ptmx and a newly created PTS
+
+# ptmx maintains the corresponding relationship between the FD and PTS internally, and then the reading and writing to this FD will be forwarded to the corresponding PTS by ptmx
+
+# you can see that sshd has opened /dev/ptmx
+
+$ sudo lsof /dev/ptmx
+COMMAND  PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+sshd    1143   root    5u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   10u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   12u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   13u   CHR    5,2      0t0   90 /dev/ptmx
+
+$ ls /dev/pt*
+/dev/ptmx
+
+/dev/pts:
+0  ptmx
+
+```
+
+
+
+
+4.At the same time, sshd creates the shell process and binds the newly created pts to the shell.
+
+So if we create a new ssh session to the same server:
+
+```shell
+
+$ ls /dev/pt*
+/dev/ptmx
+
+/dev/pts:
+0  1  ptmx
+
+$ sudo lsof /dev/ptmx
+COMMAND  PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+sshd    1143   root    5u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   10u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   12u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1255 ubuntu   13u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1616   root    5u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1698 ubuntu   10u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1698 ubuntu   12u   CHR    5,2      0t0   90 /dev/ptmx
+sshd    1698 ubuntu   13u   CHR    5,2      0t0   90 /dev/ptmx
+
+```
+
+in the new session window, typing tts, you will see
+
+```shell
+$ tty
+/dev/pts/1
+
+```
+
+### Send and receive messages
+
+1. Terminal receives the input from the keyboard and sends the data to sshd through SSH protocol
+
+2. After receiving the data from the client, sshd finds the corresponding FD associated with ptmx according to the session it manages
+
+3. Write the data sent by the client to the found FD
+
+4. After receiving the data, ptmx finds the corresponding PTS according to FD (the corresponding relationship is automatically maintained by ptmx), and forwards the data packet to the corresponding PTS
+
+5. After receiving the packet, PTS checks the current front-end process group bound to itself, and sends the packet to the leader of the process group
+
+6. Since there is only shell on PTS, the read function of shell receives the packet
+
+7. The shell processes the received packets and outputs the processing results (or no output)
+
+8. Shell writes the result to PTS through write function
+
+9. PTS forwards the results to ptmx
+
+10. Ptmx finds the corresponding FD according to PTS and writes the result to the FD
+
+11. After receiving the FD result, sshd finds the corresponding session and sends the result to the corresponding client
+
+/dev/pts contains entries corresponding to devices. /dev/pts is a special directory that is created dynamically by the Linux kernel. The contents of the directory vary with time and reflect the state of the running system
