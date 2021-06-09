@@ -53,40 +53,40 @@ Then we can find the prefix of the command line change to *hadoop*, indicating t
 
 ### 2.2 Install JDK
 
-    Because this is a fresh virtual machine with only Ubuntu OS installed on it, we need to configure our computing environment by installing necessary software packages. The following commands install the <a href="https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions">OpenJDK 8</a> on this machine:
+Because this is a fresh virtual machine with only Ubuntu OS installed on it, we need to configure our computing environment by installing necessary software packages. The following commands install the <a href="https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions">OpenJDK 8</a> on this machine:
 
-    ```Shell
-    $ sudo apt-get update
-    $ sudo apt install openjdk-8-jdk
+```Shell
+$ sudo apt-get update
+$ sudo apt install openjdk-8-jdk
 
-    ```
+```
 
-    We can observe the installation starts. We will also be able to monitor the progress of the installation and read a success message in the end.
+We can observe the installation starts. We will also be able to monitor the progress of the installation and read a success message in the end.
 
-    Now typing `java -version` can tell us if Java is successfully installed.
+Now typing `java -version` can tell us that Java is successfully installed.
 
 ### 2.3 Download the latest stable release of Hadoop (version 3.2.1)
 
-    We'll use *wget* to download files from the Hadoop website. Download the binary distribution for installation by typing:
+We'll use *wget* to download files from the Hadoop website. Download the binary distribution for installation by typing:
 
-  ```Shell
-  $ cd ~
-  $ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
-  $ ls
-  ```
+```bash
+$ cd ~
+$ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+$ ls
+```
 
-    Unpack the downloaded tar file using this command:
+Unpack the downloaded tar file using this command:
 
-  ```Shell
-  $ tar vxzf hadoop-3.2.1.tar.gz
-  $ ls
-  ```
+```bash
+$ tar vxzf hadoop-3.2.1.tar.gz
+$ ls
+```
 
 Several flags are used with the tar command.  Among them, the *x* flag tells *tar* we are extracting files, and the *f* flag lets us specify the name of the file we're going to be working with.
 
 Rename the extracted directory for easier reference. Because we are going to set Hadoop configurations by editing files in this directory, we need to give the active user the permission to make such changes in the “hadoop” directory. Give the ownership of the directory to the active user. Lastly, delete the compressed file to save the space:
 
-```Shell
+```bash
 
 $ mv hadoop-3.2.1 hadoop
 $ sudo chown -R hadoop hadoop
@@ -103,8 +103,8 @@ To do so, we will need to configure the environment in which the Hadoop daemons 
 
 Most of Hadoop management environment variables can be set in .bashrc (for shell environment configuration). Make sure “/home/<username>” is the current working directory. Use the Ubuntu nano editor to open the .bashrc file by using:
 
-```Shell
-$ cd
+```bash
+$ cd ~
 $ nano .bashrc
 ```
 
