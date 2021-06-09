@@ -5,7 +5,7 @@
 
 In this tutorial, we will cover how to set up a fully-distributed Hadoop cluster on Amazon EC2 from scratch.
 
-1. Creating a fresh EC2 instance
+## 1. Creating a fresh EC2 instance
 
 Log into the AWS Management Console, go to EC2, and click on Launch instances.
 The technical set up of the fresh instance are as follows:
@@ -16,9 +16,11 @@ The technical set up of the fresh instance are as follows:
 - The default security rule allows only SSH connections to the instance.
 
 
-1. Install and Configure Hadoop on one EC2 instance
+## 2. Install and Configure Hadoop on one EC2 instance
 
-    1.1 Create a *hadoop* group, and add a user with *hadoop* as the username in the group
+
+### 2.1 Create a *hadoop* group, and add a user with *hadoop* as the username in the group
+
     When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal:
 
     ```shell
@@ -47,7 +49,7 @@ The technical set up of the fresh instance are as follows:
     Then we can find the prefix of the command line change to *hadoop*, indicating that the active user is *hadoop*. And the working directory becomes */home/hadoop*. From now on, we'll refer to this directory as the home directory (or just home). We have full access rights (read/write/execute, or **rwx**) to the home directory, so we won't have to fiddle with *sudo* every time we need to make a change.
 
 
-    1.2 Install JDK
+### 2.2 Install JDK
 
     Because this is a fresh virtual machine with only Ubuntu OS installed on it, we need to configure our computing environment by installing necessary software packages. The following commands install the <a href="https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions">OpenJDK 8</a> on this machine:
 
@@ -61,7 +63,7 @@ The technical set up of the fresh instance are as follows:
 
     Now typing `java -version` can tell us if Java is successfully installed.
 
-    1.3 Download the latest stable release of Hadoop (version 3.2.1)
+### 2.3 Download the latest stable release of Hadoop (version 3.2.1)
 
     We'll use *wget* to download files from the Hadoop website. Download the binary distribution for installation by typing:
 
