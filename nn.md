@@ -31,9 +31,9 @@ $ sudo adduser --ingroup hadoop hadoop
 ```
 
 
-    Most of the commands here need to be prefaced with the sudo command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
+Most of the commands here need to be prefaced with the sudo command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
 
-    It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use *bigdata* as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
+It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use *bigdata* as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
 
     Then, add the user into group *sudo* to allow root access with the following command
