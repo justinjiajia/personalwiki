@@ -36,19 +36,19 @@ Most of the commands here need to be prefaced with the sudo command. This allows
 It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use *bigdata* as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
 
-    Then, add the user into group *sudo* to allow root access with the following command
+Then, add the user into group *sudo* to allow root access with the following command
 
-    ```shell
-    $ sudo adduser hadoop sudo
-    ```
+```Shell
+$ sudo adduser hadoop sudo
+```
 
-    Now, switch to the new account:
+Now, switch to the new account:
 
-    ```Shell
-    $ sudo su - hadoop
-    ```
+```Shell
+$ sudo su - hadoop
+```
 
-    Then we can find the prefix of the command line change to *hadoop*, indicating that the active user is *hadoop*. And the working directory becomes */home/hadoop*. From now on, we'll refer to this directory as the home directory (or just home). We have full access rights (read/write/execute, or **rwx**) to the home directory, so we won't have to fiddle with *sudo* every time we need to make a change.
+Then we can find the prefix of the command line change to *hadoop*, indicating that the active user is *hadoop*. And the working directory becomes */home/hadoop*. From now on, we'll refer to this directory as the home directory (or just home). We have full access rights (read/write/execute, or **rwx**) to the home directory, so we won't have to fiddle with *sudo* every time we need to make a change.
 
 
 ### 2.2 Install JDK
