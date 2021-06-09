@@ -7,12 +7,14 @@ In this tutorial, we will cover how to set up a fully-distributed Hadoop cluster
 
 ## 1. Creating a fresh EC2 instance
 
-Log into the AWS Management Console, go to EC2, and click on Launch instances.
-The technical set up of the fresh instance are as follows:
+Log into the AWS Management Console, go to EC2, and click on **Launch instances**.
 
-- Ubuntu Server 20.04 LTS (HVM), SSD Volume Type
+The technical setup of the fresh instance are as follows:
+
+- **Ubuntu Server 20.04 LTS (HVM), SSD Volume Type**
 
 - **t2.micro** – free tier
+
 - The default security rule allows only SSH connections to the instance.
 
 
@@ -21,12 +23,12 @@ The technical set up of the fresh instance are as follows:
 
 ### 2.1 Create a *hadoop* group, and add a user with *hadoop* as the username in the group
 
-    When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal:
+When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal:
 
-    ```shell
-    $ sudo addgroup hadoop
-    $ sudo adduser --ingroup hadoop hadoop
-    ```
+```Shell
+$ sudo addgroup hadoop
+$ sudo adduser --ingroup hadoop hadoop
+```
 
 
     Most of the commands here need to be prefaced with the sudo command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
@@ -42,7 +44,7 @@ The technical set up of the fresh instance are as follows:
 
     Now, switch to the new account:
 
-    ```shell
+    ```Shell
     $ sudo su - hadoop
     ```
 
@@ -53,7 +55,7 @@ The technical set up of the fresh instance are as follows:
 
     Because this is a fresh virtual machine with only Ubuntu OS installed on it, we need to configure our computing environment by installing necessary software packages. The following commands install the <a href="https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions">OpenJDK 8</a> on this machine:
 
-    ```shell
+    ```Shell
     $ sudo apt-get update
     $ sudo apt install openjdk-8-jdk
 
@@ -67,15 +69,15 @@ The technical set up of the fresh instance are as follows:
 
     We'll use *wget* to download files from the Hadoop website. Download the binary distribution for installation by typing:
 
-    ```shell
-    $ cd ~
-    $ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
-    $ ls
-    ```
+  ```Shell
+  $ cd ~
+  $ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+  $ ls
+  ```
 
     Unpack the downloaded tar file using this command:
 
-  ```shell
+  ```Shell
   $ tar vxzf hadoop-3.2.1.tar.gz
   $ ls
   ```
@@ -84,13 +86,27 @@ Several flags are used with the tar command.  Among them, the *x* flag tells *ta
 
 Rename the extracted directory for easier reference. Because we are going to set Hadoop configurations by editing files in this directory, we need to give the active user the permission to make such changes in the “hadoop” directory. Give the ownership of the directory to the active user. Lastly, delete the compressed file to save the space:
 
-```shell
+```Shell
+
 $ mv hadoop-3.2.1 hadoop
 $ sudo chown -R hadoop hadoop
 $ rm hadoop-3.2.1.tar.gz
+
 ```
 
+### 2.4 Configuring Environment of Hadoop Daemons
 
+We have successfully installed Hadoop. Now, we want to configure the Hadoop.
+
+To do so, we will need to configure the environment in which the Hadoop daemons execute as well as the configuration parameters for the Hadoop daemons (e.g., HDFS daemons are NameNode, SecondaryNameNode, and DataNode. YARN daemons are ResourceManager and NodeManager. If MapReduce is to be used, then the MapReduce Job History Server will also be running).
+
+
+Most of Hadoop management environment variables can be set in .bashrc (for shell environment configuration). Make sure “/home/<username>” is the current working directory. Use the Ubuntu nano editor to open the .bashrc file by using:
+
+```Shell
+$ cd
+$ nano .bashrc
+```
 
 
   <sup>[1](#footnote1)</sup> If you use a password other than *bigdata*, you must change the affected part of *sshconf.sh* accordingly for configuring SSH connections.
