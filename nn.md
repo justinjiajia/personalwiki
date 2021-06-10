@@ -529,10 +529,11 @@ $ mapred --daemon start historyserver
 
 The Hadoop Web UIs are reachable through the following:
 
-•	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – [Resource Manager]
+•	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
 •	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target="_blank">NameNode</a>
 
-•	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – MapReduce JobHistory Server
+•	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
+
 
 After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
 
