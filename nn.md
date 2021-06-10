@@ -90,8 +90,20 @@ $ ls
 
 - <kbd>Ctrl</kbd>+<kbd>C</kbd>  (on Windows) or <kbd>Control</kbd>+<kbd>C</kbd> (on Mac) can cancel the currently-running download process.
 
-- For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f`.
+- For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f wget-log`. For example:
 
+
+```shell
+$ wget -b http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
+$ tail -f wget-log
+
+```
+
+The background downloading process can be aborted by using:
+
+```shell
+$ pkill -9 wget
+```
 
 Unpack the downloaded tar file and delete the compressed file to save the space:
 
@@ -364,7 +376,7 @@ $ cd ~ && ssh-keygen -t rsa -P ''
 ```
 
 
-`ssh-keygen` requires us to specify the key type with the `–t` option, as there is no default. `ssh-keygen` can produce either a DSA or RSA key (both DSA and RSA are encryption algorithms). Here, `rsa` stands for the RSA algorithm. `-P ''` (two primes) indicates that the newly-created pair does not require a passphrase for authentication<sup><a href="#footnote8">8</a></sup>.
+`ssh-keygen` requires us to specify the key type with the `–t` option, as there is no default. `ssh-keygen` can produce either a DSA or RSA key (both DSA and RSA are encryption algorithms). Here, `rsa` stands for the RSA algorithm. `-P ''` (two primes) indicates that the newly-created pair does not require a passphrase for authentication.<sup><a href="#footnote8">8</a></sup>
 
 
 `ssh-keygen` then creates a local SSH configuration directory **~/.ssh** if it doesn't already exist, and stores the private and public components of the generated key in two files there. By default, their names are **id_dsa** and **id_dsa.pub**
