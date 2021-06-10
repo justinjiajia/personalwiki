@@ -41,9 +41,9 @@ $ sudo adduser --ingroup hadoop hadoop
 ```
 
 
-Most of the commands here need to be prefaced with the *sudo* command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
+Most of the commands here need to be prefaced with the *sudo* command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case **ubuntu**) will be able to use this command.
 
-It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use *bigdata* as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
+It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use **bigdata** as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
 
 Then, add the user into group *sudo* to allow root access with the following command
@@ -79,7 +79,7 @@ Now typing `java -version` can tell us that Java is successfully installed.
 
 ### 2.3 Download the latest stable release of Hadoop (version 3.2.1)
 
-We'll use *wget* to download files from the Hadoop website. Download the binary distribution for installation by typing:
+We'll use *wget* to download files from the [Hadoop website](https://hadoop.apache.org/releases.html). Download the binary distribution for installation by typing:
 
 ```bash
 $ cd ~
@@ -87,22 +87,21 @@ $ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar
 $ ls
 ```
 
-Unpack the downloaded tar file using this command:
+Unpack the downloaded tar file and delete the compressed file to save the space:
 
 ```bash
 $ tar vxzf hadoop-3.2.1.tar.gz
-$ ls
+$ rm hadoop-3.2.1.tar.gz && ls
 ```
 
-Several flags are used with the tar command.  Among them, the *x* flag tells *tar* we are extracting files, and the *f* flag lets us specify the name of the file we're going to be working with.
+Several flags are used with the tar command.  Among them, the `x` flag tells `tar` we are extracting files, and the `f` flag lets us specify the name of the file we're going to be working with. The `z` option tells tar to read or write archives through gzip, and it should be used when operating on files with the extension **.tar.gz**. The `v` option tells tar to operate verbosely.
 
-Rename the extracted directory for easier reference. Because we are going to set Hadoop configurations by editing files in this directory, we need to give the active user the permission to make such changes in the “hadoop” directory. Give the ownership of the directory to the active user. Lastly, delete the compressed file to save the space:
+Rename the extracted directory for easier reference. Because we are going to set Hadoop configurations by editing files in this directory, we need to give the active user the permission to make such changes in the **hadoop** directory. Give the ownership of the directory to the active user:
 
 ```bash
 
 $ mv hadoop-3.2.1 hadoop
 $ sudo chown -R hadoop hadoop
-$ rm hadoop-3.2.1.tar.gz
 
 ```
 
@@ -115,7 +114,7 @@ We have successfully installed Hadoop. Now, we want to configure the Hadoop clus
 To do so, we will need to configure the ***environment*** in which the Hadoop daemons execute as well as the ***configuration parameters*** for the Hadoop daemons (e.g., HDFS daemons are NameNode, SecondaryNameNode, and DataNode. YARN daemons are ResourceManager, NodeManager, and WebAppProxy. If MapReduce is to be used, then the MapReduce Job History Server will also be running).
 
 
-Most of Hadoop management environment variables can be set in **.bashrc** (for shell environment configuration)<sup><a href="#footnote2">2</a></sup><sup><a href="#footnote3">3</a></sup>. Make sure **/home/hadoop** is the current working directory. Use the Ubuntu *nano* editor to open the **.bashrc** file by using:
+Most of Hadoop management environment variables can be set in **.bashrc** (for shell environment configuration)<sup><a href="#footnote2">2</a></sup><sup><a href="#footnote3">3</a></sup>. Make sure **/home/hadoop** is the current working directory. Use the Ubuntu *nano* editor to open **.bashrc** by using:
 
 ```bash
 $ cd ~
@@ -123,7 +122,9 @@ $ nano .bashrc
 ```
 
 
-The .bashrc file contains the script that will be read and executed whenever the interactive shell is started. We want to add several environment variables (e.g., JAVA_HOME, HADOOP_HOME, PATH, etc) to the **.bashrc** file.  Copy and paste the following lines to the bottom of this file and press CTRL+X to exit the editing mode. Remember to enter **y** to save the change you just made to the **.bashrc** file.
+**.bashrc** contains the script that will be read and executed whenever the interactive shell is started. We want to add several environment variables (e.g., *JAVA_HOME*, *HADOOP_HOME*, *PATH*, etc.) to the **.bashrc** file<sup><a href="#footnote4">4</a></sup><sup><a href="#footnote5">5</a></sup>.  
+
+Copy and paste the following lines to the bottom of this file:
 
 ```bash
 # Java
@@ -138,13 +139,13 @@ export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ```
 
+Press CTRL+X to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
 
 Use *source* to reload the **.bashrc** profile into the current command prompt. To check whether the environment variables have been updated correctly, we can use *echo* to print their values to the prompt:
 
 ```bash
 $ source .bashrc
-$ echo $HADOOP_HOME
-$ echo $JAVA_HOME
+$ echo $HADOOP_HOME && echo $JAVA_HOME
 ```
 
 Now, we can also check Hadoop installation by running:
@@ -163,7 +164,7 @@ To do so, we use the *nano* editor to open **hadoop-env.sh**.
 $ nano $HADOOP_CONF_DIR/hadoop-env.sh
 ```
 
-Use CTRL+W and input *JAVA_HOME* to locate and uncomment the following line:
+Use CTRL+W and input **JAVA_HOME** to locate and uncomment the following line:
 
 
 ```bash
@@ -183,7 +184,7 @@ Then press **CTRL+X** to exit the editing mode. Remember to enter **y** to save 
 
 After done with the setup of the environment variables, we move on to configuring the Hadoop Daemons. Hadoop's configuration is driven by two types of important configuration files:
 
--	Read-only default configuration: **core-default.xml**, **hdfs-default.xml** , **yarn-default.xml**, and **mapred-default.xml**<sup><a href="#footnote5">5</a></sup><sup>.
+-	Read-only default configuration: **core-default.xml**, **hdfs-default.xml** , **yarn-default.xml**, and **mapred-default.xml**<sup><a href="#footnote6">6</a></sup><sup>.
 
 -	Site-specific configuration: **core-site.xml**, **hdfs-site.xml**, **yarn-site.xml** and **mapred-site.xml** (located in **$HADOOP_CONF_DIR**).
 
@@ -208,7 +209,7 @@ First, edit **core-site.xml**. Use the nano editor to open it:
 $ nano core-site.xml
 ```
 
-In this file, we define one essential property for the entire system; that is, the name of the default file system we wish to use. The value of *fs.defaultFS* is the URI (protocol specifier, hostname, and port) that describes the NameNode for the cluster. Each machine in the cluster on which Hadoop is expected to operate needs to know the NameNode’s address. For example, the DataNode processes needs this information to register with NameNode, and make their data available through it. Individual client programs will connect to this address to retrieve the locations of actual file blocks.
+In this file, we define one essential property for the entire system; that is, the name of the default file system we wish to use. The value of `fs.defaultFS` is the URI (protocol specifier, hostname, and port) that describes the NameNode for the cluster. Each machine in the cluster on which Hadoop is expected to operate needs to know the NameNode’s address. For example, the DataNode processes needs this information to register with NameNode, and make their data available through it. Individual client programs will connect to this address to retrieve the locations of actual file blocks.
 
 Paste the following in the `<configuration>` tag. Save and exit the editor.
 
@@ -237,7 +238,8 @@ Paste the following in the `<configuration>` tag. Save and exit the editor.
     <description>The username used when using the HDFS web UI.</description>
 </property>
 ```
-Next, edit hdfs-site.xml to configure NameNode, SecondaryNameNode, and DataNode. Copy the following and paste it between the configuration tags in the nano editor, save and exit the editor.
+
+Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataNode. Copy the following and paste it between the configuration tags in the nano editor, save and exit the editor.
 
 
 ```XML
@@ -273,11 +275,10 @@ $ mkdir -p hadoop_tmp/dfs/name hadoop_tmp/dfs/data
 In practice, if there is one instance exclusively used as the NameNode, we don't need to create the **~/hadoop_tmp/dfs/data** directory on it. Similarly, there is no need to create the namenode directory on the machine exclusively used as the DataNode.
 
 
-Next is the yarn-site.xml used for configuring ResourceManager and NodeManager. Proceed to the $HADOOP_CONF_DIR directory again and open the yarn-site.xml file:
+Next is the **yarn-site.xml** used for configuring ResourceManager and NodeManager. Proceed to the $HADOOP_CONF_DIR directory again and open the yarn-site.xml file:
 
 ```shell
-$ cd $HADOOP_CONF_DIR
-$ nano yarn-site.xml
+$ cd $HADOOP_CONF_DIR && nano yarn-site.xml
 ```
 
 Copy the following and paste it between the configuration tags just like before.
@@ -306,13 +307,13 @@ Copy the following and paste it between the configuration tags just like before.
 Save and exit the editor.
 
 
-Edit mapred-site.xml to configure MapReduce Applications and MapReduce JobHistory Server:
+Edit **mapred-site.xml** to configure MapReduce Applications and MapReduce JobHistory Server:
 
 ```shell
 $ nano mapred-site.xml
 ```
 
-Copy and paste the following between the configuration tags<sup><a href="#footnote6">6</a></sup>:
+Copy and paste the following between the configuration tags<sup><a href="#footnote7">7</a></sup>:
 
 
 ```xml
@@ -345,7 +346,7 @@ Save and exit the editor.
 
 
 
-These files should later be replicated consistently across all machines in the cluster, as we launch our fully-distributed cluster (For more configuration options, please reference the online manual for [Hadoop Cluster Setup](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).)
+These files should later be replicated consistently across all machines in the cluster, as we launch our fully-distributed cluster. For more configuration options, please reference the online manual for [Hadoop Cluster Setup](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
 
 
 
@@ -355,28 +356,28 @@ These files should later be replicated consistently across all machines in the c
 Later, password-less SSH is going to be used for remote accesses among machines in our Hadoop cluster (e.g., the master node remotely start the DataNodes and YARN services on worker nodes). Generate SSH key pairs (other than that we use to interact with the Unix shell via PUTTY) by issuing the following commands:
 
 ```shell
-$ cd ~
-$ ssh-keygen -t rsa -P ''
+$ cd ~ && ssh-keygen -t rsa -P ''
 ```
 
-`ssh-keygen` requires us to specify the key type with the `–t` option, as there is no default.
 
-`rsa` stands for the RSA algorithm for public-key cryptography. `-P ''` (two primes) indicates that the newly-created pair does not require a passphrase for authentication<sup><a href="#footnote7">7</a></sup>.
+`ssh-keygen` requires us to specify the key type with the `–t` option, as there is no default. `ssh-keygen` can produce either a DSA or RSA key (both DSA and RSA are encryption algorithms). Here, `rsa` stands for the RSA algorithm. `-P ''` (two primes) indicates that the newly-created pair does not require a passphrase for authentication<sup><a href="#footnote8">8</a></sup>.
 
 
-`ssh-keygen` then creates a local SSH directory **~/.ssh** if it doesn’t already exist, and stores the private and public components of the generated key in two files there. By default, their names are **id_dsa** and **id_dsa.pub**
+`ssh-keygen` then creates a local SSH configuration directory **~/.ssh** if it doesn't already exist, and stores the private and public components of the generated key in two files there. By default, their names are **id_dsa** and **id_dsa.pub**
 
 Run the following command, you'll find that the directory **~/.ssh** has been created and  both **id_rsa** and **id_rsa.pub** placed.
 
 ```shell
 $ cd .ssh && ls
 ```
+To be able to log into this account (hadoop) from other nodes of the cluster using the private key, we must associate the public key with this account.
 
-To be able to log into this node from other nodes of the cluster using the private key, we should add the public key to **authorized_keys**.
+This is done by editing a file **authorized_keys** in **~/.ssh**.
 
-A typical authorized_keys file contains a list of public-key data, one key per line, for this machine to act as a server.
+A typical **authorized_keys** file contains a list of public-key data, one key per line, for this machine to act as a server. The login attempt from a client will be accepted if the client proves that it holds the private key and the public key is in the server's authorization list (i.e., **authorized_keys**).
 
-We append the public key **id_rsa.pub** to **authorized_keys** with the following command:
+
+we should add the public key to **authorized_keys**. We do so by appending **id_rsa.pub** to **authorized_keys** with the following command:
 
 ```shell
 $ cat id_rsa.pub >> authorized_keys
@@ -396,16 +397,14 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFL3aGOyW1BvpwaGFEMNLwh8ppwgs7i/P9EfPvRnp9
 **authorized_keys** now contains only 1 public key, occupying its own line. You may observe line breaks inside the long number when using a command line interface. They are printing artifacts, because it is too long to fit on the screen.
 
 
-The authorized_keys file holds a list of authorized public keys The login attempt from a client will be accepted if the client proves that it holds the private key and the public key is in the server's authorization list (i.e., **authorized_keys**).
-
 
 ## 2. Creating an AMI for the Configured instance
 
 We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be consistent across all machines in a fully-distributed cluster. To make things easier, we will now just clone the EC2 instance to create an AMI. To do that:
 
-1.	Select the configured instance on the EC2 dashboard. Then, click on the Actions tab. Click Image > Create Image. Give you Image a name (e.g., hadoop-your-ITSC-account). Your instance is rebooting, and your PuTTY connection is getting lost.
+1.	Select the configured instance on the EC2 dashboard. Then, click on the **Actions** tab. Click **Image and templates** > **Create image**. Give you image a name (e.g., hadoop-your-ITSC-account). Your instance is rebooting, and your SSH connection is getting lost.
 
-2.	Look on the left pane of your EC2 dashboard. Click AMIs to view your created Image. It should be in pending status. Wait for it to be available.
+2.	Look on the left pane of your EC2 dashboard. Click **AMIs** to view your created image. It should be in pending status. Wait for it to be available.
 
 3.	Once available, we can clone this AMI to create more EC2 instances that share the same setting as the configured one to launch a fully-distributed cluster.
 
@@ -428,7 +427,7 @@ We can launch as many instances as we want.
 ### 3.1 Configuring SSH Connections among EC2 Instances
 
 
-We want to create a shell script to automate the creation of the IP-address-hostname mapping on and the setup of SSH connections among all the EC2 instances we are going to use. Use **nano** to open a file called **sshconf.sh** in the home directory, and copy and paste the following commands into it<sup><a href="#footnote8">8</a></sup>.  Save the change.
+We want to create a shell script to automate the creation of the IP-address-hostname mapping on and the setup of SSH connections among all the EC2 instances we are going to use. Use **nano** to open a file called **sshconf.sh** in the home directory, and copy and paste the following commands into it<sup><a href="#footnote9">9</a></sup>.  Save the change.
 
 ```bash
 #!/bin/bash
@@ -529,6 +528,7 @@ worker2
 ...
 ```
 To start a Hadoop cluster we need to start both the HDFS and YARN cluster.
+
 The first time we bring up HDFS, it must be formatted. Format a new distributed filesystem by issuing:
 
 
@@ -537,7 +537,7 @@ $ hdfs namenode -format
 ```
 
 
-We are now ready to launch the Hadoop Cluster. Since the $HADOOP_CONF_DIR/workers file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the start-dfs.sh script, we can first check all java processes running currently on this machine. Issue the following commands sequentially:
+We are now ready to launch the Hadoop cluster. Since the **$HADOOP_CONF_DIR/workers** file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the start-dfs.sh script, we can first check all java processes running currently on this machine. Issue the following commands sequentially:
 
 ```bash
 $ jps
@@ -645,6 +645,137 @@ The default setting can be rolled back by removing these lines after you are don
 Once this local configuration is done, you can use the file upload icon to upload a file from your local computer to HDFS. You can download files from HDFS as well.
 
 
+## Hadoop Streaming
+
+
+Python 3 is installed on Ubuntu EC2 instances. You can run the following code to check the exact Python version installed on an instance:
+
+```shell
+$ python3 --version
+```
+
+For the word counting application, the Python code for the mapper can be specified as follows:
+
+```python
+#!/usr/bin/env python3
+
+import sys
+import re
+
+for line in sys.stdin:
+    line = line.strip().lower()
+    line = re.sub('[^A-Za-z\s]', '', line)
+    words = line.split()
+    for word in words:
+        print("%s\t%s" % (word, 1))
+
+```
+
+
+The easiest way to create a **.py** file and populate it with the code above is to use *nano*. Run the following code in the home directory:
+
+```shell
+$ nano mapper.py
+```
+
+Copy and paste the Python code into the opened file, and format it to make sure code lines are properly indented.
+
+
+
+After you finish editing, hit Ctrl+X (on Windows) or Control+X (on macOS) to quit nano.  Enter **y** to save the change.
+
+The Python code for the reducer can be specified as follows:
+
+```python
+#!/usr/bin/env python3
+
+import sys
+
+current_word, current_count = None, 0
+for line in sys.stdin:
+    line = line.strip()
+    word, count = line.split('\t', 1)
+    count = int(count)
+    if current_word == word:
+        current_count += count
+    else:
+        if current_word:
+            print("%s\t%s" % (current_word, current_count))
+        current_count = count
+        current_word = word
+
+if word == current_word: print("%s\t%s" % (current_word, current_count))
+
+```
+
+
+Run the following code in the home directory to create a .py file named reducer:
+
+```shell
+$ nano reducer.py
+```
+
+Again, copy and paste the Python code into the opened file and format it properly.
+
+
+
+
+
+Then quit nano. Remember to enter **y** to save the change.
+
+Now, we've created the **mapper.py** and **reducer.py** scripts. Next, grant them execution permission by running the following command:
+
+```shell
+$ chmod +x mapper.py reducer.py
+```
+
+Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to use the following line of code to test the two Python scripts LOCALLY before submitting them to the cluster:
+
+```shell
+$ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k 1,1 | ~/reducer.py
+```
+
+If exceptions are raised, use `nano mapper.py` and `nano reducer.py` to open the two .py files to examine whether all lines of the Python code are correctly indented.
+
+If you observe the following output, it means the code works properly:
+
+```
+bar     1
+foo     3
+lab     1
+quux    2
+```
+
+
+Now everything is ready. You can run the Python MapReduce job on your EMR cluster by typing:
+
+
+or:
+
+```shell
+$ mapred streaming \
+-D mapreduce.job.reduces=2 \
+-input input_dir_on_HDFS \
+-output output_dir_on_HDFS \
+-mapper mapper.py \
+-reducer reducer.py \
+-file mapper.py \
+-file reducer.py
+```
+-file is a command option
+
+```shell
+$ mapred streaming \
+-D mapreduce.job.reduces=2 \
+-files mapper.py,reducer.py \
+-input input_dir_on_HDFS \
+-output output_dir_on_HDFS \
+-mapper mapper.py \
+-reducer reducer.py \
+```
+
+We can also use the -files option to specify a comma-separated list of files (in an adjacent pair of files, the name of the latter file must succeed that of the former without any space in between) to be copied to the cluster. These files will get copied onto the current working directory of mapper or reducer on all nodes.
+And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
 
 
 
@@ -661,16 +792,17 @@ Once this local configuration is done, you can use the file upload icon to uploa
 
 <sup>[3](#footnote3)</sup>Numerous files end with the letters **rc** (e.g., **.bashrc**) on Unix installations. The letters **rc** are historical in nature and are taken from the words run commands to indicate the intended purpose of the file
 
+<sup>[4](#footnote4)</sup> For example, the *PATH* variable contains a colon-separated list of directories that the shell searches for commands (Colon (:) is used to concatenate multiple directories). With $JAVA_HOME/bin added to the list, all tools in **$JAVA_HOME/bin**, e.g., `jps`, the tool used to list all java processes of a user, can be directly called in without specifying the path.
 
-<sup>[4](#footnote4)</sup> *export* is a bash shell built-in command. It marks an environment variable to be exported to child-processes.If a value is supplied, assign the value before exporting. The syntax is `export [-f] [-n] [name[=value] ...]` or `export -p`. There should be no space around the `=` sign in `name[=value]`.
-
-
-<sup>[5](#footnote5)</sup> The actual files are present in different JAR files under **$HADOOP_HOME/share/hadoop**. For example, `jar tf $HADOOP_HOME/share/hadoop/common/hadoop-common-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/hdfs/hadoop-hdfs-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/yarn/hadoop-yarn-common-3.2.1.jar | grep default`, and `jar tf $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-3.2.1.jar | grep default`. The information can also be found in the Apache Hadoop documentation under **$HADOOP_HOME/share/doc/hadoop**. For example, you can find them by running `ls -R $HADOOP_HOME/share/doc/hadoop | grep default.xml`. You can also find the information online.
+<sup>[5](#footnote5)</sup> *export* is a bash shell built-in command. It marks an environment variable to be exported to child-processes. If a value is supplied, assign the value before exporting. The syntax is `export [-f] [-n] [name[=value] ...]` or `export -p`. There should be no space around the `=` sign in `name[=value]`.
 
 
-<sup>[6](#footnote6)</sup> In Hadoop 3, YARN containers do not inherit the NodeManagers' environment variables. Therefore, if you want to inherit NodeManager's environment variables (e.g. `HADOOP_MAPRED_HOME`), you need to set additional parameters (e.g., `mapreduce.admin.user.env` and `yarn.app.mapreduce.am.env`). https://issues.apache.org/jira/browse/MAPREDUCE-6702
-
-<sup>[7](#footnote7)</sup> We say *passphrase* instead of *password* both to differentiate it from a login password, and to stress that spaces and punctuation are allowed and encouraged.
+<sup>[6](#footnote6)</sup> The actual files are located in different JAR files under **$HADOOP_HOME/share/hadoop**. For example, `jar tf $HADOOP_HOME/share/hadoop/common/hadoop-common-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/hdfs/hadoop-hdfs-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/yarn/hadoop-yarn-common-3.2.1.jar | grep default`, and `jar tf $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-3.2.1.jar | grep default`. The information can also be found in the Apache Hadoop documentation under **$HADOOP_HOME/share/doc/hadoop**. For example, you can find them by running `ls -R $HADOOP_HOME/share/doc/hadoop | grep default.xml`. You can also find the information online.
 
 
-<sup>[8](#footnote8)</sup> What the code does is to mimic the iterative process of sshing into a machine, adding the IP-address-hostname mapping of all machines to the /ect/hosts file on that machine, and sshing to all the other machine from there to do the former two steps in a nested manner.
+<sup>[7](#footnote7)</sup> In Hadoop 3, YARN containers do not inherit the NodeManagers' environment variables. Therefore, if you want to inherit NodeManager's environment variables (e.g. `HADOOP_MAPRED_HOME`), you need to set additional parameters (e.g., `mapreduce.admin.user.env` and `yarn.app.mapreduce.am.env`). https://issues.apache.org/jira/browse/MAPREDUCE-6702
+
+<sup>[8](#footnote8)</sup> We say *passphrase* instead of *password* both to differentiate it from a login password, and to stress that spaces and punctuation are allowed and encouraged.
+
+
+<sup>[9](#footnote9)</sup> What the code does is to mimic the iterative process of sshing into a machine, adding the IP-address-hostname mapping of all machines to the /ect/hosts file on that machine, and sshing to all the other machine from there to do the former two steps in a nested manner.
