@@ -190,7 +190,7 @@ Then press <kbd>Ctrl</kbd>+<kbd>X</kbd> to exit the editing mode. Remember to en
 
 After done with the setup of the environment variables, we move on to configuring the Hadoop Daemons. Hadoop's configuration is driven by two types of important configuration files:
 
--	Read-only default configuration: **core-default.xml**, **hdfs-default.xml** , **yarn-default.xml**, and **mapred-default.xml**<sup><a href="#footnote6">6</a></sup><sup>.
+-	Read-only default configuration: [**core-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/core-default.xml), [**hdfs-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml), [**yarn-default.xml**](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml), and [**mapred-default.xml**](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml)<sup><a href="#footnote6">6</a></sup><sup>.
 
 -	Site-specific configuration: **core-site.xml**, **hdfs-site.xml**, **yarn-site.xml** and **mapred-site.xml** (located in **$HADOOP_CONF_DIR**).
 
@@ -823,7 +823,7 @@ And because `-files` is a generic option (see `mapred streaming -help`), it come
 <sup>[5](#footnote5)</sup> *export* is a bash shell built-in command. It marks an environment variable to be exported to child-processes. If a value is supplied, assign the value before exporting. The syntax is `export [-f] [-n] [name[=value] ...]` or `export -p`. There should be no space around the `=` sign in `name[=value]`.
 
 
-<sup>[6](#footnote6)</sup> The actual files are located in different JAR files under **$HADOOP_HOME/share/hadoop**. For example, `jar tf $HADOOP_HOME/share/hadoop/common/hadoop-common-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/hdfs/hadoop-hdfs-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/yarn/hadoop-yarn-common-3.2.1.jar | grep default`, and `jar tf $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-3.2.1.jar | grep default`. The information can also be found in the Apache Hadoop documentation under **$HADOOP_HOME/share/doc/hadoop**. For example, you can find them by running `ls -R $HADOOP_HOME/share/doc/hadoop | grep default.xml`. You can also find the information online.
+<sup>[6](#footnote6)</sup> The actual files are located in different JAR files under **$HADOOP_HOME/share/hadoop**. To find them, you can use the following commands: `jar tf $HADOOP_HOME/share/hadoop/common/hadoop-common-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/hdfs/hadoop-hdfs-3.2.1.jar | grep default`, `jar tf $HADOOP_HOME/share/hadoop/yarn/hadoop-yarn-common-3.2.1.jar | grep default`, and `jar tf $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-core-3.2.1.jar | grep default`. The information can also be found in the Apache Hadoop documentation under **$HADOOP_HOME/share/doc/hadoop**. To find the documentation, you can run `ls -R $HADOOP_HOME/share/doc/hadoop | grep default.xml`. You can also find the information online.
 
 
 <sup>[7](#footnote7)</sup> In Hadoop 3, YARN containers do not inherit the NodeManagers' environment variables. Therefore, if you want to inherit NodeManager's environment variables (e.g. `HADOOP_MAPRED_HOME`), you need to set additional parameters (e.g., `mapreduce.admin.user.env` and `yarn.app.mapreduce.am.env`). https://issues.apache.org/jira/browse/MAPREDUCE-6702
