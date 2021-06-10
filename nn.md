@@ -88,7 +88,7 @@ $ ls
 
 - `wget` is used to download files from the Web. It supports HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
 
-- <kbd>Ctrl</kbd>+<kbd>C</kbd>  (on Windows) or <kbd>Control</kbd>+<kbd>C/kbd> (on Mac) can cancel the currently-running download process.
+- <kbd>Ctrl</kbd>+<kbd>C</kbd>  (on Windows) or <kbd>Control</kbd>+<kbd>C</kbd> (on Mac) can cancel the currently-running download process.
 
 - For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f`.
 
