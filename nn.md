@@ -21,9 +21,10 @@ The technical setup of the fresh instance are as follows:
 ## 2. Install and Configure Hadoop on one EC2 instance
 
 
-### 2.1 Create a *hadoop* group, and add a user with *hadoop* as the username in the group
+### 2.1   create a dedicated user
 
-When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal:
+
+When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal to create a *hadoop* group and add a user with the name *hadoop* in the group:
 
 ```Shell
 $ sudo addgroup hadoop
@@ -31,7 +32,7 @@ $ sudo adduser --ingroup hadoop hadoop
 ```
 
 
-Most of the commands here need to be prefaced with the sudo command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
+Most of the commands here need to be prefaced with the *sudo* command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case ubuntu) will be able to use this command.
 
 It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use *bigdata* as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
@@ -101,7 +102,7 @@ We have successfully installed Hadoop. Now, we want to configure the Hadoop.
 To do so, we will need to configure the environment in which the Hadoop daemons execute as well as the configuration parameters for the Hadoop daemons (e.g., HDFS daemons are NameNode, SecondaryNameNode, and DataNode. YARN daemons are ResourceManager and NodeManager. If MapReduce is to be used, then the MapReduce Job History Server will also be running).
 
 
-Most of Hadoop management environment variables can be set in .bashrc (for shell environment configuration). Make sure “/home/<username>” is the current working directory. Use the Ubuntu nano editor to open the .bashrc file by using:
+Most of Hadoop management environment variables can be set in **.bashrc** (for shell environment configuration)<sup><a href="#footnote2">2</a></sup><sup><a href="#footnote3">3</a></sup>. Make sure **/home/hadoop** is the current working directory. Use the Ubuntu *nano* editor to open the **.bashrc** file by using:
 
 ```bash
 $ cd ~
@@ -109,4 +110,8 @@ $ nano .bashrc
 ```
 
 
-  <sup>[1](#footnote1)</sup> If you use a password other than *bigdata*, you must change the affected part of *sshconf.sh* accordingly for configuring SSH connections.
+<sup>[1](#footnote1)</sup> If you use a password other than *bigdata*, you must change the affected part of **sshconf.sh** accordingly for configuring SSH connections.
+
+<sup>[2](#footnote2)</sup> When getting started, the specific shell will read and execute the configuration program native to that shell. For example, ksh executes .profile, csh executes .cshrc, and bash executes .bash_profile and/or .bashrc.
+
+<sup>[3](#footnote3)</sup>Numerous files end with the letters **rc** (e.g., **.bashrc**) on Unix installations. The letters **rc** are historical in nature and are taken from the words run commands to indicate the intended purpose of the file
