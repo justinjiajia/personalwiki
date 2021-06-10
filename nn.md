@@ -493,46 +493,67 @@ private_IP_address worker2
 This mapping associates the private IP address of a machine with a hostname, which serves as an easy reference to the machine.
 
 
-3.2 Starting the Hadoop Daemons   
-One last thing to do before launching the cluster is to declare all the worker nodes to use inside the file $HADOOP_CONF_DIR/workers (i.e., the nodes where we want to start DataNode and NodeManager). Use the nano editor to open it:
+### 3.2 Starting the Hadoop Daemons  
 
+One last thing to do before launching the cluster is to declare all the worker nodes to use inside the file $HADOOP_CONF_DIR/workers (i.e., the nodes where we want to start DataNode and NodeManager). Use **nano** to open it:
+
+
+```bash
 $ nano $HADOOP_CONF_DIR/workers
+```
 
-Remove the line showing “localhost”. Add one hostname per line into the file. Save and exit the editor.
 
+Remove the line showing `localhost`. Add one hostname per line into the file. Save and exit the editor.
+
+```
 worker1
 worker2
-…
-
+...
+```
 To start a Hadoop cluster we need to start both the HDFS and YARN cluster.
 The first time we bring up HDFS, it must be formatted. Format a new distributed filesystem by issuing:
 
+
+```bash
 $ hdfs namenode -format
+```
+
 
 We are now ready to launch the Hadoop Cluster. Since the $HADOOP_CONF_DIR/workers file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the start-dfs.sh script, we can first check all java processes running currently on this machine. Issue the following commands sequentially:
 
+```bash
 $ jps
 $ start-dfs.sh
+```
+
 
 This command will start the NameNode daemon on the node where the start-dfs.sh script was invoked. It will also start the DataNode daemon process on each of the worker nodes specified in the workers file. In the background scene, this script will ssh into each worker machine to start a DataNode daemon. We can now check the status of the Hadoop daemons:
 
+```bash
 $ jps
+```
+
 
 Similarly, all of the YARN processes can be started with a utility script as well:
 
+```bash
 $ start-yarn.sh
+```
 
 To run MapReduce applications on YARN, we should also start the MapReduce JobHistory Server with the following command:
 
+```bash
 $ mapred --daemon start historyserver
-
+```
 
 The Hadoop Web UIs are reachable through the following:
 
-•	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
-•	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target="_blank">NameNode</a>
+-	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
 
-•	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
+-	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target="_blank">NameNode</a>
+
+
+-	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
 
 
 After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
