@@ -190,7 +190,7 @@ Then press <kbd>Ctrl</kbd>+<kbd>X</kbd> to exit the editing mode. Remember to en
 
 After done with the setup of the environment variables, we move on to configuring the Hadoop Daemons. Hadoop's configuration is driven by two types of important configuration files:
 
--	Read-only default configuration: [**core-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/core-default.xml), [**hdfs-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml), [**yarn-default.xml**](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml), and [**mapred-default.xml**](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml)<sup><a href="#footnote6">6</a></sup><sup>.
+-	Read-only default configuration: [**core-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/core-default.xml), [**hdfs-default.xml**](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml), [**yarn-default.xml**](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml), and [**mapred-default.xml**](https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml).<sup><a href="#footnote6">6</a></sup><sup>
 
 -	Site-specific configuration: **core-site.xml**, **hdfs-site.xml**, **yarn-site.xml** and **mapred-site.xml** (located in **$HADOOP_CONF_DIR**).
 
