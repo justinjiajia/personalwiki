@@ -21,6 +21,15 @@ The technical setup of the fresh instance are as follows:
 ## 2. Install and Configure Hadoop on one EC2 instance
 
 
+
+Refresh updates and upgrade all packages
+
+```shell
+$ sudo apt-get update && sudo apt-get dist-upgrade
+```
+
+
+
 ### 2.1  Create a dedicated user
 
 
@@ -49,7 +58,9 @@ Now, switch to the new account:
 $ sudo su - hadoop
 ```
 
-Then we can find the prefix of the command line change to *hadoop*, indicating that the active user is *hadoop*. And the working directory becomes */home/hadoop*. From now on, we'll refer to this directory as the home directory (or just home). We have full access rights (read/write/execute, or **rwx**) to the home directory, so we won't have to fiddle with *sudo* every time we need to make a change.
+Then we can find the prefix of the command line change to *hadoop*, indicating that the active user is *hadoop*. And the working directory becomes **/home/hadoop**. From now on, we'll refer to this directory as the home directory (or just **home**). We have full access rights (read/write/execute, or **rwx**) to the home directory, so we won't have to fiddle with *sudo* every time we need to make a change.
+
+
 
 
 ### 2.2 Install Java
@@ -101,7 +112,7 @@ We have successfully installed Hadoop. Now, we want to configure the Hadoop clus
 
 
 
-To do so, we will need to configure the ***environment*** in which the Hadoop daemons execute as well as the configuration parameters for the Hadoop daemons (e.g., HDFS daemons are NameNode, SecondaryNameNode, and DataNode. YARN daemons are ResourceManager, NodeManager, and WebAppProxy. If MapReduce is to be used, then the MapReduce Job History Server will also be running).
+To do so, we will need to configure the ***environment*** in which the Hadoop daemons execute as well as the ***configuration parameters*** for the Hadoop daemons (e.g., HDFS daemons are NameNode, SecondaryNameNode, and DataNode. YARN daemons are ResourceManager, NodeManager, and WebAppProxy. If MapReduce is to be used, then the MapReduce Job History Server will also be running).
 
 
 Most of Hadoop management environment variables can be set in **.bashrc** (for shell environment configuration)<sup><a href="#footnote2">2</a></sup><sup><a href="#footnote3">3</a></sup>. Make sure **/home/hadoop** is the current working directory. Use the Ubuntu *nano* editor to open the **.bashrc** file by using:
@@ -402,9 +413,16 @@ We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration i
 ## 3. Launching a Fully-Distributed Cluster
 
 
-To launch a fully-distributed cluster with more than one EC2 instance, we can click on Launch to clone the AMI. We will go through the same steps as when we created the one for Hadoop installation and configuration. During this process, remember to select the existing security groups and the key pair. We can launch as many instances as we want.
+To launch a fully-distributed cluster with more than one EC2 instance, we can click on Launch to clone the AMI. We will go through the same steps as when we created the one for Hadoop installation and configuration. During this process, remember to select the existing security group and key pair.
 
-Configure the security group to allow inbound **SSH** from **Anywhere** and **All TCP** from all instances in the same security group (the source of this rule will be the id of the same security group).
+- c5.xlarge
+
+- Configure the security group to allow inbound **SSH** from **Anywhere** and **All TCP** from all instances in the same security group (the source of this rule will be the id of the same security group).
+
+
+We can launch as many instances as we want.
+
+
 
 
 ### 3.1 Configuring SSH Connections among EC2 Instances
@@ -574,7 +592,7 @@ $ stop-dfs.sh
 ## Use of HDFS Web UI
 
 
-Because we set in **core-site.xml**, we can experiment with the first icon right to the long text field to create a new directory, e.g., **/usr**.
+Because we've set `hadoop.http.staticuser.user` (whose default value is `dr.who`) in **core-site.xml** to `hadoop`, we can experiment with the first icon right to the long text field to create a new directory, e.g., **/usr**.
 
 This returns a new row that has several clickable fields, including Permission, Owner, Group, Name.
 
