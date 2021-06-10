@@ -530,7 +530,7 @@ $ mapred --daemon start historyserver
 The Hadoop Web UIs are reachable through the following:
 
 •	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – [Resource Manager]
-•	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target=_blank>NameNode</a>
+•	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target="_blank">NameNode</a>
 
 •	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – MapReduce JobHistory Server
 
