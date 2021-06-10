@@ -382,7 +382,7 @@ The output may look like the following:
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFL3aGOyW1BvpwaGFEMNLwh8ppwgs7i/P9EfPvRnp9UFqrz+AsB3mF8tMD4x9LyACDQQghhIK3+WtyB+FrkPaeJrXlJrdwjWteCNq50g73K9q19upHCQa+wVx5Pnh1JoNhWQMTXJ2TuLEee8+g0E8J8BIMFr9Ja5tpuCzZEVytDAMfrRuexKx1zDGU2fU++Txtn4BrxaAs4bf91wFMiFjKPu8KHO9G/ztBuGiM5EFOcnCplOeIetncrun50qLmROFngIBBZjbD8J1j646Vf5g7Qud9yFuoaTXqKwwBsfOlJ5oki1u/Yl0inA6xFo2nqtysKz9ef1aNpRIpmwW0/v+jYRaQNvlspHpJ1gErncUoJo+3I72BUJp5mQ3TvdzfzjX+thzpF1uUeo5/M1a4noesnTfB3wbtlx5l12Nr10YLv0EXOIU1q50pdNuC5dTgOXCHBiIjfHcZDoZzz7FqFvoPeiXfElkXKY1MPi7rkMvTWBBzQOzafHp46XQuNtDUwx0= hadoop@ip-172-31-84-231
 ```
 
-**authorized_keys** now contains only 1 public key, occupying its own line. The line breaks inside the long number are printing artifacts, because it is too long to fit on the screen.
+**authorized_keys** now contains only 1 public key, occupying its own line. You may observe line breaks inside the long number when using a command line interface. They are printing artifacts, because it is too long to fit on the screen.
 
 
 The authorized_keys file holds a list of authorized public keys The login attempt from a client will be accepted if the client proves that it holds the private key and the public key is in the server's authorization list (i.e., **authorized_keys**).
@@ -540,13 +540,18 @@ Similarly, all of the YARN processes can be started with a utility script as wel
 $ start-yarn.sh
 ```
 
+You can test the functionality by submitting a MapReduce job for the canonical word count example:
+
+```bash
+$ yarn jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar wordcount /input/data /output
+```
 To run MapReduce applications on YARN, we should also start the MapReduce JobHistory Server with the following command:
 
 ```bash
 $ mapred --daemon start historyserver
 ```
 
-The Hadoop Web UIs are reachable through the following:
+Several Hadoop Web UIs are reachable through the following:
 
 -	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
 
@@ -558,9 +563,70 @@ The Hadoop Web UIs are reachable through the following:
 
 After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
 
+```shell
 $ mapred --daemon stop historyserver
 $ stop-yarn.sh
 $ stop-dfs.sh
+```
+
+
+
+## Use of HDFS Web UI
+
+
+Because we set in **core-site.xml**, we can experiment with the first icon right to the long text field to create a new directory, e.g., **/usr**.
+
+This returns a new row that has several clickable fields, including Permission, Owner, Group, Name.
+
+Different from what we did to interact with HDFS in our lab, we are going to prepare the data on HDFS via the use
+of this interface.
+
+To make the file upload icon function (the second icon right to the long text field) so that we can upload files from the local computer, we need to do some configuration on our local computer (rather than any EC2 instance).
+
+
+For Mac users, start a new Terminal session, and edit **/etc/hosts** on your own computer.
+
+```shell
+$ sudo nano /etc/hosts
+```
+
+
+Provide the mapping of the public IPs (not the private ones this time, because your computer is not part of the cluster) of the EC2 instances and their hostnames by appending lines of the form:
+
+```
+Public_IP_Address master
+Public_IP_Address worker1
+Public_IP_Address worker2
+...
+```
+
+to the file. The order of the mapping should be the same as the one you input when running **sshconf.sh**.
+
+ Save the change and exit **nano**.
+
+
+For Windows users, navigate to the folder **C:\Windows\System32\drivers\etc**, open the file a file named **hosts** (right-click the file icon
+and choose run as administrator) and append lines of the form:
+
+
+```
+Public_IP_Address master
+Public_IP_Address worker1
+Public_IP_Address worker2
+...
+```
+
+
+to the file in the same way. Again, the order of the mapping should be the same as the one you input when running **sshconf.sh**.
+
+Save the change and close notepad.
+
+The default setting can be rolled back by removing these lines after you are done with the assignment.
+
+
+Once this local configuration is done, you can use the file upload icon to upload a file from your local computer to HDFS. You can download files from HDFS as well.
+
+
 
 
 
