@@ -70,7 +70,6 @@ Because this is a fresh virtual machine with only Ubuntu OS installed on it, we 
 ```Shell
 $ sudo apt-get update
 $ sudo apt install openjdk-8-jdk
-
 ```
 
 We can observe the installation starts. We will also be able to monitor the progress of the installation and read a success message in the end.
@@ -86,6 +85,13 @@ $ cd ~
 $ wget http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
 $ ls
 ```
+
+- `wget` is used to download files from the Web. It supports HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
+
+- <kbd>Ctrl</kbd>+<kbd>C</kbd> can cancel the currently-running download process.
+
+- For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f`.
+
 
 Unpack the downloaded tar file and delete the compressed file to save the space:
 
@@ -139,7 +145,7 @@ export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ```
 
-Press CTRL+X to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
+Press <kbd>Ctrl</kbd>+<kbd>X</kbd> to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
 
 Use *source* to reload the **.bashrc** profile into the current command prompt. To check whether the environment variables have been updated correctly, we can use *echo* to print their values to the prompt:
 
@@ -164,7 +170,7 @@ To do so, we use the *nano* editor to open **hadoop-env.sh**.
 $ nano $HADOOP_CONF_DIR/hadoop-env.sh
 ```
 
-Use CTRL+W and input **JAVA_HOME** to locate and uncomment the following line:
+Use <kbd>CTRL</kbd>+<kbd>W</kbd> and input **JAVA_HOME** to locate and uncomment the following line:
 
 
 ```bash
@@ -197,8 +203,6 @@ Since all site-specific configuration files are located in the **$HADOOP_CONF_DI
 
 
 ```bash
-
-
 $ cd $HADOOP_CONF_DIR
 ```
 
@@ -545,11 +549,30 @@ $ start-dfs.sh
 ```
 
 
-This command will start the NameNode daemon on the node where the start-dfs.sh script was invoked. It will also start the DataNode daemon process on each of the worker nodes specified in the workers file. In the background scene, this script will ssh into each worker machine to start a DataNode daemon. We can now check the status of the Hadoop daemons:
+This command will start the NameNode daemon on the node where the **start-dfs.sh** script was invoked.
+
+
+We can check the status of the Hadoop daemons:
 
 ```bash
 $ jps
 ```
+It should display the following processes:
+
+```
+Namenode
+SecondaryNamenode
+Jps
+```
+
+
+
+It will also start the DataNode daemon process on each of the worker nodes specified in the **workers** file.
+
+In the background scene, this script will ssh into each worker machine to start a DataNode daemon.
+
+
+
 
 
 Similarly, all of the YARN processes can be started with a utility script as well:
@@ -557,6 +580,9 @@ Similarly, all of the YARN processes can be started with a utility script as wel
 ```bash
 $ start-yarn.sh
 ```
+
+
+
 
 You can test the functionality by submitting a MapReduce job for the canonical word count example:
 
