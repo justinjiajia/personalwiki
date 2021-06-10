@@ -88,7 +88,7 @@ $ ls
 
 - `wget` is used to download files from the Web. It supports HTTP, HTTPS, and FTP protocols, as well as retrieval through HTTP proxies.
 
-- <kbd>Ctrl</kbd>+<kbd>C</kbd> can cancel the currently-running download process.
+- <kbd>Ctrl</kbd>+<kbd>C</kbd>  (on Windows) or <kbd>Control</kbd>+<kbd>C/kbd> (on Mac) can cancel the currently-running download process.
 
 - For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f`.
 
@@ -145,7 +145,7 @@ export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ```
 
-Press <kbd>Ctrl</kbd>+<kbd>X</kbd> to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
+Press <kbd>Ctrl</kbd>+<kbd>X</kbd> (on Windows) or <kbd>Control</kbd>+<kbd>X</kbd> (on Mac) to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
 
 Use *source* to reload the **.bashrc** profile into the current command prompt. To check whether the environment variables have been updated correctly, we can use *echo* to print their values to the prompt:
 
@@ -183,7 +183,7 @@ Append the path to the JDK installation to the end:
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ```
 
-Then press **CTRL+X** to exit the editing mode. Remember to enter **y** to save the change you just made.
+Then press <kbd>Ctrl</kbd>+<kbd>X</kbd> to exit the editing mode. Remember to enter **y** to save the change you just made.
 
 
 ### 2.5 Configuring the Hadoop Daemons
@@ -708,7 +708,7 @@ Copy and paste the Python code into the opened file, and format it to make sure 
 
 
 
-After you finish editing, hit Ctrl+X (on Windows) or Control+X (on macOS) to quit nano.  Enter **y** to save the change.
+After you finish editing, hit <kbd>Ctrl</kbd>+<kbd>X</kbd> to quit the **nano** editor.  Enter **y** to save the change.
 
 The Python code for the reducer can be specified as follows:
 
