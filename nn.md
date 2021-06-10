@@ -361,13 +361,185 @@ Run the following command, you'll find that the directory **~/.ssh** has been cr
 $ cd .ssh && ls
 ```
 
-To be able to log into this node from other nodes of the cluster using the private key, we should first add the public key to **authorized_keys**. We copy the public key **id_rsa.pub** to the authorized_keys file with the following command:
+To be able to log into this node from other nodes of the cluster using the private key, we should add the public key to **authorized_keys**.
+
+A typical authorized_keys file contains a list of public-key data, one key per line, for this machine to act as a server.
+
+We append the public key **id_rsa.pub** to **authorized_keys** with the following command:
 
 ```shell
 $ cat id_rsa.pub >> authorized_keys
 ```
+You can then take a look at what **authorized_keys** contains:
 
-The authorized_keys file holds a list of authorized public keys for this machine to act as a server. The login attempt from a client will be accepted if the client proves that it knows the private key and the public key is in the server's authorization list (~/.ssh/authorized_keys on the instance).
+```shell
+$ cat authorized_keys
+```
+
+The output may look like the following:
+
+```shell
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFL3aGOyW1BvpwaGFEMNLwh8ppwgs7i/P9EfPvRnp9UFqrz+AsB3mF8tMD4x9LyACDQQghhIK3+WtyB+FrkPaeJrXlJrdwjWteCNq50g73K9q19upHCQa+wVx5Pnh1JoNhWQMTXJ2TuLEee8+g0E8J8BIMFr9Ja5tpuCzZEVytDAMfrRuexKx1zDGU2fU++Txtn4BrxaAs4bf91wFMiFjKPu8KHO9G/ztBuGiM5EFOcnCplOeIetncrun50qLmROFngIBBZjbD8J1j646Vf5g7Qud9yFuoaTXqKwwBsfOlJ5oki1u/Yl0inA6xFo2nqtysKz9ef1aNpRIpmwW0/v+jYRaQNvlspHpJ1gErncUoJo+3I72BUJp5mQ3TvdzfzjX+thzpF1uUeo5/M1a4noesnTfB3wbtlx5l12Nr10YLv0EXOIU1q50pdNuC5dTgOXCHBiIjfHcZDoZzz7FqFvoPeiXfElkXKY1MPi7rkMvTWBBzQOzafHp46XQuNtDUwx0= hadoop@ip-172-31-84-231
+```
+
+**authorized_keys** now contains only 1 public key, occupying its own line. The line breaks inside the long number are printing artifacts, because it is too long to fit on the screen.
+
+
+The authorized_keys file holds a list of authorized public keys The login attempt from a client will be accepted if the client proves that it holds the private key and the public key is in the server's authorization list (i.e., **authorized_keys**).
+
+
+## 2. Creating an AMI for the Configured instance
+
+We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be consistent across all machines in a fully-distributed cluster. To make things easier, we will now just clone the EC2 instance to create an AMI. To do that:
+
+1.	Select the configured instance on the EC2 dashboard. Then, click on the Actions tab. Click Image > Create Image. Give you Image a name (e.g., hadoop-your-ITSC-account). Your instance is rebooting, and your PuTTY connection is getting lost.
+
+2.	Look on the left pane of your EC2 dashboard. Click AMIs to view your created Image. It should be in pending status. Wait for it to be available.
+
+3.	Once available, we can clone this AMI to create more EC2 instances that share the same setting as the configured one to launch a fully-distributed cluster.
+
+
+## 3. Launching a Fully-Distributed Cluster
+
+
+To launch a fully-distributed cluster with more than one EC2 instance, we can click on Launch to clone the AMI. We will go through the same steps as when we created the one for Hadoop installation and configuration. During this process, remember to select the existing security groups and the key pair. We can launch as many instances as we want.
+
+Configure the security group to allow inbound **SSH** from **Anywhere** and **All TCP** from all instances in the same security group (the source of this rule will be the id of the same security group).
+
+
+### 3.1 Configuring SSH Connections among EC2 Instances
+
+
+We want to create a shell script to automate the creation of the IP-address-hostname mapping on and the setup of SSH connections among all the EC2 instances we are going to use. Use **nano** to open a file called **sshconf.sh** in the home directory, and copy and paste the following commands into it<sup><a href="#footnote8">8</a></sup>.  Save the change.
+
+```bash
+#!/bin/bash
+ETC_HOSTS=/etc/hosts
+array=()
+array2=()
+
+echo "How many worker(s) are you going to use (with the master excluded from counting)?"
+read workersNumber
+
+re='^[1-9]$'
+if ! [[ $workersNumber =~ $re ]] ; then
+   echo "Error number of workers: Must be between 1 and 9" >&2; exit 1
+fi
+
+array=("master")
+for ((i=1;i<$workersNumber+1;++i)); do
+   array+=("worker$i")
+done
+
+array2=()
+for ((i=0;i<${#array[@]};++i)); do
+   echo "Enter the private IP address for ${array[i]}?"
+   read ipAddr
+   array2+=("$ipAddr")
+done
+
+for ((i=0;i<${#array[@]};++i)); do
+    if [ -n "$(grep ${array[i]} /etc/hosts)" ]
+    then
+        echo "${array[i]} Found in your $ETC_HOSTS, Removing now...";
+        sudo sed -i".bak" "/${array[i]}/d" $ETC_HOSTS
+    else
+        echo "${array[i]} was not found in your $ETC_HOSTS";
+    fi
+done
+
+for ((i=0;i<${#array[@]};++i)); do
+
+    HOSTS_LINE="${array2[i]}\t${array[i]}"
+    echo "Adding new ${array[i]} to your $ETC_HOSTS";
+    sudo -- sh -c -e "echo '$HOSTS_LINE' >> /etc/hosts";
+
+done
+rm -Rf $PWD/.ssh/known_hosts
+for HOSTNAME in ${array[@]};
+do
+    ssh -o StrictHostKeyChecking=no $HOSTNAME "exit";
+done
+
+
+for HOSTNAME in ${array[@]};
+do
+    ssh $HOSTNAME -t 'echo bigdata | sudo -S chmod 666 /etc/hosts'
+    rcp /etc/hosts $HOSTNAME:/etc/hosts
+    rcp $PWD/.ssh/known_hosts $HOSTNAME:$PWD/.ssh/known_hosts
+    ssh $HOSTNAME -t 'echo bigdata | sudo -S chmod 644 /etc/hosts'
+done
+
+```
+
+The term `bigdata` in `'echo bigdata | sudo -S chmod 644 /etc/hosts'` and `'echo bigdata | sudo -S chmod 644 /etc/hosts'` is the password for the dedicated user, *hadoop*.
+
+Give the execute permission to the script file and execute it:
+
+```shell
+$ chmod +x sshconf.sh
+$ ./sshconf.sh
+```
+
+Provide information as instructed. Consequently, we can find the following mapping created in **/ect/hosts** of each instance:
+
+```
+private_IP_address master
+private_IP_address worker1
+private_IP_address worker2
+...
+```
+
+This mapping associates the private IP address of a machine with a hostname, which serves as an easy reference to the machine.
+
+
+3.2 Starting the Hadoop Daemons   
+One last thing to do before launching the cluster is to declare all the worker nodes to use inside the file $HADOOP_CONF_DIR/workers (i.e., the nodes where we want to start DataNode and NodeManager). Use the nano editor to open it:
+
+$ nano $HADOOP_CONF_DIR/workers
+
+Remove the line showing “localhost”. Add one hostname per line into the file. Save and exit the editor.
+
+worker1
+worker2
+…
+
+To start a Hadoop cluster we need to start both the HDFS and YARN cluster.
+The first time we bring up HDFS, it must be formatted. Format a new distributed filesystem by issuing:
+
+$ hdfs namenode -format
+
+We are now ready to launch the Hadoop Cluster. Since the $HADOOP_CONF_DIR/workers file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the start-dfs.sh script, we can first check all java processes running currently on this machine. Issue the following commands sequentially:
+
+$ jps
+$ start-dfs.sh
+
+This command will start the NameNode daemon on the node where the start-dfs.sh script was invoked. It will also start the DataNode daemon process on each of the worker nodes specified in the workers file. In the background scene, this script will ssh into each worker machine to start a DataNode daemon. We can now check the status of the Hadoop daemons:
+
+$ jps
+
+Similarly, all of the YARN processes can be started with a utility script as well:
+
+$ start-yarn.sh
+
+To run MapReduce applications on YARN, we should also start the MapReduce JobHistory Server with the following command:
+
+$ mapred --daemon start historyserver
+
+
+The Hadoop Web UIs are reachable through the following:
+
+•	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – [Resource Manager]
+•	http://PUBLIC_IP_OF_NAMENODE:9870 – [NameNode](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address)
+
+•	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – MapReduce JobHistory Server
+
+After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
+
+$ mapred --daemon stop historyserver
+$ stop-yarn.sh
+$ stop-dfs.sh
+
 
 
 
@@ -393,3 +565,6 @@ The authorized_keys file holds a list of authorized public keys for this machine
 <sup>[6](#footnote6)</sup> In Hadoop 3, YARN containers do not inherit the NodeManagers' environment variables. Therefore, if you want to inherit NodeManager's environment variables (e.g. `HADOOP_MAPRED_HOME`), you need to set additional parameters (e.g., `mapreduce.admin.user.env` and `yarn.app.mapreduce.am.env`). https://issues.apache.org/jira/browse/MAPREDUCE-6702
 
 <sup>[7](#footnote7)</sup> We say *passphrase* instead of *password* both to differentiate it from a login password, and to stress that spaces and punctuation are allowed and encouraged.
+
+
+<sup>[8](#footnote8)</sup> What the code does is to mimic the iterative process of sshing into a machine, adding the IP-address-hostname mapping of all machines to the /ect/hosts file on that machine, and sshing to all the other machine from there to do the former two steps in a nested manner.
