@@ -33,7 +33,7 @@ $ sudo apt-get update && sudo apt-get dist-upgrade
 ### 2.1  Create a dedicated user
 
 
-When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the terminal to create a *hadoop* group and add a user with the name *hadoop* in the group:
+When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the command-line interface to create a *hadoop* group and add a user with the name *hadoop* in the group:
 
 ```Shell
 $ sudo addgroup hadoop
@@ -41,9 +41,9 @@ $ sudo adduser --ingroup hadoop hadoop
 ```
 
 
-Most of the commands here need to be prefaced with the *sudo* command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case **ubuntu**) will be able to use this command.
+Most of the commands here need to be prefaced with the *sudo* command. This allows for executing commands with privileges elevated to the root-user administrative level on an as-needed basis. It is necessary when working with directories or files not owned by your user account. When using *sudo* you will be prompted for the password of the current user account. Initially, only users with *sudo* (administrative) privileges (in this case **ubuntu**) are able to use this command.
 
-It will prompt you to create the password for the newly-added user. To facilitate our successive configuration, use **bigdata** as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
+It will prompt you to create the password for the newly-added user (providing your personal information is optional). To facilitate our successive configuration, use **bigdata** as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
 
 Then, add the user into group *sudo* to allow root access with the following command
@@ -447,6 +447,7 @@ We want to create a shell script to automate the creation of the IP-address-host
 
 ```bash
 #!/bin/bash
+
 ETC_HOSTS=/etc/hosts
 array=()
 array2=()
@@ -536,13 +537,19 @@ $ nano $HADOOP_CONF_DIR/workers
 ```
 
 
-Remove the line showing `localhost`. Add one hostname per line into the file. Save and exit the editor.
+Remove the line showing `localhost`.
+
+List all worker hostnames (or IP addresses) in this file, one per line.
+
 
 ```
 worker1
 worker2
 ...
 ```
+
+Save and exit the editor.
+
 To start a Hadoop cluster we need to start both the HDFS and YARN cluster.
 
 The first time we bring up HDFS, it must be formatted. Format a new distributed filesystem by issuing:
@@ -579,11 +586,27 @@ Jps
 
 
 
-It will also start the DataNode daemon process on each of the worker nodes specified in the **workers** file.
+It will also start the DataNode daemon process on each of the worker nodes specified in the **$HADOOP_CONF_DIR/workers** file.
 
 In the background scene, this script will ssh into each worker machine to start a DataNode daemon.
 
 
+Because the secondary NameNode needs to merge the fsimage and the edits log files periodically so as to keep edits log size within a limit,
+its memory requirements are on the same order as the primary NameNode,
+
+Therefore, in a production cluster, the secondary NameNode is usually run on a different machine than the primary NameNode.
+
+To configure the secondary Namenode to run on a different machine, e.g., **worker1**
+
+you need to add one more property in **hdfs-site.xml**:
+
+```XML
+<property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>worker1:9868</value>
+    <description> The SecondaryNameNode's http server address and port.</description>
+</property>
+```
 
 
 
@@ -624,6 +647,7 @@ $ mapred --daemon stop historyserver
 $ stop-yarn.sh
 $ stop-dfs.sh
 ```
+
 
 
 
