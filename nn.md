@@ -591,14 +591,10 @@ It will also start the DataNode daemon process on each of the worker nodes speci
 In the background scene, this script will ssh into each worker machine to start a DataNode daemon.
 
 
-Because the secondary NameNode needs to merge the fsimage and the edits log files periodically so as to keep edits log size within a limit,
-its memory requirements are on the same order as the primary NameNode,
 
-Therefore, in a production cluster, the secondary NameNode is usually run on a different machine than the primary NameNode.
+In a production cluster, the secondary NameNode is usually configured to run on a different machine than the primary NameNode, e.g., **worker1**.<sup><a href="#footnote10">10</a></sup>
 
-To configure the secondary Namenode to run on a different machine, e.g., **worker1**
-
-you need to add one more property in **hdfs-site.xml**:
+To do so, you need to add one more property in **hdfs-site.xml**:
 
 ```XML
 <property>
@@ -868,3 +864,6 @@ And because `-files` is a generic option (see `mapred streaming -help`), it come
 
 
 <sup>[9](#footnote9)</sup> What the code does is to mimic the iterative process of sshing into a machine, adding the IP-address-hostname mapping of all machines to the /ect/hosts file on that machine, and sshing to all the other machine from there to do the former two steps in a nested manner.
+
+
+<sup>[10](#footnote10)</sup> The secondary NameNode merges the fsimage and the edits log files periodically and keeps edits log size within a limit. Its memory requirements are on the same order as the primary NameNode.
