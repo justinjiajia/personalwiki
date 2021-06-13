@@ -108,7 +108,7 @@ $ pkill -9 wget
 Unpack the downloaded tar file and delete the compressed file to save the space:
 
 ```bash
-$ tar vxzf hadoop-3.2.1.tar.gz
+$ tar -vxzf hadoop-3.2.1.tar.gz
 $ rm hadoop-3.2.1.tar.gz && ls
 ```
 
