@@ -3,7 +3,10 @@
 # Installing Pig and Running Pig
 
 
-Pig does not need to be installed on a Hadoop cluster. It runs on the machine from which we launch Hadoop jobs as a **client-side application**. In practice, a cluster owner sets up one or more machines that have access to the Hadoop cluster but are not part of the cluster (i.e., they are not DataNodes or NodeManagers). But Pig needs to know the configuration of the cluster (e.g., the location of the cluster's NameNode and ResourceManager). The configurations can be found in core-site.xml, hdfs-site.xml, yarn-site.xml, and mapred-site.xml. Make sure that these files are present on the machine from where we interact with the Hadoop cluster.
+Pig does not need to be installed on a Hadoop cluster. It runs on the machine from which we launch Hadoop jobs as a **client-side application**. In practice, a cluster owner sets up one or more machines that have access to the Hadoop cluster but are not part of the cluster (i.e., they are not DataNodes or NodeManagers). But Pig needs to know the configuration of the cluster (e.g., the location of the cluster's NameNode and ResourceManager). The configurations can be found in **core-site.xml**, **hdfs-site.xml**, **yarn-site.xml**, and **mapred-site.xml**. Make sure that these files are present on the machine from where we interact with the Hadoop cluster.
+
+
+
 
 
 We can clone the AMI with the Hadoop setup to launch an EC2 instance for Pig installation. In this way, we can enrich our big data analytics stack incrementally over the course of learning.
@@ -26,7 +29,7 @@ $ nano .bashrc
 
 ```
 
-We need to add **~/pig/bin** to the environment variable *PATH* for running the Pig script file<sup><a href="#footnote1">1</a></sup>. Also, in order to run the Pig scripts in MapReduce mode, we need to set the *PIG_CLASSPATH* environment variable to the location of the cluster configuration directory (the directory that contains the core-site.xml, hdfs-site.xml, yarn-site.xml, and mapred-site.xml files).
+We need to add **~/pig/bin** to the environment variable *PATH* for running the Pig script file<sup><a href="#footnote1">1</a></sup><sup><a href="#footnote2">2</a></sup><sup><a href="#footnote3">3</a></sup>. Also, in order to run the Pig scripts in MapReduce mode, we need to set the *PIG_CLASSPATH* environment variable to the location of the cluster configuration directory (the directory that contains the core-site.xml, hdfs-site.xml, yarn-site.xml, and mapred-site.xml files).
 
 Append the following code to the bottom of **.bashrc**:
 
@@ -40,13 +43,7 @@ export PIG_CLASSPATH=$HADOOP_CONF_DIR
 ```
 
 
-
-
-
-
-
-
-Press CTRL+X to save the change and exit nano. Load the new directory into the working environment:
+Press <kdb>CTRL</kdb>+<kdb>X</kdb> to save the change and exit nano. Load the new directory into the working environment:
 
 ```shell
 $ source ~/.bashrc
@@ -61,16 +58,24 @@ $ pig -help
 
 ## 2. Running Pig Locally in Interactive Mode
 
-We can run Pig in local mode interactively using the **Grunt shell**. Local mode helps prototype and debug the Pig Latin scripts on small representative datasets before we apply the same processing to large data<sup><a href="#footnote2">2</a></sup>.   
+We can run Pig in local mode interactively using the **Grunt shell**. Local mode helps prototype and debug the Pig Latin scripts on small representative datasets before we apply the same processing to large data<sup><a href="#footnote4">4</a></sup>.   
+
+
 
 Invoke the Grunt shell using the `pig` command, setting the execution type to local by using the `-x` or `-exectype` flag as shown below:
 
 ```bash
 $ pig -x local
 ```
-Grunt has line-editing facilities like those used in the bash shell and many other command-line applications. For instance, the <kbd>Ctrl</kbd>+<kbd>E</kbd> key combination will move the cursor to the end of the line, while Ctrl-A will move the cursor to the start of the line. Grunt remembers command history, and we can recall lines in the history buffer using the up or down cursor keys.
 
-Another handy feature is Grunt's completion mechanism, which will try to complete Pig Latin keywords and functions when we press the Tab key. For example, consider the following incomplete line:
+Now we can start entering our Pig Latin statements and Pig commands interactively at the Grunt shell.
+
+Grunt has line-editing facilities like those used in the bash shell and many other command-line applications. For instance, the <kbd>Ctrl</kbd>+<kbd>E</kbd> key combination will move the cursor to the end of the line, while <kbd>Ctrl</kbd>+<kbd>A</kbd> will move the cursor to the start of the line. Grunt remembers command history, and we can recall lines in the history buffer using the up or down cursor keys.
+
+Another handy feature is Grunt's completion mechanism, which will try to complete Pig Latin keywords and functions when we press the <kdb>Tab</kdb> key. For example, consider the following incomplete line:
+
+
+
 
 ```pig
 grunt> a = foreach b ge
@@ -87,9 +92,15 @@ grunt> a = foreach b generate
 ```
 
 
-A number of commands that come directly from Unix shells can operate in ways that are familiar: these include cat, cp, ls, mkdir, mv, rm, and so on.
+A number of commands that come directly from Unix shells can operate in ways that are familiar: these include `cat`, `cp`, `ls`, `mkdir`, `mv`, `rm`, and so on:
 
-We can terminate the Grunt session with the `quit` command, the shortcut `\q`, or Ctrl-D. If we are in the middle of executing a Pig script, we can use Ctrl-C to terminate the execution.
+```pig
+grunt> pwd
+grunt> cd ~/pig
+grunt> ls
+```
+
+We can get a list of commands using the `help` command.  When we've finished the Grunt session, we can terminate the Grunt session with the `quit` command, the shortcut `\q`, or <kdb>Ctrl</kdb>+<kdb>D</kdb>. If we are in the middle of executing a Pig script, we can use <kdb>Ctrl</kdb>+<kdb>C</kdb> to terminate the execution.
 
 Let's exit Grunt for now:
 
@@ -98,8 +109,13 @@ Let's exit Grunt for now:
 grunt> quit
 ```
 
+
+
+
+
 Prepare the datasets to be processed by executing the following commands:
 
+```bash
 $ mkdir most_visited
 $ echo "amy	,cnn.com,30
 amy,bbc.com,20
@@ -110,8 +126,223 @@ bbc.com,news,0.8
 flickr.com,photos,0.7
 espn.com,sports,0.9" > most_visited/urls
 
+```
+
+Restart the Grunt shell and run the following pig Latin statements sequentially to find the most-visited websites for each category as exemplified in our lecture.
+
+```pig
+grunt> visits  = LOAD 'most_visited/visits' using PigStorage(',') AS (user:chararray, url:chararray, time:double);
+grunt> gVisits  = GROUP visits BY url;
+grunt> visitCounts  = FOREACH gVisits GENERATE group as url, COUNT(visits) as count;
+grunt> urls  = LOAD 'most_visited/urls' using PigStorage(',') AS (url:chararray, category:chararray, pagerank:double);
+grunt> jVisitCounts  = JOIN visitCounts BY url, urls BY url;
+grunt> gCategories  = GROUP jVisitCounts BY category;
+grunt> topUrls  = FOREACH gCategories GENERATE  group As category, TOP(1, 1, jVisitCounts);
+grunt> STORE topUrls into 'most_visited/topUrls';
+```
+
+During the process, we can use diagnostic operations (`dump`, `describe`, `illustrate`, etc.) freely to figure out the content and schemas of the intermediate relations.
+
+The result should be a lot of output on the screen. Much of this is MapReduce's LocalJobRunner generating logs. But some of it is Pig telling us how it will execute the script, giving us the status as it executes, etc.
+
+Near the bottom of the output we should see the simple message **Success!**. This means all went well. The script stores its output to a local directory named **topUrls** that contains a file named **part-r-00000**. Enter the following to see this:
 
 
-<sup>[1](#footnote1)</sup> **~/pig/bin/** contains the Pig script file, [**pig**](https://github.com/apache/pig/blob/trunk/bin/pig), which describes and sets Pig's environment variables, such as *PIG_CONF_DIR** and *PIG_CONF_DIR*. **~/pig/conf** contains the Pig properties file, **pig.properties**.
+```pig
+grunt> ls most_visited/topUrls
+grunt> cat most_visited/topUrls/part-r-00000
+```
 
-<sup>[2](#footnote2)</sup> When running locally, Pig uses the Hadoop class LocalJobRunner, which reads from the local filesystem and executes MapReduce jobs locally. This has the nice property that Pig jobs run locally in the same way as they will on our cluster.
+
+
+
+
+## 3. Running Pig with UDFs Locally in Batch Mode (Optional)
+
+Terminate the Grunt shell and come back to the bash shell. Prepare the datasets to be processed and the Java source code of the user defined function by executing the following commands:
+
+```bash
+$ mkdir revenue_attribution
+$ echo "lakers,top,50
+Lakers,side,20
+Kings,top,30
+Kings,side,10" > revenue_attribution/revenues
+$ echo "lakers,nba.com,1
+Lakers,espn.com,2
+Kings,nhl.com,1
+Kings,nba.com,2" > revenue_attribution/results
+$ mkdir myudfs
+$ cd myudfs && nano DistRev.java
+```
+
+Copy the code below into this file.
+
+
+? java code 有问题需要改
+
+```java
+package myudfs;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.pig.EvalFunc;
+import org.apache.pig.data.DataBag;
+import org.apache.pig.data.DataType;
+import org.apache.pig.data.DefaultBagFactory;
+import org.apache.pig.data.Tuple;
+import org.apache.pig.data.TupleFactory;
+import org.apache.pig.impl.logicalLayer.FrontendException;
+import org.apache.pig.impl.logicalLayer.schema.Schema;
+
+
+public class DistRev extends EvalFunc<DataBag> {
+
+        public DataBag exec(Tuple input) throws IOException {
+                if (input == null || input.size()!=2) return null;
+                try{
+                        DataBag output = DefaultBagFactory.getInstance().newDefaultBag();
+                        DataBag in1 = (DataBag)input.get(0);
+                        DataBag in2 = (DataBag)input.get(1);
+                        Map<String, Double> adSlots = new HashMap<String, Double>();
+                        Map<String, Long> ranks = new HashMap<String, Long>();
+
+                        Iterator<Tuple> it1 = in1.iterator();
+                        Iterator<Tuple> it2 = in2.iterator();
+
+                        while (it2.hasNext()) {
+                                Tuple t = it2.next();
+                                String adSlot = (String)t.get(1);
+                                Double amount = (Double)t.get(2);
+                                adSlots.put(adSlot, amount);
+                        }
+
+                        while (it1.hasNext()) {
+                                Tuple t = it1.next();
+                                String url = (String)t.get(1);
+                                Long rank = (Long)t.get(2);
+                                ranks.put(url, rank);
+                        }
+
+                        Iterator<String> it = ranks.keySet().iterator();
+                        int rankSize = ranks.size();
+                        while (it.hasNext()) {
+                                String url = it.next();
+                                Long rank = ranks.get(url);
+                                Tuple t = TupleFactory.getInstance().newTuple(2);
+                                t.set(0, url);
+                                if (rank == 1) t.set(1, adSlots.get("top")+ adSlots.get("side")/ rankSize);
+                                else t.set(1, adSlots.get("side")/ rankSize);
+                                output.add(t);
+                        }
+                        return output;
+                }catch (Exception e){
+                        System.err.println("DistRev: failed to process input; error - " + e.getMessage());
+                        return null;
+                }
+        }
+
+        public Schema outputSchema(Schema input) {
+                Schema bagSchema = new Schema();
+                bagSchema.add(new Schema.FieldSchema("url", DataType.CHARARRAY));
+                bagSchema.add(new Schema.FieldSchema("amount", DataType.DOUBLE));
+                try{
+                        return new Schema(new Schema.FieldSchema(getSchemaName(this.getClass().getName().toLowerCase(),input), bagSchema, DataType.BAG));               
+                }catch (FrontendException e){
+                        return null;
+                }
+        }
+}
+ ```
+
+Save it and exit the nano editor. The **Hadoop jar** and the **pig jar** that contain required libraries are needed to compile the Java source code. Executing
+
+```bash
+$ hadoop classpath
+```
+
+prints the class path needed to get the **Hadoop jar**. Since we downloaded the binary distribution of Pig, **pig.jar** is part of it. Copy **pig-*.jar** from **~/pig** to **myudfs** directory by issuing:
+
+```bash
+$ cp ~/pig/pig-*.jar pig.jar
+```
+
+To compile the Java source code, we use the javac command<sup><a href="#footnote5">5</a></sup> with `-cp` option specifying where to find required class files:
+
+```bash
+$ javac -cp pig.jar:`hadoop classpath`  DistRev.java
+```
+
+
+Use the jar tool to bundle the bytecode class files into a jar file called **myudfs.jar**. Move the jar file into **revenue_attribution**:
+
+```bash
+$ cd ..
+$ jar -cf myudfs.jar myudfs
+$ mv myudfs.jar revenue_attribution
+$ cd revenue_attribution
+```
+
+
+
+Use the nano editor to create a pig script called **revenue_attribution.pig**:
+
+```bash
+$ nano revenue_attribution.pig
+```
+
+
+
+Paste the following code into the opened editor. Save the change and exit it.
+
+```pig
+register myudfs.jar;
+results = load 'results' as (query:chararray, url:chararray, rank:long);
+revenues = load 'revenues' as (query:chararray, adSlot:chararray, amount:double);
+grouped_data = cogroup results by query, revenues by query;
+url_revenues = foreach grouped_data generate group, myudfs.DistRev(results, revenues);
+dump url_revenues;
+```
+
+Enter the following code to run the pig script in batch mode:
+
+```bash
+pig -x local revenue_attribution.pig
+```
+
+
+
+
+
+## 	MapReduce mode
+
+In MapReduce mode, Pig translates queries into MapReduce jobs and runs them on a Hadoop cluster. MapReduce mode with a fully distributed cluster is what you use when you want to run Pig on large datasets.
+
+To use MapReduce mode, you first need to check that the version of Pig you downloaded is compatible with the version of Hadoop you are using. Pig releases will only work against particular versions of Hadoop; this is documented in the [release notes](https://pig.apache.org/releases.html).
+
+
+
+Note: we have set the HADOOP_HOME already when configuring the Hadoop working environment in our second lab.
+
+Next, we need to point Pig at the cluster’s namenode and resource manager. If the installation of Hadoop at HADOOP_HOME is already configured for this, then there is nothing more to do (again, we have done this in our previous labs). Otherwise, you can set HADOOP_CONF_DIR to a directory containing the Hadoop site file (or files) that define fs.defaultFS, yarn.resourcemanager.address, and mapreduce.framework.name (should be set to yarn).
+
+Alternatively, you can set these properties in the pig.properties file in Pig’s conf directory (the directory specified by PIG_CONF_DIR).  
+
+In MapReduce mode, we can optionally enable auto-local mode (by setting pig.auto.local.enabled to true), which is an optimization that runs small jobs locally if the input is less than 100 MB (set by pig.auto.local.input.maxbytes, default 100,000,000) and no more than one reducer is being used.
+
+Once we have configured Pig to connect to a Hadoop cluster, we proceed to launch the set of daemons necessary to run a Pig Latin program in the MapReduce mode.
+
+
+<sup>[1](#footnote1)</sup> **~/pig/bin/** contains the Pig script file, [**pig**](https://github.com/apache/pig/blob/trunk/bin/pig), which describes and sets Pig's environment variables, such as *PIG_CONF_DIR** and *PIG_CONF_DIR*. **~/pig/conf** contains the Pig properties file, [**pig.properties**](https://github.com/apache/pig/blob/trunk/conf/pig.properties).
+
+<sup>[2](#footnote2)</sup>	You need to make sure that the environment variable *JAVA_HOME* is set to the directory that contains your Java distribution. Pig will fail immediately if this value is not in the environment. You can set this in your shell (we have done this in the AMI we use), or specify it on the command line when you invoke Pig.
+
+<sup>[3](#footnote3)</sup> If you have already added **~hadoop/bin/hadoop** into the *PATH* variable, **~/pig/bin/pig** will automatically configure Hadoop-related environment variable, such as [*HADOOP_BIN*](https://github.com/apache/pig/blob/trunk/bin/pig#L288) and [*HADOOP_HOME*](https://github.com/apache/pig/blob/trunk/bin/pig#L318), so that Pig can use the right Hadoop library from your local Hadoop distribution. But under certain circumstances, it is best to explicitly set *HADOOP_HOME*.
+
+<sup>[4](#footnote4)</sup> When running locally, Pig uses the Hadoop class **LocalJobRunner**, which reads from the local filesystem and executes MapReduce jobs locally. This has the nice property that Pig jobs run locally in the same way as they will on our cluster.
+
+
+<sup>[5](#footnote5)</sup> Invoke Java programming language compiler
