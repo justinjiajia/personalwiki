@@ -281,6 +281,20 @@ Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataN
 
 ```
 
+
+In a production cluster, the secondary NameNode is usually configured to run on a different machine than the primary NameNode, e.g., **worker1**.<sup><a href="#footnote10">10</a></sup>
+
+To do so, you need to add one more property in **hdfs-site.xml**:
+
+```XML
+<property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>worker1:9868</value>
+    <description> The SecondaryNameNode's http server address and port.</description>
+</property>
+```
+
+
 Now return to the local system. Create directories on the local file system for the NameNode to store the namespace and transactions logs and for individual DataNodes to store their blocks.
 
 ```shell
@@ -319,6 +333,37 @@ Copy the following and paste it between the configuration tags just like before.
 </property>
 
 ```
+
+
+
+
+if you want to enable the timeline service and the generic history service, add the following properties as well:
+
+```XML
+<property>
+  <description>Indicate to clients whether Timeline service is enabled or not.
+  If enabled, the TimelineClient library used by end-users will post entities
+  and events to the Timeline server.</description>
+  <name>yarn.timeline-service.enabled</name>
+  <value>true</value>
+</property>
+
+<property>
+  <description>The setting that controls whether yarn system metrics is published on the Timeline service or not by RM And NM.</description>
+  <name>yarn.system-metrics-publisher.enabled</name>
+  <value>true</value>
+</property>
+
+<property>
+  <description>Indicate to clients whether to query generic application
+  data from timeline history-service or not. If not enabled then application
+  data is queried only from Resource Manager.</description>
+  <name>yarn.timeline-service.generic-application-history.enabled</name>
+  <value>true</value>
+</property>
+
+```
+
 
 Save and exit the editor.
 
@@ -360,6 +405,16 @@ Copy and paste the following between the configuration tags<sup><a href="#footno
 
 Save and exit the editor.
 
+
+```XML
+<property>
+  <name>mapreduce.job.emit-timeline-data</name>
+  <value>true</value>
+  <description>Specifies if the Application Master should emit timeline data to the timeline server. Individual jobs can override this value.
+  </description>
+</property>
+
+```
 
 
 These files should later be replicated consistently across all machines in the cluster, as we launch our fully-distributed cluster. For more configuration options, please reference the online manual for [Hadoop Cluster Setup](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
@@ -576,15 +631,20 @@ We can check the status of the Hadoop daemons:
 ```bash
 $ jps
 ```
-It should display the following processes:
+If you've configured the secondary Namenode to be run on **worker1**, it should display the following processes :
 
 ```
 Namenode
-SecondaryNamenode
 Jps
 ```
 
+and if your ssh into **worker1** and run `jps`, it should display the following:
 
+```
+Jps
+DataNode
+SecondaryNameNode
+```
 
 It will also start the DataNode daemon process on each of the worker nodes specified in the **$HADOOP_CONF_DIR/workers** file.
 
@@ -592,17 +652,7 @@ In the background scene, this script will ssh into each worker machine to start 
 
 
 
-In a production cluster, the secondary NameNode is usually configured to run on a different machine than the primary NameNode, e.g., **worker1**.<sup><a href="#footnote10">10</a></sup>
 
-To do so, you need to add one more property in **hdfs-site.xml**:
-
-```XML
-<property>
-    <name>dfs.namenode.secondary.http-address</name>
-    <value>worker1:9868</value>
-    <description> The SecondaryNameNode's http server address and port.</description>
-</property>
-```
 
 
 
@@ -624,6 +674,12 @@ To run MapReduce applications on YARN, we should also start the MapReduce JobHis
 
 ```bash
 $ mapred --daemon start historyserver
+```
+
+To start the Timeline server / history daemon:
+
+```bash
+$ yarn --daemon start timelineserver
 ```
 
 Several Hadoop Web UIs are reachable through the following:

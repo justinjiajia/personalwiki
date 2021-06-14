@@ -337,13 +337,43 @@ $ hdfs namenode -format
 $ start-dfs.sh
 $ start-yarn.sh
 $ mapred --daemon start historyserver
-
 ```
 
+`jps` prints:
+
+```
+JobHistoryServer
+Jps
+ResourceManager
+NameNode
+```
 
 As of Hadoop 2.5.1, the YARN timeline server does not yet store MapReduce job history, so a MapReduce job history server daemon is still needed
 
-???but 3.2.1 seems no need to use mapreduce job history server
+???but 3.2.1 seems still need to use mapreduce job history server???
+10200 is the port for mapreduce.jobhistory.address	0.0.0.0:10020
+
+yarn.timeline-service.address	${yarn.timeline-service.hostname}:10200
+
+
+2021-06-14 09:28:19,241 [main] INFO  org.apache.hadoop.yarn.client.AHSProxy - Connecting to Application History server at /0.0.0.0:10200
+...
+org.apache.hadoop.mapred.ClientServiceDelegate - Application state is completed. FinalApplicationStatus=SUCCEEDED. Redirecting to job history server
+2021-06-14 09:28:52,476 [main] INFO  org.apache.hadoop.ipc.Client - Retrying connect to server: 0.0.0.0/0.0.0.0:10020. Already tried 0 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=10, sleepTime=1000 MILLISECONDS)
+
+```bash
+$ yarn --daemon start timelineserver
+```
+
+
+```
+JobHistoryServer
+Jps
+ResourceManager
+NameNode
+ApplicationHistoryServer
+```
+
 
 4. WordCount with Pig
 
@@ -352,9 +382,9 @@ We prepare the same set of text files as before by sequentially execute the foll
 
 
 ```shell
-$ cd ..
-$ mkdir /input
-$ cd ~/examples/wordcount/inputfiles
+$ cd ~
+$ mkdir data
+$ cd data
 $ wget https://archive.org/download/encyclopaediabri31156gut/pg31156.txt
 $ wget https://archive.org/download/encyclopaediabri34751gut/pg34751.txt
 $ wget https://archive.org/download/encyclopaediabri35236gut/pg35236.txt
