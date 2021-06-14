@@ -130,7 +130,7 @@ We can use the `--master` option to specify the master URL for a distributed clu
 $ spark-shell --master local[2]
 ```
 
-To exit the shell, press <kdb>Ctrl</kdb> + <kdb>D</kdb> or type:
+To exit the shell, press <kbd>Ctrl</kbd>+<kbd>D</kbd> or type:
 
 ```Scala
 scala> :q
@@ -165,7 +165,7 @@ $ pyspark --master local[1]
 ```
 
 
-To exit the PySpark shell, press <kdb>Ctrl</kdb> + <kdb>D</kdb> or type:
+To exit the PySpark shell, press <kbd>Ctrl</kbd>+<kbd>D</kbd> or type:
 
 ```python
 >>> quit()
@@ -775,7 +775,7 @@ def isHeader(line: String): Boolean = { line.contains("id_1") }
 
 
 
-The return type for the function is declared by the keyword Boolean following a colon right after the argument list. Click <kdb>Ctrl</kdb>+<kdb>D</kdb> to finish. Then we apply the `isHeader` function to the millions of linkage records represented by the `rawblocks` RDD:
+The return type for the function is declared by the keyword Boolean following a colon right after the argument list. Click <kbd>Ctrl</kbd>+<kbd>D</kbd> to finish. Then we apply the `isHeader` function to the millions of linkage records represented by the `rawblocks` RDD:
 
 
 
