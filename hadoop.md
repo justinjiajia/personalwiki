@@ -337,7 +337,7 @@ Copy the following and paste it between the configuration tags just like before.
 
 
 
-if you want to enable the timeline service and the generic history service, add the following properties as well:
+If you want to enable the timeline service and the generic history service, add the following properties as well:
 
 ```XML
 <property>
@@ -403,7 +403,7 @@ Copy and paste the following between the configuration tags<sup><a href="#footno
 </property>
 ```
 
-Save and exit the editor.
+If you want to enable the timeline service and the generic history service, add the following property as well:
 
 
 ```XML
@@ -415,6 +415,8 @@ Save and exit the editor.
 </property>
 
 ```
+
+Save and exit the editor.
 
 
 These files should later be replicated consistently across all machines in the cluster, as we launch our fully-distributed cluster. For more configuration options, please reference the online manual for [Hadoop Cluster Setup](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
