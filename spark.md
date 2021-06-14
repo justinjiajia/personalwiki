@@ -78,6 +78,8 @@ $ spark-shell
 
 `spark-shell` defaults to run locally with as many worker threads as logical cores on your machine (i.e., `master = local[*]`).
 
+when we use an EC2 instance with 2 logical cores, it can be verified that 2 worker threads have been spawned by running:
+
 ```Scala
 scala> sc.getConf.getAll
 res1: Array[(String, String)] = Array((spark.repl.class.outputDir,/tmp/spark-6c5b79a0-5460-40b8-a67f-856bd1743468/repl-9f2c4d88-f97a-495a-ba38-8d35f59278d4), (spark.driver.host,ip-172-31-30-164.ec2.internal), (spark.home,/home/hadoop/spark), (spark.executor.id,driver), (spark.app.startTime,1623654216689), (spark.repl.class.uri,spark://ip-172-31-30-164.ec2.internal:43781/classes), (spark.app.name,Spark shell), (spark.sql.catalogImplementation,hive), (spark.app.id,local-1623654218362), (spark.jars,""), (spark.master,local[*]), (spark.submit.pyFiles,""), (spark.submit.deployMode,client), (spark.ui.showConsoleProgress,true), (spark.driver.port,43781))
@@ -86,24 +88,43 @@ scala> sc.defaultParallelism
 res2: Int = 2
 ```
 
+
+
 We can use the `--master` option to specify the master URL for a distributed cluster, or `local[N]` to run locally with $N$ threads as shown below:
 
 ```bash
 $ spark-shell --master local[2]
 ```
 
+To exit the shell, press <kdb>Ctrl</kdb> + <kdb>D</kdb> or type:
 
-
-To open the Python version of the Spark shell, which we also refer to as the PySpark Shell, go into your Spark directory and type:
-
-```bash
-$ pyspark
-```
-
-To exit either shell, press Ctrl-D or type:
-
+```Scala
 scala> :q
-
+```
 or
 
+```Scala
 scala> :quit
+```
+
+
+To open the Python version of the Spark shell, which is referred to as the PySpark Shell, go into your Spark directory and type:
+
+```bash
+$ pyspark --master local[1]
+```
+
+```python3
+>>> sc.getConf().getAll()
+[('spark.app.id', 'local-1623655224134'), ('spark.driver.host', 'ip-172-31-30-164.ec2.internal'), ('spark.executor.id', 'driver'), ('spark.app.name', 'PySparkShell'), ('spark.sql.catalogImplementation', 'hive'), ('spark.rdd.compress', 'True'), ('spark.driver.port', '46371'), ('spark.app.startTime', '1623655222961'), ('spark.serializer.objectStreamReset', '100'), ('spark.sql.warehouse.dir', 'file:/home/hadoop/spark-warehouse'), ('spark.submit.pyFiles', ''), ('spark.submit.deployMode', 'client'), ('spark.ui.showConsoleProgress', 'true'), ('spark.master', 'local[1]')]
+
+>>> sc.defaultParallelism
+1
+```
+
+
+To exit the PySpark shell, press <kdb>Ctrl</kdb> + <kdb>D</kdb> or type:
+
+```python
+>>> quit()
+```
