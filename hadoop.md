@@ -636,6 +636,8 @@ Several Hadoop Web UIs are reachable through the following:
 -	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
 
 
+-	http://PUBLIC_IP_OF_MASTER_NODE:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
+
 After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
 
 ```shell
@@ -706,7 +708,13 @@ Once this local configuration is done, you can use the file upload icon to uploa
 ## Hadoop Streaming
 
 
-Python 3 is installed on Ubuntu EC2 instances. You can run the following code to check the exact Python version installed on an instance:
+Python 3 is installed on Ubuntu EC2 instances.
+
+```bash
+which python3
+```
+
+You can run the following code to check the exact Python version installed:
 
 ```shell
 $ python3 --version

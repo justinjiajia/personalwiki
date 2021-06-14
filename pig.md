@@ -48,12 +48,10 @@ Press <kdb>CTRL</kdb>+<kdb>X</kdb> to save the change and exit nano. Load the ne
 ```shell
 $ source ~/.bashrc
 ```
-Test the Pig installation with this simple command:
+Test the Pig installation with a simple command `pig -help` or `pig -h`:
 
 
-```shell
-$ pig -help
-```
+It also lists a number of command-line options that you can use with Pig. Most of these options will be discussed later, in the sections that cover the features these options control.
 
 
 ## 2. Running Pig Locally in Interactive Mode
@@ -325,15 +323,171 @@ To use MapReduce mode, you first need to check that the version of Pig you downl
 
 
 
-Note: we have set the HADOOP_HOME already when configuring the Hadoop working environment in our second lab.
+We need to point Pig at the cluster's namenode and resource manager. If the installation of Hadoop at *HADOOP_HOME* is already configured for this, then there is nothing more to do (we have done this already). Otherwise, you can set HADOOP_CONF_DIR to a directory containing the Hadoop site file (or files) that define fs.defaultFS, yarn.resourcemanager.address, and mapreduce.framework.name (should be set to yarn).
 
-Next, we need to point Pig at the cluster’s namenode and resource manager. If the installation of Hadoop at HADOOP_HOME is already configured for this, then there is nothing more to do (again, we have done this in our previous labs). Otherwise, you can set HADOOP_CONF_DIR to a directory containing the Hadoop site file (or files) that define fs.defaultFS, yarn.resourcemanager.address, and mapreduce.framework.name (should be set to yarn).
-
-Alternatively, you can set these properties in the pig.properties file in Pig’s conf directory (the directory specified by PIG_CONF_DIR).  
+Alternatively, you can set these properties in the **~pig/conf/pig.properties** file.
 
 In MapReduce mode, we can optionally enable auto-local mode (by setting pig.auto.local.enabled to true), which is an optimization that runs small jobs locally if the input is less than 100 MB (set by pig.auto.local.input.maxbytes, default 100,000,000) and no more than one reducer is being used.
 
 Once we have configured Pig to connect to a Hadoop cluster, we proceed to launch the set of daemons necessary to run a Pig Latin program in the MapReduce mode.
+
+
+ ```bash
+$ hdfs namenode -format
+$ start-dfs.sh
+$ start-yarn.sh
+$ mapred --daemon start historyserver
+
+```
+
+
+As of Hadoop 2.5.1, the YARN timeline server does not yet store MapReduce job history, so a MapReduce job history server daemon is still needed
+
+???but 3.2.1 seems no need to use mapreduce job history server
+
+4. WordCount with Pig
+
+
+We prepare the same set of text files as before by sequentially execute the following commands:
+
+
+```shell
+$ cd ..
+$ mkdir /input
+$ cd ~/examples/wordcount/inputfiles
+$ wget https://archive.org/download/encyclopaediabri31156gut/pg31156.txt
+$ wget https://archive.org/download/encyclopaediabri34751gut/pg34751.txt
+$ wget https://archive.org/download/encyclopaediabri35236gut/pg35236.txt
+$ cd ..
+$ (hadoop or pig -e) fs -put data /
+```
+
+
+`-e` or `-execute` execute a single command in Pig. For example, `pig -e fs -ls /` lists your home directory on HDFS.
+
+
+
+
+With HDFS, YARN, and mr-jobhistory daemons running on the cluster and input data prepared on HDFS (as we did before), we can launch Pig, setting the `-x` option to `mapreduce` or omitting it entirely, as MapReduce mode is the default. And we can also use the `-brief` option to stop timestamps from being logged:
+
+```bash
+$ pig -x mapreduce -brief
+```
+
+As you can see from the output, Pig reports the file system (but not the YARN resource manager) that it has connected to (Connecting to hadoop file system at: **hdfs://master:9000**).
+
+Then we start to interact with the Grunt shell by issuing the following Pig Latin commands. First, we load the input data from HDFS and define a Pig bag called lines:
+
+```pig
+grunt> lines = LOAD '/data' AS (line:chararray);
+
+```
+
+
+
+Then we extract words from each line, put them into a bag, and flatten the bag to get one word on each row:
+
+```pig
+grunt> words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+```
+
+We further filter out any words that are just white spaces:
+
+```pig
+grunt> filtered_words = FILTER words BY word MATCHES '\\w+';
+```
+
+
+Then create a group for each word:
+
+```pig
+grunt> word_groups = GROUP filtered_words BY word;
+```
+
+
+Count the entries in each group:
+
+```pig
+grunt> word_count = FOREACH word_groups GENERATE COUNT(filtered_words) AS count, group AS word;
+```
+
+Order the records by count:
+
+
+```pig
+grunt> ordered_word_count = ORDER word_count BY count DESC;
+```
+
+
+Use the `STORE` operator and the load/store functions to write final results to the HDFS (`PigStorage` is the default store function):
+
+
+```pig
+grunt> STORE ordered_word_count INTO '/output';
+
+```
+
+Note that as we issue Pig Latin commands, the Pig interpreter parses them and verifies that the input files and bags being referred to by the command are valid. During this process, Pig constructs a logical plan for every bag that we define.
+
+However, no data processing is actually carried out until we invoke the STORE command. At that point, the logical plan is compiled into a physical plan, and is executed.  
+
+The above Pig Latin statements will be compiled into 3 consecutive MapReduce jobs. Pig stores the intermediate data generated between MapReduce jobs in a temporary location on HDFS. This location can be configured using the **pig.temp.dir** property. The property's default value is **/tmp**.
+
+Note: During the testing/debugging phase of your implementation, you can use DUMP to display results to your terminal screen. However, in a production environment you always want to use the `STORE` operator to save your results (see [Store vs. Dump](https://pig.apache.org/docs/r0.17.0/perf.html#store-dump)).
+
+Pig supports a number of [properties](https://pig.apache.org/docs/r0.17.0/start.html#properties) that you can use to customize Pig behavior. You can retrieve a list of the properties using the `pig -help properties` command. All of these properties are optional; none are required.
+
+
+
+
+
+
+5. Running Pig in Batch Mode
+
+In addition to working with the Grunt shell, we can also run a Pig Latin program in batch mode using Pig scripts and the `pig` command (in local or mapreduce mode).
+
+We combine the Pig Latin statements used in the previous section into a Pig script (use `nano wordcount.pig`) with annotated comments. For multi-line comments we use `/*...*/`, and for single-line comments we use `--`.
+
+
+```pig
+/* wordcount.pig
+some explanatary text
+*/
+
+lines = LOAD '/data' AS (line:chararray);
+
+-- Extract words from each line and put them into a pig bag
+-- datatype, then flatten the bag to get one word on each row
+
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
+
+-- filter out any words that are just white spaces
+
+filtered_words = FILTER words BY word MATCHES '\\w+';
+
+--create a group for each word
+
+word_groups = GROUP filtered_words BY word;
+
+-- count the entries in each group
+
+word_count = FOREACH word_groups GENERATE COUNT(filtered_words) AS count, group AS word;
+
+-- order the records by count
+
+ordered_word_count = ORDER word_count BY count DESC;
+
+STORE ordered_word_count INTO '/output';
+```
+
+To run the script in mapreduce mode, we simply type:
+
+```bash
+$ pig -x mapreduce wordcount.pig
+```
+Note: you can also change the input/output directories to those on the local file system, and issue the following command to run the pig script in local mode,
+
+$ pig -x mapreduce wordcount.pig
 
 
 <sup>[1](#footnote1)</sup> **~/pig/bin/** contains the Pig script file, [**pig**](https://github.com/apache/pig/blob/trunk/bin/pig), which describes and sets Pig's environment variables, such as *PIG_CONF_DIR** and *PIG_CONF_DIR*. **~/pig/conf** contains the Pig properties file, [**pig.properties**](https://github.com/apache/pig/blob/trunk/conf/pig.properties).

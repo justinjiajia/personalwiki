@@ -1,6 +1,6 @@
 
 
-**start-dfs.sh**
+**start-dfs.sh** https://github.com/apache/hadoop/blob/trunk/hadoop-hdfs-project/hadoop-hdfs/src/main/bin/start-dfs.sh
 
 
 ```bash
@@ -86,7 +86,7 @@ fi
 
 ```
 
-in **hadoop/bin/hdfs**
+in **hadoop/bin/hdfs** https://github.com/apache/hadoop/blob/trunk/hadoop-hdfs-project/hadoop-hdfs/src/main/bin/hdfs
 
 ```
 getconf)
