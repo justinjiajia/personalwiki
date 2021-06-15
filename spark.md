@@ -70,7 +70,10 @@ Run `source  ~/.bashrc` to load the newly defined environment variables into the
 2. Spark's Interactive Shells
 
 
-Spark comes with interactive shells that enable ad hoc data analysis. Unlike most other shells, however, which let you manipulate data using the disk and memory on a single machine such as those in R, Python, and operating system shells like Bash, Spark's shells allow you to interact with data that is distributed on disk or in memory across many machines, and Spark takes care of automatically distributing this processing.
+
+
+Spark comes with interactive shells that enable ad hoc data analysis. Spark's shells allow us to interact with data that is distributed on disk or in memory across many machines, as most other shells, such as those in R, Python, and operating system shells like bash, let us manipulate data using the disk and memory on a single machine. Spark takes care of automatically distributing this processing.
+
 
 
 The first step is to open up one of Spark's shells. To open the Scala version of the shell, type:
@@ -81,23 +84,18 @@ $ spark-shell
 
 `spark-shell` defaults to run locally with as many worker threads as logical cores on your machine (i.e., `master = local[*]`).
 
+In local mode, Spark uses the client process as the single executor in the cluster, and the number of threads specified determines how many tasks can be executed in parallel.
 
-The Spark log messages indicates that ***Spark context available as sc***.  **SparkContext** is an object that coordinates the execution of Spark jobs.
-In the Spark shell,  **SparkContext** is already created for us as variable `sc`. Type `sc` at the command line:
-
-
-
-
-
+The Spark log messages indicates that `Spark context available as sc`, meaning that
+**SparkContext** is already created for us as variable `sc` in this shell. **SparkContext** is an object that coordinates the execution of Spark jobs.  Go ahead and type `sc` at the command line:
 
 ```scala
 scala> sc
 res0: org.apache.spark.SparkContext = org.apache.spark.SparkContext@796affb8
 ```
 
-
-
 The shell prints the string form of the object, and for the **SparkContext** object, this is simply its name plus the hexadecimal address of the object in memory.
+
 
 As an object, **SparkContext** has methods associated with it. We can see what those methods are in the spark shell by typing the name of a variable, followed by a period, followed by <kdb>Tab</kdb>:
 
@@ -112,7 +110,7 @@ scala> sc.[\t]
 The SparkContext has a long list of methods. But the ones that we're going to use most often allow us to create Resilient Distributed Datasets, or RDDs. RDDs are Spark's fundamental abstraction for distributed data and computation. In Spark, we express our computation through operations on RDDs.
 
 
-When we use an EC2 instance with 2 logical cores, it can be verified that 2 worker threads have been spawned by running:
+When we use an EC2 instance with 2 logical cores (e.g., c4.large), it can be verified that 2 threads have been spawned by running:
 
 ```Scala
 scala> sc.getConf.getAll
@@ -124,10 +122,10 @@ res2: Int = 2
 
 
 
-We can use the `--master` option to specify the master URL for a distributed cluster, or `local[N]` to run locally with $N$ threads as shown below:
+We can use the `--master` option to specify the master URL for a distributed cluster, or `local[N]` to run locally with $N$ threads as shown below<sup><a href="#footnote1">1</a></sup>:
 
 ```bash
-$ spark-shell --master local[2]
+$ spark-shell --master local[4]
 ```
 
 To exit the shell, press <kbd>Ctrl</kbd>+<kbd>D</kbd> or type:
@@ -153,15 +151,15 @@ If this is your first time using the Spark shell, run the `:help` command to lis
 To open the Python version of the Spark shell, which is referred to as the PySpark Shell, go into your Spark directory and type:
 
 ```bash
-$ pyspark --master local[1]
+$ pyspark --master local[4]
 ```
 
 ```python3
 >>> sc.getConf().getAll()
-[('spark.app.id', 'local-1623655224134'), ('spark.driver.host', 'ip-172-31-30-164.ec2.internal'), ('spark.executor.id', 'driver'), ('spark.app.name', 'PySparkShell'), ('spark.sql.catalogImplementation', 'hive'), ('spark.rdd.compress', 'True'), ('spark.driver.port', '46371'), ('spark.app.startTime', '1623655222961'), ('spark.serializer.objectStreamReset', '100'), ('spark.sql.warehouse.dir', 'file:/home/hadoop/spark-warehouse'), ('spark.submit.pyFiles', ''), ('spark.submit.deployMode', 'client'), ('spark.ui.showConsoleProgress', 'true'), ('spark.master', 'local[1]')]
+[('spark.app.id', 'local-1623655224134'), ('spark.driver.host', 'ip-172-31-30-164.ec2.internal'), ('spark.executor.id', 'driver'), ('spark.app.name', 'PySparkShell'), ('spark.sql.catalogImplementation', 'hive'), ('spark.rdd.compress', 'True'), ('spark.driver.port', '46371'), ('spark.app.startTime', '1623655222961'), ('spark.serializer.objectStreamReset', '100'), ('spark.sql.warehouse.dir', 'file:/home/hadoop/spark-warehouse'), ('spark.submit.pyFiles', ''), ('spark.submit.deployMode', 'client'), ('spark.ui.showConsoleProgress', 'true'), ('spark.master', 'local[4]')]
 
 >>> sc.defaultParallelism
-1
+4
 ```
 
 
@@ -175,20 +173,21 @@ To exit the PySpark shell, press <kbd>Ctrl</kbd>+<kbd>D</kbd> or type:
 ### Starting a Standalone Cluster
 
 
-Spark applications run as independent sets of processes on a cluster, coordinated by the SparkContext object in the main program (called the **driver program**). Specifically, the SparkContext can connect to several types of cluster managers (either Spark's own standalone cluster manager, Mesos or YARN) to run applications on a cluster.
+Spark applications run as independent sets of processes on a cluster, coordinated by the SparkContext object in the **driver program**. Specifically, the SparkContext can connect to several types of cluster managers (either Spark's own standalone cluster manager, Mesos or YARN) to run applications on a cluster.
 
 
 
-In this section, we will first experiment the Spark's own standalone deploy mode. We can launch a standalone cluster either manually, by starting a master and workers by hand, or use the provided [launch scripts](https://spark.apache.org/docs/latest/spark-standalone.html#cluster-launch-scripts).
 
 
 
+
+
+In this section, we will first experiment the Spark's standalone deploy mode. We can launch a standalone cluster either manually, by starting a master and workers by hand, or use the provided [launch scripts](https://spark.apache.org/docs/latest/spark-standalone.html#cluster-launch-scripts).
 
 
 
 
 To launch a Spark standalone cluster, we should create a file called **workers** in the **$SPARK_HOME** directory, which contains the hostnames of all the machines where we intend to start Spark workers.
-
 
 
 ```bash
@@ -198,6 +197,11 @@ $ nano workers
 ```
 
 The **workers** file (similar to a Hadoop **workers** file) should contain a list of worker hostnames, each on a separate line (here, to avoid insufficient memory issue, we don't use the master node as a worker).
+
+
+
+
+
 
 
 
@@ -268,6 +272,8 @@ $ start-worker.sh spark://master:7077
 
 We can run Spark alongside our existing Hadoop cluster by just launching it as a separate service on the same machines.
 
+
+
 Configure **$HADOOP_CONF_DIR/workers** and run the following commands to launch the HDFS service from the master node:
 
 ```bash
@@ -290,7 +296,7 @@ DataNode
 SecondaryNameNode
 ```
 
-We prepare the same set of text files as before by sequentially execute the following commands:
+We prepare the same set of text files as before by sequentially executing the following commands:
 
 ```shell
 $ cd ~
@@ -309,13 +315,21 @@ To run an interactive Spark shell on the cluster, issue the following command:
 $ spark-shell --master spark://master:7077 --executor-memory 512m
 ```
 
+
+
+
 Using the `--executor-memory` option, we can configure the size of memory each executor uses. Each application will have at most one executor on each worker, so this setting controls how much of that worker's memory the application will claim. By default, this setting is 1 GB. We decrease it to 512 MB as EC2 instances we are using may have limited resources.
 
 
 
 
 
+
+
 [We can also pass an option `--total-executor-cores <numCores>` to control the total number of cores that spark-shell uses across all executors for an application. By default, this is unlimited; that is, the application will launch executors on every available node in the cluster. To run code that accesses external libraries, we need to include the JARs for these libraries on the classpath of Spark’s processes.] proofread later
+
+
+
 
 
 
@@ -792,11 +806,6 @@ We can use the take operation of an RDD to get the first 10 records to have a lo
 
 
 
-
-
-
-
-
 ```scala
 scala> noheader.take(10).foreach(println)
 ```
@@ -890,3 +899,7 @@ The `stats` action provides us with exactly the summary statistics about the val
 import java.lang.Double.isNaN
 val stats = (0 until 9).map(i => { parsed.map(md => md.scores(i)).filter(!isNaN(_)).stats()})
 ```
+
+
+
+<sup>[1](#footnote1)</sup> You can specify more threads than available CPU cores. That way, CPU cores can be better utilized. Although it depends on the complexity of your jobs, multiplying the number of CPU cores by two or three gives you a good starting point for this parameter (for example, for a machine with quad-core CPUs, set the number of threads to a value between 8 and 12)
