@@ -94,10 +94,10 @@ scala> sc
 res0: org.apache.spark.SparkContext = org.apache.spark.SparkContext@796affb8
 ```
 
-The shell prints the string form of the object, and for the **SparkContext** object, this is simply its name plus the hexadecimal address of the object in memory.
+The shell prints the string form of the **SparkContext** object. It is simply its name plus the hexadecimal address of the object in memory.
 
 
-As an object, **SparkContext** has methods associated with it. We can see what those methods are in the spark shell by typing the name of a variable, followed by a period, followed by <kdb>Tab</kdb>:
+As an object, **SparkContext** has methods associated with it. We can see what those methods are by typing the name of a variable, followed by a period, followed by <kdb>Tab</kdb>:
 
 
 
@@ -143,11 +143,6 @@ If this is your first time using the Spark shell, run the `:help` command to lis
 
 
 
-
-
-
-
-
 To open the Python version of the Spark shell, which is referred to as the PySpark Shell, go into your Spark directory and type:
 
 ```bash
@@ -178,10 +173,6 @@ Spark applications run as independent sets of processes on a cluster, coordinate
 
 
 
-
-
-
-
 In this section, we will first experiment the Spark's standalone deploy mode. We can launch a standalone cluster either manually, by starting a master and workers by hand, or use the provided [launch scripts](https://spark.apache.org/docs/latest/spark-standalone.html#cluster-launch-scripts).
 
 
@@ -200,11 +191,6 @@ The **workers** file (similar to a Hadoop **workers** file) should contain a lis
 
 
 
-
-
-
-
-
 ```
 worker1
 worker2
@@ -216,13 +202,11 @@ worker3
 
 
 
-
 Execute the **sshconf.sh** script to set SSH connections:
 
 ```bash
 $ ./sshconf.sh
 ```
-
 
 
 Then, we can launch or stop the cluster with the following shell scripts, based on Hadoop's deploy scripts, and available in `$SPARK_HOME/sbin`:
@@ -271,7 +255,6 @@ $ start-worker.sh spark://master:7077
 ### Running an Interactive Spark Shell against the Standalone Cluster
 
 We can run Spark alongside our existing Hadoop cluster by just launching it as a separate service on the same machines.
-
 
 
 Configure **$HADOOP_CONF_DIR/workers** and run the following commands to launch the HDFS service from the master node:
@@ -331,15 +314,7 @@ Using the `--executor-memory` option, we can configure the size of memory each e
 
 
 
-
-
-
-
-
-The **SparkContext** object is already created for us as variable `sc`.
-
-
-If we use 3 workers with each running on an EC2 instance of 2 cores (c4.large):
+The **SparkContext** object is already created for us as variable `sc`. If we use 3 workers with each running on an EC2 instance of 2 cores (c4.large):
 
 ```scala
 sc.getConf.getAll
@@ -351,8 +326,6 @@ res1: Int = 6
 
 
 Text file RDDs can be created using SparkContext's `textFile` method. This method takes a URI for the file (either a local path on the machine, or a hdfs://, s3n://, etc。) and reads it as a collection of lines. Load the input data from HDFS and declare a variable called `lines`:
-
-
 
 
 ```scala
@@ -373,11 +346,7 @@ lines: org.apache.spark.rdd.RDD[String] = hdfs://master:9000/data MapPartitionsR
 
 
 
-
-
-
 There are a few things happening on this line that are worth going over. As we can see from the shell, the variable `lines` has a type of **RDD[String]**, even though we never specified that type information in our variable declaration. Type inference is a feature of the Scala programming language. Whenever possible, Scala figures out what type a variable has based on its context. In this case, Scala looks up the return type from the textFile function on the SparkContext object, sees that it returns an `RDD[String]`, and assigns that type to the `lines` variable.
-
 
 
 
@@ -385,11 +354,8 @@ There are a few things happening on this line that are worth going over. As we c
 Whenever we create a new variable in Scala, we must preface the name of the variable with either `val` or `var`. Variables that are prefaced with `val` are immutable, and cannot be changed to refer to another value once they are assigned, whereas variables that are prefaced with `var` can be changed to refer to different objects of the same type.
 
 
+
 Once created, `lines` can be acted on by dataset operations. Spark supports pulling data sets into a cluster-wide in-memory cache. This is very useful when data is accessed repeatedly. We may want to persist the lines RDD in memory using the cache method for much faster access the next time we query it.
-
-
-
-
 
 
 
@@ -430,7 +396,10 @@ The `foreach(println)` pattern is an example of a common functional programming 
 
 
 
-Define a sequence of RDDs with the following transformations:
+Define a sequence of RDDs with the following transformations and build a dataset of (String, Int) pairs called `counts`:
+
+
+
 
 ```scala
 scala> val counts = lines.flatMap(_.split(" ")).map(x=>(x,1)).reduceByKey(_ + _, 1).map(x=>x.swap).sortByKey(false,1).map(x=>x.swap)
@@ -439,12 +408,19 @@ counts: org.apache.spark.rdd.RDD[(String, Int)] = MapPartitionsRDD[7] at map at 
 
 Refer to [Spark Programming Guide](http://spark.apache.org/docs/latest/rdd-programming-guide.html) for details of these transformations.
 
-Use the `saveAsTextFile` action to kick off a job to execute on a cluster:
+
+Then use the `saveAsTextFile` action to kick off a job to execute on a cluster:
 
 ```scala
 scala> counts.saveAsTextFile("hdfs://master:9000/output")
 ```
+
 We will see a console progress bar. For example, [Stage 2: shows the stage you are in now, and (14174 + 5) / 62500] is (numCompletedTasks + numActiveTasks) / totalNumOfTasksInThisStage]. The progress bar shows $numCompletedTasks / totalNumOfTasksInThisStage$.
+
+
+
+
+
 
 
 
@@ -460,6 +436,8 @@ We may also want to add up the sizes of all the lines using the `map` and `reduc
 scala> lines.map(s => s.length).reduce((a, b) => a + b)
 res6: Int = 6760426
 ```
+
+
 
 ### Running Compiled Applications on the Standalone Cluster
 
@@ -503,9 +481,6 @@ Unlike the earlier example with the Spark shell, which initializes its own Spark
 
 
 
-
-
-
 We call `SparkSession.builder` to construct a SparkSession, then set the application name (this will identify our application on the cluster manager's UI if we connect to a cluster), and finally call `getOrCreate` to get the SparkSession instance
 
 
@@ -543,15 +518,10 @@ object WordCount {
 
 
 
+We pass the SparkContext constructor a `SparkConf` which contains information about our application. This example shows the minimal way to initialize a SparkContext, where we only pass an application name, namely Word Count. This will identify our application on the cluster manager’s UI if we connect to a cluster. Additional parameters exist for configuring how our application executes or adding code to be shipped to the cluster.
+ 
 
-
-  We pass the SparkContext constructor a `SparkConf` which contains information about our application. This example shows the minimal way to initialize a SparkContext, where we only pass an application name, namely Word Count. This will identify our application on the cluster manager’s UI if we connect to a cluster. Additional parameters exist for configuring how our application executes or adding code to be shipped to the cluster.
-
-
-
-After we have initialized a SparkContext, we can use all the methods as before to create RDDs (e.g., from a text file) and manipulate them. Finally, to shut down Spark, we can either call the stop() method on your SparkContext, or simply exit the application (e.g., with System.exit(0) or sys.exit()).
-
-
+After we have initialized a SparkContext, we can use all the methods as before to create RDDs (e.g., from a text file) and manipulate them. Finally, to shut down Spark, we can either call the `stop` method on your SparkContext, or simply exit the application (e.g., with `System.exit(0)` or `sys.exit()`).
 
 
 
@@ -573,12 +543,11 @@ Manually tracking the transitive dependency graph and submitting the associated 
 
 
 
-The most popular build tools for Java and Scala are **Maven** and **sbt** (Scala build tool). Either tool can be used with either language, but **Maven** is more often used for Java projects and **sbt** for Scala projects.
+The most popular build tools for Java and Scala are **Maven** and **sbt** (**Scala build tool**). Either tool can be used with either language, but **Maven** is more often used for Java projects and **sbt** for Scala projects.
 
 
 
-
-to install sbt, please refer to http://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html
+To install sbt, please refer to http://www.scala-sbt.org/release/docs/Installing-sbt-on-Linux.html
 
 
 
@@ -780,6 +749,8 @@ scala> val rawblocks = sc.textFile("hdfs://master:9000/linkage")
 ```
 
 There are a couple of issues with the data that we need to address before we begin our analysis. First, the CSV files each contain a header row that we want to filter out from our subsequent analysis. We can use the presence of the `"id_1"` string in the row as the filter condition, and write a Scala function that tests for the presence of that string. Type `:paste` to enter the paste mode, and paste the following code (the following code without being prefaced with `scala>` should all be inserted in this way):
+
+
 
 
 

@@ -43,7 +43,7 @@ export PIG_CLASSPATH=$HADOOP_CONF_DIR
 ```
 
 
-Press <kdb>CTRL</kdb>+<kdb>X</kdb> to save the change and exit nano. Load the new directory into the working environment:
+Press <kdb>CTRL</kdb>+<kdb>X</kdb> to save the change and exit nano and apply changes:
 
 ```shell
 $ source ~/.bashrc
@@ -319,17 +319,26 @@ pig -x local revenue_attribution.pig
 
 In MapReduce mode, Pig translates queries into MapReduce jobs and runs them on a Hadoop cluster. MapReduce mode with a fully distributed cluster is what you use when you want to run Pig on large datasets.
 
-To use MapReduce mode, you first need to check that the version of Pig you downloaded is compatible with the version of Hadoop you are using. Pig releases will only work against particular versions of Hadoop; this is documented in the [release notes](https://pig.apache.org/releases.html).
+To use MapReduce mode, you need to check that the version of Pig you downloaded is compatible with the version of Hadoop you are using. Pig releases will only work against particular versions of Hadoop; this is documented in the [release notes](https://pig.apache.org/releases.html).
 
 
+Pig honors the `HADOOP_HOME` environment variable for finding which Hadoop client to
+run. However, if it is not set, Pig will use a bundled copy of the Hadoop libraries. Note that these may not match the version of Hadoop running on your cluster, so it is best to explicitly set `HADOOP_HOME` (we have done this in the AMI we use).
 
-We need to point Pig at the cluster's namenode and resource manager. If the installation of Hadoop at *HADOOP_HOME* is already configured for this, then there is nothing more to do (we have done this already). Otherwise, you can set HADOOP_CONF_DIR to a directory containing the Hadoop site file (or files) that define fs.defaultFS, yarn.resourcemanager.address, and mapreduce.framework.name (should be set to yarn).
+Next, you need to point Pig at the cluster's namenode and resource manager. If the
+installation of Hadoop at `HADOOP_HOME` is already configured for this, then there is nothing more to do. Otherwise, you can set `HADOOP_CONF_DIR` to a directory containing the Hadoop site file (or files) that define fs.defaultFS, yarn.resourcemanager.address,
+and mapreduce.framework.name (agian, we have done this in the AMI we use).
 
-Alternatively, you can set these properties in the **~pig/conf/pig.properties** file.
+
+Alternatively, you can set these properties in the [**~pig/conf/pig.properties** file](https://pig.apache.org/docs/r0.17.0/start.html#properties).
 
 In MapReduce mode, we can optionally enable auto-local mode (by setting pig.auto.local.enabled to true), which is an optimization that runs small jobs locally if the input is less than 100 MB (set by pig.auto.local.input.maxbytes, default 100,000,000) and no more than one reducer is being used.
 
+
+
 Once we have configured Pig to connect to a Hadoop cluster, we proceed to launch the set of daemons necessary to run a Pig Latin program in the MapReduce mode.
+
+Apart from regular daemons, Pig needs one more daemon to be running on Hadoop called a job history server. The job history server maintains information about MapReduce jobs after their Application Master terminates. All the job history data per job is persisted to HDFS by the MapReduce ApplicationMaster.
 
 
  ```bash
@@ -348,6 +357,12 @@ ResourceManager
 NameNode
 ```
 
+We need only one MapReduce job history server per cluster. It can run on any node we like, including a dedicated node of its own, but traditionally runs on the same node as the resourcemanager. The job history server is declared in mapred-site.xml. Its configurational options can be found in the online manual for [Hadoop Cluster Setup](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
+
+
+
+---
+
 As of Hadoop 2.5.1, the YARN timeline server does not yet store MapReduce job history, so a MapReduce job history server daemon is still needed
 
 ???but 3.2.1 seems still need to use mapreduce job history server???
@@ -361,6 +376,8 @@ yarn.timeline-service.address	${yarn.timeline-service.hostname}:10200
 org.apache.hadoop.mapred.ClientServiceDelegate - Application state is completed. FinalApplicationStatus=SUCCEEDED. Redirecting to job history server
 2021-06-14 09:28:52,476 [main] INFO  org.apache.hadoop.ipc.Client - Retrying connect to server: 0.0.0.0/0.0.0.0:10020. Already tried 0 time(s); retry policy is RetryUpToMaximumCountWithFixedSleep(maxRetries=10, sleepTime=1000 MILLISECONDS)
 
+
+some
 ```bash
 $ yarn --daemon start timelineserver
 ```
@@ -374,9 +391,22 @@ NameNode
 ApplicationHistoryServer
 ```
 
+---
 
-4. WordCount with Pig
+The Hadoop UIs are reachable through the following:
 
+-	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
+
+-	http://PUBLIC_IP_OF_NAMENODE:9870 – <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/hdfs-default.xml#dfs.namenode.http-address" target="_blank">NameNode</a>
+
+-	http://PUBLIC_IP_OF_JOBHISTORY_SERVER:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
+
+
+
+
+### WordCount with Pig
+
+#### Data Preparation
 
 We prepare the same set of text files as before by sequentially execute the following commands:
 
@@ -392,21 +422,32 @@ $ cd ..
 $ (hadoop or pig -e) fs -put data /
 ```
 
+There are a number of command-line options that we can use with Pig. We can see the full list by entering `pig -h`.  
 
 `-e` or `-execute` execute a single command in Pig. For example, `pig -e fs -ls /` lists your home directory on HDFS.
 
 
-
-
-With HDFS, YARN, and mr-jobhistory daemons running on the cluster and input data prepared on HDFS (as we did before), we can launch Pig, setting the `-x` option to `mapreduce` or omitting it entirely, as MapReduce mode is the default. And we can also use the `-brief` option to stop timestamps from being logged:
+With HDFS, YARN, and the job history server daemons running on the cluster and input data prepared on HDFS, we can launch Pig, setting the `-x` option to `mapreduce` or omitting it entirely, as MapReduce mode is the default. And we can also use the `-brief` option to stop timestamps from being logged:
 
 ```bash
 $ pig -x mapreduce -brief
 ```
 
-As you can see from the output, Pig reports the file system (but not the YARN resource manager) that it has connected to (Connecting to hadoop file system at: **hdfs://master:9000**).
+As we can see from the output, Pig reports the file system (but not the YARN resource manager) that it has connected to (Connecting to hadoop file system at: **hdfs://master:9000**). The Grunt shell is started.
 
-Then we start to interact with the Grunt shell by issuing the following Pig Latin commands. First, we load the input data from HDFS and define a Pig bag called lines:
+
+
+Besides entering Pig Latin interactively, Grunt's other major use is to act as a shell for HDFS. All `hadoop fs` shell commands are available in Pig. They are accessed using the keyword `fs`. The dash (-) used in `hadoop fs` is also required:
+
+
+```pig
+grunt> fs -ls
+```
+
+
+
+Then, we start to interact with the Grunt shell. First, we load the input data from HDFS and define a Pig bag called `lines`:
+
 
 ```pig
 grunt> lines = LOAD '/data' AS (line:chararray);
@@ -417,15 +458,25 @@ grunt> lines = LOAD '/data' AS (line:chararray);
 
 Then we extract words from each line, put them into a bag, and flatten the bag to get one word on each row:
 
+
+
 ```pig
 grunt> words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) AS word;
 ```
+
+
+
 
 We further filter out any words that are just white spaces:
 
 ```pig
 grunt> filtered_words = FILTER words BY word MATCHES '\\w+';
 ```
+
+
+
+
+
 
 
 Then create a group for each word:
@@ -441,6 +492,9 @@ Count the entries in each group:
 grunt> word_count = FOREACH word_groups GENERATE COUNT(filtered_words) AS count, group AS word;
 ```
 
+
+
+
 Order the records by count:
 
 
@@ -449,7 +503,7 @@ grunt> ordered_word_count = ORDER word_count BY count DESC;
 ```
 
 
-Use the `STORE` operator and the load/store functions to write final results to the HDFS (`PigStorage` is the default store function):
+Use the `STORE` operator possibly with the load/store functions to write final results to the HDFS (`PigStorage` is the default store function):
 
 
 ```pig
@@ -459,16 +513,25 @@ grunt> STORE ordered_word_count INTO '/output';
 
 Note that as we issue Pig Latin commands, the Pig interpreter parses them and verifies that the input files and bags being referred to by the command are valid. During this process, Pig constructs a logical plan for every bag that we define.
 
-However, no data processing is actually carried out until we invoke the STORE command. At that point, the logical plan is compiled into a physical plan, and is executed.  
+
+
+However, no data processing is actually carried out until we invoke the `STORE` command. At that point, the logical plan is compiled into a physical plan, and is executed.  
+
+
 
 The above Pig Latin statements will be compiled into 3 consecutive MapReduce jobs. Pig stores the intermediate data generated between MapReduce jobs in a temporary location on HDFS. This location can be configured using the **pig.temp.dir** property. The property's default value is **/tmp**.
 
-Note: During the testing/debugging phase of your implementation, you can use DUMP to display results to your terminal screen. However, in a production environment you always want to use the `STORE` operator to save your results (see [Store vs. Dump](https://pig.apache.org/docs/r0.17.0/perf.html#store-dump)).
-
-Pig supports a number of [properties](https://pig.apache.org/docs/r0.17.0/start.html#properties) that you can use to customize Pig behavior. You can retrieve a list of the properties using the `pig -help properties` command. All of these properties are optional; none are required.
 
 
 
+
+
+
+Note: During the testing/debugging phase of your implementation, you can use `DUMP` to display results to your screen. However, in a production environment, you always want to use the `STORE` operator to save your results (see [Store vs. Dump](https://pig.apache.org/docs/r0.17.0/perf.html#store-dump)).
+
+
+
+Pig supports a number of [properties](https://pig.apache.org/docs/r0.17.0/start.html#properties) that you can use to customize Pig behavior. You can retrieve a list of the properties using the [`pig -help properties` command](http://pig.apache.org/docs/r0.17.0/cmds.html#help). All of these properties are optional; none are required.
 
 
 
