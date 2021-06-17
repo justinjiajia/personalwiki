@@ -168,7 +168,7 @@ mysql> SHOW GLOBAL VARIABLES LIKE 'PORT';
 1 row in set (0.01 sec)
 
 
-mysql> quit;  # or exit;
+mysql> quit;  # or exit; to leave the shell
 Bye
 ```
 
@@ -318,6 +318,16 @@ In this configuration, the Hive table definitions that we create will be local t
 how to configure a shared remote metastore, which is the norm in production envi‐
 ronments
 
+```xml
+<property>  
+  <name>hive.metastore.uris</name>  
+  <value>thrift://localhost:9083</value>  
+  <description>If not set (the default), use an local (in-process) metastore; otherwise, connect to one or more remote metastores</description>
+</property>
+```
+---
+??[if we choose remote, so later when using spark-sql, avoid reconfiguration](https://programmer.help/blogs/installation-and-configuration-of-hive.html)
+---
 
 
 You may have noticed the ConnectionURL property starts with a prefix of `jdbc:mysql`.
@@ -371,18 +381,28 @@ $ ln -s /usr/share/java/mysql-connector-java-8.0.25.jar hive/lib
 With the driver and the configuration settings in place, Hive will store its metastore information in MySQL.
 
 
+
+guava lib issue
+
+
+To avoid issues like the one described on page:
+
+https://issues.apache.org/jira/browse/HIVE-22718
+https://issues.apache.org/jira/browse/HIVE-22915
+```
+Exception in thread "main" java.lang.NoSuchMethodError: com.google.common.base.Preconditions.checkArgument(ZLjava/lang/String;Ljava/lang/Object;)V
+```
+
 ```bash
 
 $ ls hive/lib | grep guava
 
 ```
 
-Tested Hive 3.1.2 with Hadoop 3.2.1 and got the same error.
-https://issues.apache.org/jira/browse/HIVE-22718
-https://issues.apache.org/jira/browse/HIVE-22915
-```
-Exception in thread "main" java.lang.NoSuchMethodError: com.google.common.base.Preconditions.checkArgument(ZLjava/lang/String;Ljava/lang/Object;)V
-```
+
+let's ensure guava library version is consistent between Hive and Hadoop.
+
+
 
 
 Problem temporarily solved by replacing its guava-19.0.jar with Hadoop's guava-27.0-jre.jar
@@ -399,9 +419,10 @@ $ cp hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar hive/lib
 
 
 
-run
 
-The Hive distribution includes an [offline tool](https://cwiki.apache.org/confluence/display/Hive/Hive+Schema+Tool) for Hive metastore schema manipulation. This tool can be used to initialize the metastore schema for the current Hive version. It can also handle upgrading the schema from an older version to current. It tries to find the current schema from the metastore if it is available. In case of upgrades from older releases like 0.7.0 or 0.10.0, you can specify the schema version of the existing metastore as a command line option to the tool.
+Starting from Hive 2.1, we need to run the [schematool command](https://cwiki.apache.org/confluence/display/Hive/Hive+Schema+Tool) as an initialization step.
+
+This tool can be used to initialize the metastore schema for the current Hive version. It can also handle upgrading the schema from an older version to current. It tries to find the current schema from the metastore if it is available. In case of upgrades from older releases like 0.7.0 or 0.10.0, you can specify the schema version of the existing metastore as a command line option to the tool.
 
 ```bash
 $ schematool -help
@@ -414,6 +435,15 @@ The schematool figures out the SQL scripts required to initialize or upgrade the
 $ schematool -initSchema -dbType mysql
 ```
 
+For the flag dbType, it can be any of the following values `derby|mysql|postgres|oracle|mssql`
+
+
+
+to get schema information:
+```bash
+$ schematool -dbType mysql -info
+```
+
 ### Running Hive
 
 
@@ -422,13 +452,19 @@ Hive uses Hadoop, so:
 - you must have Hadoop in your path OR
 - `export HADOOP_HOME=<hadoop-install-dir>`
 
-In addition, you must use below HDFS commands to create /tmp and /user/hive/warehouse (aka hive.metastore.warehouse.dir; it was configured with **$HIVE_HOME/conf/hive-site.xml**) and set them `chmod g+w` before you can create a table in Hive.
+In addition, we should /tmp and /user/hive/warehouse on HDFS (aka hive.metastore.warehouse.dir that was configured with **$HIVE_HOME/conf/hive-site.xml**) and set them `chmod g+w` before you can create a table in Hive.
 
 ```bash
-$ hadoop fs -mkdir -p /user/hive/warehouse
-$ hadoop fs -chmod g+w /user/hive/warehouse
+hadoop fs -mkdir /tmp
+hadoop fs -chmod g+w /tmp
+hadoop fs -mkdir -p /user/hive/warehouse
+hadoop fs -chmod g+w /user/hive/warehouse
 ```
+Or alternatively, directly run the following command:
 
+```bash
+$ $HIVE_HOME/bin/init-hive-dfs.sh
+```
 
 We’ll also assume that you have added $HIVE_HOME/bin to your environment’s PATH so
 you can type hive at the shell prompt and your shell environment (e.g., bash) will find the command.
@@ -437,17 +473,30 @@ you can type hive at the shell prompt and your shell environment (e.g., bash) wi
 The $HIVE_HOME/bin directory contains executable scripts that launch various Hive services, including the hive command-line interface (CLI). The CLI is the most popular way to use Hive. We will use hive (in lowercase, with a fixed-width font) to refer to the CLI, except where noted. The CLI can be used interactively to type in statements one at a time or it can be used to run “scripts” of Hive statements, as we’ll see. Hive
 
 
-Let’s finally start the Hive command-line interface (CLI) and run a few commands! We’ll briefly comment on what’s happening, but save the details for discussion later.
-In the following session, we’ll use the $HIVE_HOME/bin/hive command, which is a bash shell script, to start the CLI. Substitute
+### Running Hive CLI
+
+
+
+we'll use the **$HIVE_HOME/bin/hive** command, which is a bash shell script, to start the [Hive command line interface (CLI)](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Cli) and use it from the shell:
+
+```bash
+$ hive --service cli # or simply hive because the CLI is the default service
+```
+
 
 The shell is the primary way that we will interact with Hive, by issuing commands in
-HiveQL. HiveQL is Hive’s query language, a dialect of SQL. It is heavily influenced by
+HiveQL. HiveQL is Hive's query language, a dialect of SQL. It is heavily influenced by
 MySQL, so if you are familiar with MySQL, you should feel at home using Hive
 
 Like SQL, HiveQL is generally case insensitive (except for string comparisons), so show
 tables; works equally well here. The Tab key will autocomplete Hive keywords and
 functions.
 
+```hive
+hive> SHOW TABLES;  # list all tables
+hive> SHOW TABLES '.*s'; # list all tables that end with 's'
+hive> DESCRIBE invites;  # show the list of columns.
+```
 
 
 
@@ -517,7 +566,7 @@ $ hive -hiveconf fs.defaultFS=hdfs://localhost \
 2. The command-line -hiveconf option
 3. hive-site.xml and the Hadoop site files (core-site.xml, hdfs-site.xml, mapredsite.xml, and yarn-site.xml)
 4. The Hive defaults and the Hadoop default files (core-default.xml, hdfs-default.xml,
-mapred-default.xml, and yarn-default.xml)
+mapred-default.xml, and yarn-default.xml;Hive configuration is an overlay on top of Hadoop – it inherits the Hadoop configuration variables by default)
 
 
 Execution engines
@@ -541,6 +590,8 @@ in the following list:
 cli
 The command-line interface to Hive (the shell). This is the default service.
 
+
+The Hive shell is only one of several services that you can run using the hive command
 
 
 Hive Web Interface (component removed as of Hive 2.2.0)

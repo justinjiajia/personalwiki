@@ -332,7 +332,7 @@ and mapreduce.framework.name (agian, we have done this in the AMI we use).
 
 Alternatively, you can set these properties in the [**~pig/conf/pig.properties** file](https://pig.apache.org/docs/r0.17.0/start.html#properties).
 
-In MapReduce mode, we can optionally enable auto-local mode (by setting pig.auto.local.enabled to true), which is an optimization that runs small jobs locally if the input is less than 100 MB (set by pig.auto.local.input.maxbytes, default 100,000,000) and no more than one reducer is being used.
+In MapReduce mode, we can optionally enable auto-local mode (by setting **pig.auto.local.enabled** to true), which is an optimization that runs small jobs locally if the input is less than 100 MB (set by pig.auto.local.input.maxbytes, default 100,000,000) and no more than one reducer is being used.
 
 
 
@@ -357,7 +357,7 @@ ResourceManager
 NameNode
 ```
 
-We need only one MapReduce job history server per cluster. It can run on any node we like, including a dedicated node of its own, but traditionally runs on the same node as the resourcemanager. The job history server is declared in mapred-site.xml. Its configurational options can be found in the online manual for [Hadoop Cluster Setup](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
+We need only one MapReduce job history server per cluster. It can run on any node we like, including a dedicated node of its own, but traditionally runs on the same node as the resourcemanager. The job history server is declared in **mapred-site.xml**. Its configurational options can be found in the [online manual for Hadoop Cluster Setup](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html).
 
 
 
@@ -433,11 +433,11 @@ With HDFS, YARN, and the job history server daemons running on the cluster and i
 $ pig -x mapreduce -brief
 ```
 
-As we can see from the output, Pig reports the file system (but not the YARN resource manager) that it has connected to (Connecting to hadoop file system at: **hdfs://master:9000**). The Grunt shell is started.
+As we can see from the output, Pig reports the file system (but not the YARN resource manager) that it has connected to (connecting to hadoop file system at: **hdfs://master:9000**). The Grunt shell is started.
 
 
 
-Besides entering Pig Latin interactively, Grunt's other major use is to act as a shell for HDFS. All `hadoop fs` shell commands are available in Pig. They are accessed using the keyword `fs`. The dash (-) used in `hadoop fs` is also required:
+Besides entering Pig Latin interactively, Grunt's other major use is to act as a shell for HDFS. All `hadoop fs` shell commands are available in Pig. They are accessed using the keyword `fs`. The dash (`-`) used in `hadoop fs` is also required:
 
 
 ```pig
@@ -445,8 +445,7 @@ grunt> fs -ls
 ```
 
 
-
-Then, we start to interact with the Grunt shell. First, we load the input data from HDFS and define a Pig bag called `lines`:
+Now, we start to interact with the Grunt shell. First, we load the input data from HDFS and define a Pig bag called `lines`:
 
 
 ```pig
@@ -503,7 +502,7 @@ grunt> ordered_word_count = ORDER word_count BY count DESC;
 ```
 
 
-Use the `STORE` operator possibly with the load/store functions to write final results to the HDFS (`PigStorage` is the default store function):
+Use the [`STORE` operator](http://pig.apache.org/docs/latest/basic.html#store) possibly with the [load/store functions](https://pig.apache.org/docs/latest/udf.html#load-store-functions) to write final results to the HDFS (`PigStorage` is the default store function):
 
 
 ```pig
@@ -511,11 +510,7 @@ grunt> STORE ordered_word_count INTO '/output';
 
 ```
 
-Note that as we issue Pig Latin commands, the Pig interpreter parses them and verifies that the input files and bags being referred to by the command are valid. During this process, Pig constructs a logical plan for every bag that we define.
-
-
-
-However, no data processing is actually carried out until we invoke the `STORE` command. At that point, the logical plan is compiled into a physical plan, and is executed.  
+Note that as we issue Pig Latin commands, the Pig interpreter parses them and verifies that the input files and bags being referred to by the command are valid. During this process, Pig constructs a logical plan for every bag that we define. However, no data processing is actually carried out until we invoke the `STORE` command. At that point, the logical plan is compiled into a physical plan and is executed.  
 
 
 
@@ -527,24 +522,35 @@ The above Pig Latin statements will be compiled into 3 consecutive MapReduce job
 
 
 
-Note: During the testing/debugging phase of your implementation, you can use `DUMP` to display results to your screen. However, in a production environment, you always want to use the `STORE` operator to save your results (see [Store vs. Dump](https://pig.apache.org/docs/r0.17.0/perf.html#store-dump)).
+Note: During the testing/debugging phase of your implementation, you can use `DUMP` to display results to your screen. However, in a production environment, you always want to use the `STORE` operator to save your results (see [Store vs. Dump](https://pig.apache.org/docs/latest/perf.html#store-dump)).
 
 
 
-Pig supports a number of [properties](https://pig.apache.org/docs/r0.17.0/start.html#properties) that you can use to customize Pig behavior. You can retrieve a list of the properties using the [`pig -help properties` command](http://pig.apache.org/docs/r0.17.0/cmds.html#help). All of these properties are optional; none are required.
+Pig supports a number of [properties](https://pig.apache.org/docs/latest/start.html#properties) that you can use to customize Pig behavior. You can retrieve a list of the properties using the [`pig -help properties` command](http://pig.apache.org/docs/latest/cmds.html#help). All of these properties are optional; none are required.
+
+
+
+To specify Pig properties use one of these mechanisms:
+
+-	The pig.properties file (add the directory that contains the pig.properties file to the classpath)
+-	The `-D` and a Pig property in PIG_OPTS environment variable (export PIG_OPTS= -Dpig.tmpfilecompression = true)
+-	The `-P` command line option and a properties file (pig -P mypig.properties)
+-	The set command (set pig.exec.nocombiner true)
+Note: The properties file uses standard Java property file format.
+The following precedence order is supported: pig.properties < -D Pig property < -P properties file < set command. This means that if the same property is provided using the `-D` command line option as well as the `-P` command line option (properties file), the value of the property in the properties file will take precedence.
 
 
 
 5. Running Pig in Batch Mode
 
-In addition to working with the Grunt shell, we can also run a Pig Latin program in batch mode using Pig scripts and the `pig` command (in local or mapreduce mode).
+In addition to working with the Grunt shell, we can also run a Pig Latin program in batch mode using [Pig scripts](https://pig.apache.org/docs/latest/start.html#pig-scripts) and the `pig` command (in local or mapreduce mode).
 
 We combine the Pig Latin statements used in the previous section into a Pig script (use `nano wordcount.pig`) with annotated comments. For multi-line comments we use `/*...*/`, and for single-line comments we use `--`.
 
 
 ```pig
 /* wordcount.pig
-some explanatary text
+some explanatory text
 */
 
 lines = LOAD '/data' AS (line:chararray);
@@ -578,9 +584,13 @@ To run the script in mapreduce mode, we simply type:
 ```bash
 $ pig -x mapreduce wordcount.pig
 ```
-Note: you can also change the input/output directories to those on the local file system, and issue the following command to run the pig script in local mode,
 
-$ pig -x mapreduce wordcount.pig
+
+Note: you can also change the input/output directories to those on the local file system, and issue the following command to run the pig script in local mode:
+
+```bash
+$ pig -x local wordcount.pig
+```
 
 
 <sup>[1](#footnote1)</sup> **~/pig/bin/** contains the Pig script file, [**pig**](https://github.com/apache/pig/blob/trunk/bin/pig), which describes and sets Pig's environment variables, such as *PIG_CONF_DIR** and *PIG_CONF_DIR*. **~/pig/conf** contains the Pig properties file, [**pig.properties**](https://github.com/apache/pig/blob/trunk/conf/pig.properties).

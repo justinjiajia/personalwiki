@@ -290,7 +290,10 @@ To do so, you need to add one more property in **hdfs-site.xml**:
 <property>
     <name>dfs.namenode.secondary.http-address</name>
     <value>worker1:9868</value>
-    <description> The SecondaryNameNode's http server address and port.</description>
+    <description>
+      The SecondaryNameNode's http server address and port. Optional.
+      By specifying this, we can place the SecondaryNameNode on specific node
+    </description>
 </property>
 ```
 
