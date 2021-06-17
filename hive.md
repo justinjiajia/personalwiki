@@ -382,26 +382,24 @@ With the driver and the configuration settings in place, Hive will store its met
 
 
 
-guava lib issue
+**guava-*-jre.jar** version under hadoop libraries and hive libraries can be different. They need to be of same version. Otherwise, you will get the error below:
 
-
-To avoid issues like the one described on page:
-
-https://issues.apache.org/jira/browse/HIVE-22718
-https://issues.apache.org/jira/browse/HIVE-22915
 ```
 Exception in thread "main" java.lang.NoSuchMethodError: com.google.common.base.Preconditions.checkArgument(ZLjava/lang/String;Ljava/lang/Object;)V
-```
-
-```bash
-
-$ ls hive/lib | grep guava
-
 ```
 
 
 let's ensure guava library version is consistent between Hive and Hadoop.
 
+```bash
+$ ls hive/lib | grep guava
+$ ls hadoop/share/hadoop/hdfs/lib | grep guava
+```
+
+To avoid issues like the one described on page:
+
+https://issues.apache.org/jira/browse/HIVE-22718
+https://issues.apache.org/jira/browse/HIVE-22915
 
 
 
@@ -413,9 +411,6 @@ Problem temporarily solved by replacing its guava-19.0.jar with Hadoop's guava-2
 $ rm hive/lib/guava-19.0.jar
 $ cp hadoop/share/hadoop/hdfs/lib/guava-27.0-jre.jar hive/lib
 ```
-
-
-
 
 
 
@@ -477,7 +472,9 @@ The $HIVE_HOME/bin directory contains executable scripts that launch various Hiv
 
 
 
-we'll use the **$HIVE_HOME/bin/hive** command, which is a bash shell script, to start the [Hive command line interface (CLI)](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Cli) and use it from the shell:
+
+
+we'll use the **$HIVE_HOME/bin/hive** command, which is a bash shell script, to start the Hive [command line interface (CLI)](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Cli) and use it to play around:
 
 ```bash
 $ hive --service cli # or simply hive because the CLI is the default service

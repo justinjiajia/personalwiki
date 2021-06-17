@@ -769,7 +769,8 @@ Once this local configuration is done, you can use the file upload icon to uploa
 ## Hadoop Streaming
 
 
-Python 3 is installed on Ubuntu EC2 instances.
+Starting from Ubuntu 20.04, Python 3 is included in the base system installation.
+
 
 ```bash
 which python3

@@ -519,7 +519,7 @@ object WordCount {
 
 
 We pass the SparkContext constructor a `SparkConf` which contains information about our application. This example shows the minimal way to initialize a SparkContext, where we only pass an application name, namely Word Count. This will identify our application on the cluster manager’s UI if we connect to a cluster. Additional parameters exist for configuring how our application executes or adding code to be shipped to the cluster.
- 
+
 
 After we have initialized a SparkContext, we can use all the methods as before to create RDDs (e.g., from a text file) and manipulate them. Finally, to shut down Spark, we can either call the `stop` method on your SparkContext, or simply exit the application (e.g., with `System.exit(0)` or `sys.exit()`).
 
@@ -872,5 +872,211 @@ val stats = (0 until 9).map(i => { parsed.map(md => md.scores(i)).filter(!isNaN(
 ```
 
 
+## Jupyter Notebook
+
+
+16GB storage
+
+
+find the Anaconda bash script for the latest Version of Anaconda in https://repo.anaconda.com/archive/ and download it:
+
+
+
+```bash
+$ wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+```
+or
+
+```bash
+curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+```
+
+Verify the data integrity of the installer file through SHA-256 checksum:
+
+```bash
+sha256sum Anaconda3-2021.05-Linux-x86_64.sh
+```
+
+Compare the output against the checksum found on https://docs.anaconda.com/anaconda/install/hashes/lin-3-64/
+
+
+Run the Anaconda Script
+
+
+
+
+```
+$ bash Anaconda3-2021.05-Linux-x86_64.sh
+```
+
+Review the license agreement by pressing ENTER until you reach the end. When you get to the end of the license, type yes as long as you agree to the license to complete installation.
+Once you agree to the license, you will be prompted to choose the location of the installation. You can press ENTER to accept the default location, or specify a different location.
+
+
+
+Once installation is complete, you'll receive the following message:
+
+```bash
+installation finished.
+Do you wish the installer to initialize Anaconda3?
+by running conda init? [yes|no]
+[no] >>>  
+```
+
+You are recommended to  `yes`.
+
+
+Activate the Anaconda environment
+
+```bash
+$ source ~/.bashrc
+```
+You will see `(base)` before your instance name if you in the Anaconda environment
+
+To check if your default python is from anaconda, type in:
+
+```bash
+$ which python
+/home/hadoop/anaconda3/bin/python
+```
+
+
+open up the python interactive shell by typing python
+
+Use the following code block to generate an encrypted password.
+
+```python
+from IPython.lib import passwd
+passwd("your password")
+```
+
+Copy the encrypted password and also remember the password you typed in as you will need it to log in to the Jupyter Notebook
+
+
+
+### Securing the Server with SSL certificate
+
+Since our server will be open to the web, we will use OpenSSL to add an SSL certification to act as an added security layer.
+
+Run the following commands:
+
+```bash
+$ mkdir certs
+$ cd certs
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl_cert.pem -out ssl_cert.pem
+```
+
+Fill in the details when prompted.
+
+This will create a file named **ssl_cert.pem** in the **certs** directory.
+
+```bash
+$ ls -lah certs/ssl_cert.pem
+-rw-------  1 root   root   3.0K Jun 17 11:05 ssl_cert.pem
+```
+
+Change the ownership of the file to prevent permission errors:
+
+```bash
+$ sudo chown $USER:$USER ssl_cert.pem
+```
+
+Configuring Jupyter Notebook
+
+
+Type in the following command to generate a configuration file for Jupyter Notebook.
+
+```bash
+$ jupyter notebook --generate-config
+```
+
+
+It will create a configuration file at **/home/hadoop/.jupyter/jupyter_notebook_config.py** by default.
+
+To edit the configuration file type and enter :
+
+
+```bash
+$ nano .jupyter/jupyter_notebook_config.py
+```
+
+Edit the configuration file to add the following lines of code.
+
+```python3
+c = get_config()
+
+# Notebook config this is where you saved your pem cert
+c.ServerApp.certfile = '/home/ubuntu/certs/ssl_cert.pem'
+
+# Run on all IP addresses of your instance
+c.ServerApp.ip = '*'
+
+# Setting it to False will not let the Notebook attempt to open up in a native browser
+# as AWS server has no browsers or GUI
+c.ServerApp.open_browser = False
+
+# The encrypted password to log in to jupyter notebook
+c.ServerApp.password = 'sha1:5093985f5d96:84cd6ecedf03d4a281ca30ceef123faabf4d7e99'
+
+
+# Fix port to 8888
+c.ServerApp.port = 8888
+```
+
+Make a new directory to put all your notebooks. Move into the directory and start the Jupyter notebook using the following commands.
+
+```bash
+$ mkdir notebook_files
+$ cd notebook_files
+```
+
+Type and enter:
+
+``` bash
+$ jupyter notebook
+```
+
+to start the notebook server. Once it is started you can see the logging.
+
+
+Accessing the Jupyter Notebook Remotely
+
+
+Copy the public DNS of your AWS EC2 instance from your AWS console. It will be similar to the one shown below:
+```
+ec2-13-128-70-55.us-east-1.compute.amazonaws.com
+```
+
+Prepend `https://` and append the port number on which the jupyter notebook is running on the server as shown below.
+
+```
+https://ec2-13-128-70-55.us-east-1.compute.amazonaws.com:8888
+```
+
+
+Install Scala by typing and entering the following command :
+
+```bash
+sudo apt install scala
+```
+
+Verify by typing `scala -version`.
+
+We also need to install the py4j library which enables Python programs running in a Python interpreter to dynamically access Java objects in a Java Virtual Machine.
+
+To install `py4j` make sure you are in the Anaconda environment (command lines prefaced with (base)), and type
+`pip install py4j` to install py4j.
+
+
+Define one more environment variable in **.bashrc**:
+
+```bash
+export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+```
 
 <sup>[1](#footnote1)</sup> You can specify more threads than available CPU cores. That way, CPU cores can be better utilized. Although it depends on the complexity of your jobs, multiplying the number of CPU cores by two or three gives you a good starting point for this parameter (for example, for a machine with quad-core CPUs, set the number of threads to a value between 8 and 12)
+
+
+
+
+https://analyticsindiamag.com/setting-up-a-completely-free-jupyter-server-for-data-science-with-aws/
