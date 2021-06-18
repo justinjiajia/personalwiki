@@ -581,7 +581,7 @@ Note that Tez needs to be installed on the Hadoop cluster first
 
 
 The Hive shell is only one of several services that you can run using the hive command.
-You can specify the service to run using the --service option. Type hive --service
+You can specify the service to run using the `--service` option. Type hive --service
 help to get a list of available service names; some of the most useful ones are described
 in the following list:
 cli
@@ -592,3 +592,8 @@ The Hive shell is only one of several services that you can run using the hive c
 
 
 Hive Web Interface (component removed as of Hive 2.2.0)
+
+
+
+
+https://www.codenong.com/cs110673896/

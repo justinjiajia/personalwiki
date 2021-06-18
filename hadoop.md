@@ -474,6 +474,51 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFL3aGOyW1BvpwaGFEMNLwh8ppwgs7i/P9EfPvRnp9
 
 
 
+
+###
+
+If you want to use the AWS generated key pair (in that **.pem**) to mount into the instance as the dedicated user, **hadoop**, directly.
+
+You need to append the public key to **~/.ssh/authorized_keys** in **hadoop**'s home directory and
+
+
+- For Mac users, you can use the `ssh-keygen` command to retrieve the public key from the **.pem** file:
+
+```bash
+$ ssh-keygen -y -f  <pathname to the .pem file>
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCgbWghnWsLUcKpLiXVfbArZDyLW2wQ+J1FgR3oKhJopZrYmq9M3/rJLrayM+pniMkKIduBfefsHvkz7/F47rjeuSn/DGUruPwIPcMQreGhQhvZJVpBO8ezyqfjfyD0ND+Y+O545IhiUcqfM6hosrbyuscSLxurgfPrHs2sUB07SUe/jke/4bmhTx+qmpnP70ly3+GZdxidMgMqtMYSMMME0Z6mpBUPLy3f7E6MWlDq/btsr+aUH5LqsOcyjgUyLkgSun4BZyk+W0vsZimhoPawMPgr5YzaHHX477L7IiHqnYTHk8mblBdray8/Q1JVsxYRaJC91O1h2QfR7u0BiBoD
+```
+
+- For Windows users, you can use PuTTYgen to get the public key for your key pair.
+Start PuTTYgen, choose **Load** and locate the **.pem** file. PuTTYgen will then display the public key.
+
+
+Then run the following code on the instance to append the public key:
+
+```bash
+$ echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCgbWghnWsLUcKpLiXVfbArZDyLW2wQ+J1FgR3oKhJopZrYmq9M3/rJLrayM+pniMkKIduBfefsHvkz7/F47rjeuSn/DGUruPwIPcMQreGhQhvZJVpBO8ezyqfjfyD0ND+Y+O545IhiUcqfM6hosrbyuscSLxurgfPrHs2sUB07SUe/jke/4bmhTx+qmpnP70ly3+GZdxidMgMqtMYSMMME0Z6mpBUPLy3f7E6MWlDq/btsr+aUH5LqsOcyjgUyLkgSun4BZyk+W0vsZimhoPawMPgr5YzaHHX477L7IiHqnYTHk8mblBdray8/Q1JVsxYRaJC91O1h2QfR7u0BiBoD imported-openssh-key" >> ~/.ssh/authorized_keys
+```
+
+Then you canmount into the instance as **hadoop**  directly.
+
+
+
+with this configuration, you can copy a lcoal file into the EC2 instance later:
+
+- For Mac users, run the `scp` command from **Terminal**:
+
+```bash
+$ scp -i /path/key-pair.pem /path/file hadoop@PUBLIC_DNS:PATH
+```
+
+-  For Windows users, run the following command from within the Command Prompt:
+
+```bash
+> pscp -i /path/private-key.ppk -P 22 /path/file hadoop@PUBLIC_DNS:PATH
+```
+
+
+
 ## 2. Creating an AMI for the Configured instance
 
 We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be consistent across all machines in a fully-distributed cluster. To make things easier, we will now just clone the EC2 instance to create an AMI. To do that:

@@ -900,30 +900,24 @@ sha256sum Anaconda3-2021.05-Linux-x86_64.sh
 Compare the output against the checksum found on https://docs.anaconda.com/anaconda/install/hashes/lin-3-64/
 
 
-Run the Anaconda Script
+Run the Anaconda Script:
 
-
-
-
-```
+```bash
 $ bash Anaconda3-2021.05-Linux-x86_64.sh
 ```
 
-Review the license agreement by pressing ENTER until you reach the end. When you get to the end of the license, type yes as long as you agree to the license to complete installation.
-Once you agree to the license, you will be prompted to choose the location of the installation. You can press ENTER to accept the default location, or specify a different location.
 
+You'll have to hit <kdb>Enter</kdb> to get through all the legalese, but eventually you need to type `yes` to agree and then just hit <kdb>Enter</kdb> to install Anaconda3 into the default directory.
 
+Once it starts installing, you'll see all the packages included in Anaconda3 also being installed. Anaconda3 gives you everything you'll need to get your Jupyter Notebook running. At the end you'll be prompted to include Anaconda3 into your **.bashrc** `PATH`. Make sure to type `yes`.
 
-Once installation is complete, you'll receive the following message:
 
 ```bash
-installation finished.
-Do you wish the installer to initialize Anaconda3?
+Do you wish the installer to initialize Anaconda3
 by running conda init? [yes|no]
-[no] >>>  
+[no] >>> yes
 ```
 
-You are recommended to  `yes`.
 
 
 Activate the Anaconda environment
@@ -931,6 +925,7 @@ Activate the Anaconda environment
 ```bash
 $ source ~/.bashrc
 ```
+
 You will see `(base)` before your instance name if you in the Anaconda environment
 
 To check if your default python is from anaconda, type in:
@@ -946,8 +941,10 @@ open up the python interactive shell by typing python
 Use the following code block to generate an encrypted password.
 
 ```python
-from IPython.lib import passwd
-passwd("your password")
+>>> from IPython.lib import passwd
+>>> passwd("bigdata")
+'sha1:6dc9ee89f2bc:837a9682752395af9f2d477bf892c2a8cae6f149'
+>>> quit()
 ```
 
 Copy the encrypted password and also remember the password you typed in as you will need it to log in to the Jupyter Notebook
@@ -961,8 +958,7 @@ Since our server will be open to the web, we will use OpenSSL to add an SSL cert
 Run the following commands:
 
 ```bash
-$ mkdir certs
-$ cd certs
+$ mkdir certs && cd certs
 $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl_cert.pem -out ssl_cert.pem
 ```
 
@@ -971,8 +967,8 @@ Fill in the details when prompted.
 This will create a file named **ssl_cert.pem** in the **certs** directory.
 
 ```bash
-$ ls -lah certs/ssl_cert.pem
--rw-------  1 root   root   3.0K Jun 17 11:05 ssl_cert.pem
+$ ls -lah ssl_cert.pem
+-rw------- 1 root root 2.9K Jun 17 12:42 ssl_cert.pem
 ```
 
 Change the ownership of the file to prevent permission errors:
@@ -987,7 +983,7 @@ Configuring Jupyter Notebook
 Type in the following command to generate a configuration file for Jupyter Notebook.
 
 ```bash
-$ jupyter notebook --generate-config
+$ cd ~ && jupyter notebook --generate-config
 ```
 
 
@@ -1006,28 +1002,30 @@ Edit the configuration file to add the following lines of code.
 c = get_config()
 
 # Notebook config this is where you saved your pem cert
-c.ServerApp.certfile = '/home/ubuntu/certs/ssl_cert.pem'
+c.NotebookApp.certfile = '/home/hadoop/certs/ssl_cert.pem'
 
 # Run on all IP addresses of your instance
-c.ServerApp.ip = '*'
+c.NotebookApp.ip = '*'
 
 # Setting it to False will not let the Notebook attempt to open up in a native browser
 # as AWS server has no browsers or GUI
-c.ServerApp.open_browser = False
+c.NotebookApp.open_browser = False
 
 # The encrypted password to log in to jupyter notebook
-c.ServerApp.password = 'sha1:5093985f5d96:84cd6ecedf03d4a281ca30ceef123faabf4d7e99'
-
+c.NotebookApp.password = 'sha1:6dc9ee89f2bc:837a9682752395af9f2d477bf892c2a8cae6f149'
 
 # Fix port to 8888
-c.ServerApp.port = 8888
+c.NotebookApp.port = 8888
+
 ```
+
+
+
 
 Make a new directory to put all your notebooks. Move into the directory and start the Jupyter notebook using the following commands.
 
 ```bash
-$ mkdir notebook_files
-$ cd notebook_files
+$ mkdir notebook_files && cd notebook_files
 ```
 
 Type and enter:
@@ -1043,6 +1041,7 @@ Accessing the Jupyter Notebook Remotely
 
 
 Copy the public DNS of your AWS EC2 instance from your AWS console. It will be similar to the one shown below:
+
 ```
 ec2-13-128-70-55.us-east-1.compute.amazonaws.com
 ```
@@ -1053,12 +1052,48 @@ Prepend `https://` and append the port number on which the jupyter notebook is r
 https://ec2-13-128-70-55.us-east-1.compute.amazonaws.com:8888
 ```
 
+If you did not set a password, then you need to further append a token to the end
+
+```
+https://ec2-13-128-70-55.us-east-1.compute.amazonaws.com:8888/?token=07a4470d10722cb2a1f723abed9f57c0c70d5d838a222e15
+```
+
+
+Some unresolved issues:
+
+https://github.com/jupyterlab/jupyterlab/issues/9512#issuecomment-751437788
+https://github.com/jupyter/docker-stacks/issues/1205
+https://jupyter-server.readthedocs.io/en/latest/operators/migrate-from-nbserver.html#running-jupyter-notebook-on-jupyter-server
+
+```
+[W 2021-06-17 13:26:39.593 LabApp] 'certfile' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2021-06-17 13:26:39.593 LabApp] 'ip' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2021-06-17 13:26:39.593 LabApp] 'ip' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2021-06-17 13:26:39.593 LabApp] 'password' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2021-06-17 13:26:39.593 LabApp] 'port' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2021-06-17 13:26:39.593 LabApp] 'port' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+```
+
+```
+[W 13:26:47.164 NotebookApp] SSL Error on 12 ('219.78.160.38', 53412): [SSL: SSLV3_ALERT_CERTIFICATE_UNKNOWN] sslv3 alert certificate unknown (_ssl.c:1125)
+```
+
+https://github.com/jupyterlab/jupyterlab/issues/6396
+
 
 Install Scala by typing and entering the following command :
 
 ```bash
 sudo apt install scala
 ```
+
+You can install specific versions of Scala with the following (replace the version numbers):
+
+```bash
+$ wget http://www.scala-lang.org/files/archive/scala-2.11.8.deb
+$ sudo dpkg -i scala-2.11.8.deb
+```
+
 
 Verify by typing `scala -version`.
 
@@ -1074,9 +1109,21 @@ Define one more environment variable in **.bashrc**:
 export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
 ```
 
+then you can use jupyter notebook as if you are using the pyspark shell
+
+```pyspark
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.master("local[*]").config("spark.default.parallelism", 4).getOrCreate()  
+sc = spark.sparkContext
+sc
+sc.getConf().getAll()
+```
+
 <sup>[1](#footnote1)</sup> You can specify more threads than available CPU cores. That way, CPU cores can be better utilized. Although it depends on the complexity of your jobs, multiplying the number of CPU cores by two or three gives you a good starting point for this parameter (for example, for a machine with quad-core CPUs, set the number of threads to a value between 8 and 12)
 
 
 
 
 https://analyticsindiamag.com/setting-up-a-completely-free-jupyter-server-for-data-science-with-aws/
+https://analyticsindiamag.com/beginners-guide-to-pyspark-how-to-set-up-apache-spark-on-aws/
+https://medium.com/@skumarr53/setting-up-python-jupyter-spark-integrated-environment-in-aws-ec2-instance-6dfd93a85c84
