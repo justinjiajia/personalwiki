@@ -229,11 +229,18 @@ $ nano ~/wordcount/pom.xml
 ```
 
 
+
+https://aws.amazon.com/about-aws/whats-new/2018/11/amazon-emr-now-supports-a-public-EMR-artifact-repository-for-maven-builds/
+
+The EMR artifacts repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
+
 [Checking dependencies using the Amazon EMR artifact repository](https://docs.amazonaws.cn/en_us/emr/latest/ReleaseGuide/emr-artifact-repository.html)
 
 
 EMR 6.3.0 Releases Repository is not available. Use that for 6.2.0 instead:
 
+
+. Putting repository information in the pom.xml   file
 
 ```xml
 
@@ -271,9 +278,26 @@ EMR 6.3.0 Releases Repository is not available. Use that for 6.2.0 instead:
 </project>
 ```
 
+You can make sure
+that this dependency has been successfully added by running:
+
 
 ```bash
-$ cd ~/wordcount && mvn clean package
+$ cd ~/wordcount && mvn dependency:tree
+
+
+```
+
+the command `mvn
+package` will execute the package phase and all prior phases of the default lifecycle. But you can skip certain prior phases by using the `maven.*.skip` property, e.g., `mvn package –Dmaven.test.skip=true`
+
+ The `clean` lifecycle handles the deletion of
+temporary files and generated artifacts from the
+target directory
+
+
+```bash
+mvn clean package
 
 ...
 [INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ wordcount ---
@@ -282,6 +306,15 @@ $ cd ~/wordcount && mvn clean package
 [INFO] BUILD SUCCESS
 ...
 ```
+
+The package suffix after the mvn command is a Maven phase that
+compiles Java code and packages it into the JAR file.
+
+The SNAPSHOT qualifier in the project’s version carries a special meaning. It
+indicates that the project is in a development stage. When a project uses a
+SNAPSHOT dependency, every time the project is built, Maven will fetch and
+use the latest SNAPSHOT artifact.
+
 
 ```bash
 $ jar -tf wordcount/target/wordcount-1.0-SNAPSHOT.jar
