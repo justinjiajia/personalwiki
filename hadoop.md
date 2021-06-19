@@ -231,27 +231,28 @@ Paste the following in the `<configuration>` tag. Save and exit the editor.
 
 ```xml
 <property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://master:9000</value>
-    <description>NameNode URI. master is the hostname of the machine running namenode. 9000 denotes port on which datanode will send heartbeat to namenode.</description>
+  <name>fs.defaultFS</name>
+  <value>hdfs://master:9000</value>
+  <description>NameNode URI. master is the hostname of the machine
+    running namenode. 9000 denotes port on which datanode will send
+    heartbeat to namenode.</description>
 </property>
 
 <property>
-    <name>io.file.buffer.size</name>
-    <value>131072</value>
+  <name>io.file.buffer.size</name>
+  <value>131072</value>
 </property>
 
 <property>
-    <name>hadoop.tmp.dir</name>
-    <value>/home/hadoop/hadoop_tmp</value>
-    <description>A base for other temporary directories.</description>
+  <name>hadoop.tmp.dir</name>
+  <value>/home/hadoop/hadoop_tmp</value>
+  <description>A base for other temporary directories.</description>
 </property>
 
-
 <property>
-    <name>hadoop.http.staticuser.user</name>
-    <value>hadoop</value>
-    <description>The username used when using the HDFS web UI.</description>
+  <name>hadoop.http.staticuser.user</name>
+  <value>hadoop</value>
+  <description>The username used when using the HDFS web UI.</description>
 </property>
 ```
 
@@ -261,23 +262,23 @@ Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataN
 ```XML
 
 <property>
-    <name>dfs.namenode.name.dir</name>
-    <value>file://${hadoop.tmp.dir}/dfs/name</value>
-    <description> Path on the local filesystem where the NameNode stores the name table (fsimage) and transactions logs persistently.</description>
-</property>
-
-
-<property>
-    <name>dfs.datanode.data.dir</name>
-    <value>file://${hadoop.tmp.dir}/dfs/data</value>
-    <description> Comma separated list of paths on the local filesystem of a DataNode where it should store its blocks.</description>
+  <name>dfs.namenode.name.dir</name>
+  <value>file://${hadoop.tmp.dir}/dfs/name</value>
+  <description> Path on the local filesystem where the NameNode stores
+    the name table (fsimage) and transactions logs persistently.</description>
 </property>
 
 <property>
-    <name>dfs.blocksize</name>
-    <value>16m</value>
+  <name>dfs.datanode.data.dir</name>
+  <value>file://${hadoop.tmp.dir}/dfs/data</value>
+  <description> Comma separated list of paths on the local filesystem of
+    a DataNode where it should store its blocks.</description>
 </property>
 
+<property>
+  <name>dfs.blocksize</name>
+  <value>16m</value>
+</property>
 
 ```
 

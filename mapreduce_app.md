@@ -3,24 +3,90 @@
 
 
 
-```bash
+```java
+import java.io.IOException;
+import java.util.StringTokenizer;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount {
+
+  public static class TokenizerMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class IntSumReducer
+       extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+```
+
+## Build Java MapReduce Application in EC2 Instances
+
+
+```bash
  $ javac -cp `hadoop classpath` WordCount.java
  ```
 
 
- We can find three .class files produced by the Java compiler. They are WordCount.class, WordCount$IntSumReducer.class, and WordCount$TokenizerMapper.class. Use the jar tool to bundle the bytecode class files into a jar file executable on the JVM:
+ We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a jar file executable on the JVM:
 
  ```bash
-
 $ jar -cf wordcount.jar WordCount*.class
 ```
 
-When developing Hadoop applications, it is common to debug and test the
-application locally.
+When developing Hadoop applications, it is common to debug and test the application locally.
 
 
-### Download some data
+### Download Some Data
 
 
 We will download a bunch of books from **gutenberg.org**.
@@ -97,40 +163,37 @@ $ hadoop --config conf jar wordcount.jar WordCount data output
 
 
 
-### build Java Mapreduce application on EMR
+## Build Java MapReduce Application in EMR
 
 
-Out of the box, the Amazon Elastic MapReduce (EMR) cluster is missing a few tools.
-It is based on Red Hat Enterprise Linux (RHEL). You will need to deploy and run
-your application. In this section, you will first connect to the server, update it, and install the missing tools
+Amazon Elastic MapReduce (EMR) now supports a public EMR artifacts repository to help developers build applications based on the EMR distribution for Apache Hadoop and Apache Hive using **Apache Maven**. The EMR artifacts repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
 
 
-Because EMR is based on Red Hat Linux, you can use the yum package manager to
-update the system:
+The EMR cluster is based on Red Hat Enterprise Linux (RHEL) and thereby missing a few tools we'll need to deploy and run Mapreduce applications (e.g., **Apache Maven**).
 
-Optionally, first update all installed packages, with `-y` switch to automatically choose "yes" for future questions:
+Optional: Because EMR is based on Red Hat Linux, we can first use the **yum** package manager to update all installed packages in the local system. Switch on the `-y` option to automatically choose `yes` for future questions:
 
  ```bash
 $ sudo yum -y update
 ```
 
-Then add an external repository to yum and configures it:
+Then add an external repository to `yum` and configures it:
 
- ```bash
+```bash
 $ sudo wget https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
 $ sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
 ```
 
-and lastly, installs **Apache Maven**:
+And lastly, installs **Apache Maven** by running:
 
- ```bash
+```bash
 $ sudo yum install -y apache-maven
 ```
 
 
-Unfortunately, installing Maven in this way will also install Java v1.7, so you will need to switch back to Java v1.8. To do that, use the alternatives command for java (runtime):
+Unfortunately, installing Maven in this way will also install Java v1.7, so you will need to switch back to Java v1.8. To do that, use the `alternatives` command for java (runtime):
 
- ```bash
+```bash
 $ sudo alternatives --config java
 There are 2 programs which provide 'java'.
  Selection Command
@@ -142,7 +205,7 @@ Enter to keep the current selection[+], or type selection number: 1
 
 And for the Java compiler:
 
- ```bash
+```bash
 $ sudo alternatives --config javac
 There are 2 programs which provide 'javac'.
  Selection Command
@@ -154,7 +217,7 @@ Enter to keep the current selection[+], or type selection number: 1
 
 Check that everything went well:
 
- ```bash
+```bash
 $ mvn -version
 ```
 
@@ -180,79 +243,13 @@ wordcount
 $ nano ~/wordcount/src/main/java/example/WordCount.java
  ```
 
-```java
-import java.io.IOException;
-import java.util.StringTokenizer;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-public class WordCount {
-
-  public static class TokenizerMapper
-       extends Mapper<Object, Text, Text, IntWritable>{
-
-    private final static IntWritable one = new IntWritable(1);
-    private Text word = new Text();
-
-    public void map(Object key, Text value, Context context
-                    ) throws IOException, InterruptedException {
-      StringTokenizer itr = new StringTokenizer(value.toString());
-      while (itr.hasMoreTokens()) {
-        word.set(itr.nextToken());
-        context.write(word, one);
-      }
-    }
-  }
-
-  public static class IntSumReducer
-       extends Reducer<Text, IntWritable, Text, IntWritable> {
-
-    private IntWritable result = new IntWritable();
-
-    public void reduce(Text key, Iterable<IntWritable> values,
-                       Context context
-                       ) throws IOException, InterruptedException {
-      int sum = 0;
-      for (IntWritable val : values) {
-        sum += val.get();
-      }
-      result.set(sum);
-      context.write(key, result);
-    }
-  }
-
-  public static void main(String[] args) throws Exception {
-    Configuration conf = new Configuration();
-    Job job = Job.getInstance(conf, "word count");
-    job.setJarByClass(WordCount.class);
-    job.setMapperClass(TokenizerMapper.class);
-    job.setCombinerClass(IntSumReducer.class);
-    job.setReducerClass(IntSumReducer.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(IntWritable.class);
-    FileInputFormat.addInputPath(job, new Path(args[0]));
-    FileOutputFormat.setOutputPath(job, new Path(args[1]));
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
-  }
-}
-
-```
+Then copy and paste the Java source code for the word count application.
 
 ```bash
 $ nano ~/wordcount/pom.xml
 ```
 
 
-
-https://aws.amazon.com/about-aws/whats-new/2018/11/amazon-emr-now-supports-a-public-EMR-artifact-repository-for-maven-builds/
 
 The EMR artifacts repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
 
