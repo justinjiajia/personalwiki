@@ -289,12 +289,12 @@ To do so, you need to add one more property in **hdfs-site.xml**:
 
 ```XML
 <property>
-    <name>dfs.namenode.secondary.http-address</name>
-    <value>worker1:9868</value>
-    <description>
-      The SecondaryNameNode's http server address and port. Optional.
-      By specifying this, we can place the SecondaryNameNode on specific node
-    </description>
+  <name>dfs.namenode.secondary.http-address</name>
+  <value>worker1:9868</value>
+  <description>
+    The SecondaryNameNode's http server address and port. Optional.
+    By specifying this, we can place the SecondaryNameNode on specific node
+  </description>
 </property>
 ```
 
@@ -318,24 +318,25 @@ $ cd $HADOOP_CONF_DIR && nano yarn-site.xml
 Copy the following and paste it between the configuration tags just like before.
 
 ```XML
-<property>    
-    <name>yarn.resourcemanager.hostname</name>
-    <value>master</value>
-    <description>The hostname of the ResourceManager.</description>
-</property>
-
-<property>    
-  <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
-  <value>true</value>
-  <description>Enable auto-detection of node capabilities such as memory and CPU. </description>
+<property>
+  <name>yarn.resourcemanager.hostname</name>
+  <value>master</value>
+  <description>The hostname of the ResourceManager.</description>
 </property>
 
 <property>
-   <name>yarn.nodemanager.aux-services</name>
-   <value>mapreduce_shuffle</value>
-   <description>Shuffle service that needs to be set for MapReduce applications.</description>
+  <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
+  <value>true</value>
+  <description>Enable auto-detection of node capabilities such as memory
+    and CPU. </description>
 </property>
 
+<property>
+  <name>yarn.nodemanager.aux-services</name>
+  <value>mapreduce_shuffle</value>
+  <description>Shuffle service that needs to be set for MapReduce
+    applications.</description>
+</property>
 ```
 
 
@@ -345,27 +346,30 @@ If you want to enable the timeline service and the generic history service, add 
 
 ```XML
 <property>
-  <description>Indicate to clients whether Timeline service is enabled or not.
-  If enabled, the TimelineClient library used by end-users will post entities
-  and events to the Timeline server.</description>
+  <description>Indicate to clients whether Timeline service is enabled
+    or not.
+    If enabled, the TimelineClient library used by end-users will post
+    entities
+    and events to the Timeline server.</description>
   <name>yarn.timeline-service.enabled</name>
   <value>true</value>
 </property>
 
 <property>
-  <description>The setting that controls whether yarn system metrics is published on the Timeline service or not by RM And NM.</description>
+  <description>The setting that controls whether yarn system metrics is
+    published on the Timeline service or not by RM And NM.</description>
   <name>yarn.system-metrics-publisher.enabled</name>
   <value>true</value>
 </property>
 
 <property>
   <description>Indicate to clients whether to query generic application
-  data from timeline history-service or not. If not enabled then application
-  data is queried only from Resource Manager.</description>
+    data from timeline history-service or not. If not enabled then
+    application
+    data is queried only from Resource Manager.</description>
   <name>yarn.timeline-service.generic-application-history.enabled</name>
   <value>true</value>
 </property>
-
 ```
 
 
@@ -391,19 +395,22 @@ Copy and paste the following between the configuration tags<sup><a href="#footno
 <property>
   <name>yarn.app.mapreduce.am.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description>User added environment variables for the MR App Master processes.</description>
+  <description>User added environment variables for the MR App Master
+    processes.</description>
 </property>
 
 <property>
   <name>mapreduce.map.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description> User added environment variables for the map task processes.</description>
+  <description> User added environment variables for the map task
+    processes.</description>
 </property>
 
 <property>
   <name>mapreduce.reduce.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description> User added environment variables for the reduce task processes.</description>
+  <description> User added environment variables for the reduce task
+    processes.</description>
 </property>
 ```
 
@@ -414,7 +421,8 @@ If you want to enable the timeline service and the generic history service, add 
 <property>
   <name>mapreduce.job.emit-timeline-data</name>
   <value>true</value>
-  <description>Specifies if the Application Master should emit timeline data to the timeline server. Individual jobs can override this value.
+  <description>Specifies if the Application Master should emit timeline
+    data to the timeline server. Individual jobs can override this value.
   </description>
 </property>
 
