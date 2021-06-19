@@ -72,21 +72,6 @@ public class WordCount {
 ## Build Java MapReduce Application in EC2 Instances
 
 
-```bash
- $ javac -cp `hadoop classpath` WordCount.java
- ```
-
-
- We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a Java Archive (JAR) file executable on the JVM<sup><a href="footnote1">1</a>/sup>:
-
-
- ```bash
-$ jar -cf wordcount.jar WordCount*.class
-```
-
-When developing Hadoop applications, it is common to debug and test the application locally.
-
-
 ### Download Some Data
 
 
@@ -123,6 +108,35 @@ $ rm ~/data/download_books.sh
 
 Once the download is finished, you can list the files in the directory with: `ls -lh data` And you can check the total size of in the directory: `du -sh data`.
 
+
+
+
+
+
+```bash
+ $ javac -cp `hadoop classpath` WordCount.java
+ ```
+
+
+ We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a Java Archive (JAR) file executable on the JVM<sup><a href="#footnote1">1</a></sup>:
+
+
+ ```bash
+$ jar -cf wordcount.jar WordCount*.class
+```
+
+We can use the following command to view the content of the wordcount.jar file:
+
+```bash
+$ jar -tf wordcount.jar
+```
+
+
+
+
+
+
+When developing Hadoop applications, it is common to debug and test the application locally.
 
 
 
@@ -399,4 +413,7 @@ To build the uber JAR, you will use the Maven Shade build plugin. You can read i
 ## Footnote
 
 
-<sup>[1](#footnote1)</sup> Java Archive (JAR) is a package file format typically used to aggregate many Java class files and associated metadata and resources (text, images, etc.) into one file to distribute applications on the Java platform. For details, see Using JAR Files: The Basics.
+<sup>[1](#footnote1)</sup> Java Archive (JAR) is a package file format typically used to aggregate many Java class files and associated metadata and resources (text, images, etc.) into one file to distribute applications on the Java platform. For details, see [Using JAR Files: The Basics](https://docs.oracle.com/javase/tutorial/deployment/jar/basicsindex.html).
+
+
+<sup>[2](#footnote2)</sup>
