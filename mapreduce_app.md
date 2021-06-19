@@ -77,7 +77,8 @@ public class WordCount {
  ```
 
 
- We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a jar file executable on the JVM:
+ We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a Java Archive (JAR) file executable on the JVM<sup><a href="footnote1">1</a>/sup>:
+
 
  ```bash
 $ jar -cf wordcount.jar WordCount*.class
@@ -166,8 +167,7 @@ $ hadoop --config conf jar wordcount.jar WordCount data output
 ## Build Java MapReduce Application in EMR
 
 
-Amazon Elastic MapReduce (EMR) now supports a public EMR artifacts repository to help developers build applications based on the EMR distribution for Apache Hadoop and Apache Hive using **Apache Maven**. The EMR artifacts repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
-
+Amazon Elastic MapReduce (EMR) now supports a public EMR artifact repository to help developers build applications based on the EMR distribution for Apache Hadoop and Apache Hive using **Apache Maven**.
 
 The EMR cluster is based on Red Hat Enterprise Linux (RHEL) and thereby missing a few tools we'll need to deploy and run Mapreduce applications (e.g., **Apache Maven**).
 
@@ -249,17 +249,17 @@ Then copy and paste the Java source code for the word count application.
 $ nano ~/wordcount/pom.xml
 ```
 
+The EMR artifact repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
+
+To use the right repository, we need to add its URL to the Maven settings file or to a specific project's pom.xml configuration file. We can then specify the dependencies in your project configuration. Visit [Checking dependencies using the Amazon EMR artifact repository](https://docs.amazonaws.cn/en_us/emr/latest/ReleaseGuide/emr-artifact-repository.html) for detailed information.
 
 
-The EMR artifacts repository hosts the same optimized versions of libraries and dependencies that are available with specific Amazon EMR release versions, ensuring that artifacts used in building applications against the EMR stack are compatible with the runtime libraries on the EMR cluster.
-
-[Checking dependencies using the Amazon EMR artifact repository](https://docs.amazonaws.cn/en_us/emr/latest/ReleaseGuide/emr-artifact-repository.html)
 
 
-EMR 6.3.0 Releases Repository is not available. Use that for 6.2.0 instead:
+Currently, EMR 6.3.0 Releases Repository is not available. Use that for 6.2.0 instead:
 
 
-You can remove the Maven generated **pom.xml** file and then create a new one with the XML below:
+We can remove the Maven generated **pom.xml** file and then create a new one with the XML below:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -394,3 +394,9 @@ $ hadoop jar ~/wordcount/target/wordcount-0.0.1-SNAPSHOT.jar WordCount /data /ou
  On your journey to deployment, one of your options is to package your application in an uber JAR. An uber JAR (also known as super JAR or fat JAR) is a JAR above (literally the German translation of über) the other JARs. The uber JAR contains all the classes needed by your application, regardless of the number of JARs you had on your class path. In other words, it contains most, if not all, the dependencies of your application. Logistics are then uber simplified because you will handle only one JAR.
 
 To build the uber JAR, you will use the Maven Shade build plugin. You can read its full documentation at http://maven.apache.org/plugins/maven-shade-plugin/index.html
+
+
+## Footnote
+
+
+<sup>[1](#footnote1)</sup> Java Archive (JAR) is a package file format typically used to aggregate many Java class files and associated metadata and resources (text, images, etc.) into one file to distribute applications on the Java platform. For details, see Using JAR Files: The Basics.

@@ -421,9 +421,7 @@ If you want to enable the timeline service and the generic history service, add 
 <property>
   <name>mapreduce.job.emit-timeline-data</name>
   <value>true</value>
-  <description>Specifies if the Application Master should emit timeline
-    data to the timeline server. Individual jobs can override this value.
-  </description>
+  <description>Specifies if the Application Master should emit timeline data to the timeline server. Individual jobs can override this value. </description>
 </property>
 
 ```
