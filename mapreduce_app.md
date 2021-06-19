@@ -17,22 +17,44 @@ $ jar -cf wordcount.jar WordCount*.class
 ```
 
 When developing Hadoop applications, it is common to debug and test the
-application locally
+application locally.
 
-Then we write a short script to download a few dozen books with vim download_books.sh or nano download_books.sh:
+
+### Download some data
+
+
+We will download a bunch of books from **gutenberg.org**.
+
+First let's create a directory and write a short script to download a few dozen books into it:
+
+```bash
+$ mkdir data && nano ~/data/download_books.sh
+```
+
 
 ```bash
 #!/usr/bin/env bash
 
-for i in {1380..1400}
+this="${BASH_SOURCE-$0}"
+path=$(cd -P -- "$(dirname -- "$this")" && pwd -P)
+
+for i in {1391..1400}
 do
-    wget "http://www.gutenberg.org/files/$i/$i.txt"
+    wget "https://www.gutenberg.org/files/$i/$i.txt" -O "$path/$i.txt"
 done
 ```
 
 
-Save the script, then make sure it is executable: chmod +x download_books.sh. We can now start downloading the books (some of them won't be available in .txt format, that's fine):
+Save the script and exit **nano**. Then make sure it is executable and start downloading the books (some of them won't be available in .txt format, that's fine):
 
+```bash
+$ chmod +x ~/data/download_books.sh && ./data/download_books.sh
+$ rm ~/data/download_books.sh
+```
+
+
+
+Once the download is finished, you can list the files in the directory with: `ls -lh data` And you can check the total size of in the directory: `du -sh data`.
 
 
 
@@ -95,7 +117,7 @@ $ sudo yum -y update
 Then add an external repository to yum and configures it:
 
  ```bash
-$ sudo wget https://repos.fedorapeople.org/repos/dchen/apache-maven/ epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+$ sudo wget https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
 $ sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
 ```
 
@@ -240,41 +262,70 @@ The EMR artifacts repository hosts the same optimized versions of libraries and 
 EMR 6.3.0 Releases Repository is not available. Use that for 6.2.0 instead:
 
 
-. Putting repository information in the pom.xml   file
+You can remove the Maven generated **pom.xml** file and then create a new one with the XML below:
 
 ```xml
+<?xml version="1.0" encoding="UTF-8"?>
 
-...
-<name>wordcount</name>
-<url>http://maven.apache.org</url>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-<repositories>
-  <repository>
-    <id>emr-6.2.0-artifacts</id>
-    <name>EMR 6.2.0 Releases Repository</name>
-    <releases>
-      <enabled>true</enabled>
-    </releases>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-    <url>https://s3.us-east-1.amazonaws.com/us-east-1-emr-artifacts/emr-6.2.0/repos/maven/</url>
-  </repository>
-</repositories>
+	<groupId>example</groupId>
+	<artifactId>wordcount</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
-<dependencies>
-<dependency>
-  <groupId>org.apache.hadoop</groupId>
-  <artifactId>hadoop-client</artifactId>
-  <version>3.2.1</version>
-</dependency>
-<dependency>
- <groupId>junit</groupId>
- <artifactId>junit</artifactId>
- <version>3.8.1</version>
- <scope>test</scope>
-</dependency>
-</dependencies>
+	<name>wordcount</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>emr-6.2.0-artifacts</id>
+			<name>EMR 6.2.0 Releases Repository</name>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<url>https://s3.us-east-1.amazonaws.com/us-east-1-emr-artifacts/emr-6.2.0/repos/maven/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
 </project>
 ```
 
@@ -288,12 +339,9 @@ $ cd ~/wordcount && mvn dependency:tree
 
 ```
 
-the command `mvn
-package` will execute the package phase and all prior phases of the default lifecycle. But you can skip certain prior phases by using the `maven.*.skip` property, e.g., `mvn package –Dmaven.test.skip=true`
+the command `mvn package` will execute the package phase and all prior phases of the default lifecycle. But you can skip certain prior phases by using the `maven.*.skip` property, e.g., `mvn package -Dmaven.test.skip=true`.
 
- The `clean` lifecycle handles the deletion of
-temporary files and generated artifacts from the
-target directory
+ The `clean` lifecycle handles the deletion of temporary files and generated artifacts from the target directory.
 
 
 ```bash
@@ -301,7 +349,7 @@ mvn clean package
 
 ...
 [INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ wordcount ---
-[INFO] Building jar: /home/hadoop/wordcount/target/wordcount-1.0-SNAPSHOT.jar
+[INFO] Building jar: /home/hadoop/wordcount/target/wordcount-0.0.1-SNAPSHOT.jar
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 ...
@@ -317,7 +365,7 @@ use the latest SNAPSHOT artifact.
 
 
 ```bash
-$ jar -tf wordcount/target/wordcount-1.0-SNAPSHOT.jar
+$ jar -tf ~/wordcount/target/wordcount-0.0.1-SNAPSHOT.jar
 META-INF/
 META-INF/MANIFEST.MF
 example/
@@ -332,15 +380,20 @@ META-INF/maven/example/wordcount/pom.xml
 META-INF/maven/example/wordcount/pom.properties
 ```
 
+local mode:
+
 ```bash
-$ hadoop --config conf jar ~/wordcount/target/wordcount-1.0-SNAPSHOT.jar WordCount data output
+$ hadoop --config conf jar ~/wordcount/target/wordcount-0.0.1-SNAPSHOT.jar WordCount data output
+```
+
+distributed mode:
+
+```bash
+$ hadoop jar ~/wordcount/target/wordcount-0.0.1-SNAPSHOT.jar WordCount /data /output
 ```
 
 
 
- On your journey to deployment, one of your options is to package your application in
-an uber JAR. As you may recall from chapter 5, an uber JAR is an archive containing
-all the classes needed by your application, regardless of the number of JARs you had
-on your class path. The uber JAR contains most, if not all, the dependencies of your
-application. Logistics are then uber simplified, as you will handle only one JAR. Let’s
-build an uber JAR with Maven.
+ On your journey to deployment, one of your options is to package your application in an uber JAR. An uber JAR (also known as super JAR or fat JAR) is a JAR above (literally the German translation of über) the other JARs. The uber JAR contains all the classes needed by your application, regardless of the number of JARs you had on your class path. In other words, it contains most, if not all, the dependencies of your application. Logistics are then uber simplified because you will handle only one JAR.
+
+To build the uber JAR, you will use the Maven Shade build plugin. You can read its full documentation at http://maven.apache.org/plugins/maven-shade-plugin/index.html
