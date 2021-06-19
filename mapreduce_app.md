@@ -111,7 +111,7 @@ Once the download is finished, you can list the files in the directory with: `ls
 
 
 
-
+Compile WordCount.java:
 
 ```bash
  $ javac -cp `hadoop classpath` WordCount.java
