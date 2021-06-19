@@ -64,19 +64,19 @@ We can create a configuration file **~/conf/hadoop-local.xml** for this purpose.
 
 ```xml
 <?xml version="1.0"?>
-<configuration>
- <property>
- <name>fs.defaultFS</name>
- <value>file:///</value>
- </property>
 
- <property>
- <name>mapreduce.framework.name</name>
- <value>local</value>
- </property>
+<configuration>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>file:///</value>
+	</property>
+
+	<property>
+		<name>mapreduce.framework.name</name>
+		<value>local</value>
+	</property>
 
 </configuration>
-
 ```
 
 With this setup, it is easy to use any configuration with the `-conf` or `--config` command-line switch.
@@ -177,7 +177,7 @@ wordcount
  ```
 
  ```bash
-$ nano ~/wordcount/src/main/java//example/WordCount.java
+$ nano ~/wordcount/src/main/java/example/WordCount.java
  ```
 
 ```java
