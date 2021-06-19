@@ -283,9 +283,9 @@ Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataN
 ```
 
 
-In a production cluster, the secondary NameNode is usually configured to run on a different machine than the primary NameNode, e.g., **worker1**.<sup><a href="#footnote10">10</a></sup>
+In a production cluster, the secondary NameNode is usually configured to run on a different machine than the primary NameNode<sup><a href="#footnote10">10</a></sup>.
 
-To do so, you need to add one more property in **hdfs-site.xml**:
+So we add one more property in **hdfs-site.xml** to choose one from the imminently-spawned instances to run the secondary NameNode (e.g., **worker1**):
 
 ```XML
 <property>
@@ -297,6 +297,8 @@ To do so, you need to add one more property in **hdfs-site.xml**:
   </description>
 </property>
 ```
+
+
 
 
 Now return to the local system. Create directories on the local file system for the NameNode to store the namespace and transactions logs and for individual DataNodes to store their blocks.
@@ -530,11 +532,15 @@ $ scp -i /path/key-pair.pem /path/file hadoop@PUBLIC_DNS:PATH
 
 We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be consistent across all machines in a fully-distributed cluster. To make things easier, we will now just clone the EC2 instance to create an AMI. To do that:
 
+
+
 1.	Select the configured instance on the EC2 dashboard. Then, click on the **Actions** tab. Click **Image and templates** > **Create image**. Give you image a name (e.g., hadoop-your-ITSC-account). Your instance is rebooting, and your SSH connection is getting lost.
 
 2.	Look on the left pane of your EC2 dashboard. Click **AMIs** to view your created image. It should be in pending status. Wait for it to be available.
 
-3.	Once available, we can clone this AMI to create more EC2 instances that share the same setting as the configured one to launch a fully-distributed cluster.
+3.	Once available, select the AMI and click Launch. You will go through the same steps as when you first created the master node. But this time, on the security groups and key-pairs window, select the existing group and key pair that you created for the master node. You can then clone this AMI to create more EC2 instances that share the same settings as the configured one to launch a fully-distributed cluster.
+
+4.	Once these new instances are ready and available, you can log back into the master node.
 
 
 ## 3. Launching a Fully-Distributed Cluster
@@ -662,17 +668,15 @@ worker2
 
 Save and exit the editor.
 
-To start a Hadoop cluster we need to start both the HDFS and YARN cluster.
+To start a fully-distributed Hadoop cluster, we need to start both the HDFS and YARN cluster.
 
-The first time we bring up HDFS, it must be formatted. Format a new distributed filesystem by issuing:
-
+The first time we bring up HDFS, it must be formatted:
 
 ```bash
 $ hdfs namenode -format
 ```
 
-
-We are now ready to launch the Hadoop cluster. Since the **$HADOOP_CONF_DIR/workers** file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the start-dfs.sh script, we can first check all java processes running currently on this machine. Issue the following commands sequentially:
+Since the **$HADOOP_CONF_DIR/workers** file and SSH trusted access are configured, the HDFS daemons can be started with a utility script. In order to highlight the difference introduced by executing the **start-dfs.sh** script, we can first check all java processes running currently on this machine by issuing the following commands sequentially:
 
 ```bash
 $ jps
@@ -739,6 +743,9 @@ To start the Timeline server / history daemon:
 $ yarn --daemon start timelineserver
 ```
 
+For large installations, these daemons are generally running on separate nodes.
+
+
 Several Hadoop Web UIs are reachable through the following:
 
 -	http://PUBLIC_IP_OF_RESOURCEMANAGER:8088 – <a href="https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-common/yarn-default.xml#yarn.resourcemanager.webapp.address" target="_blank">Resource Manager</a>
@@ -751,7 +758,7 @@ Several Hadoop Web UIs are reachable through the following:
 
 -	http://PUBLIC_IP_OF_MASTER_NODE:19888 – <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml#mapreduce.jobhistory.webapp.address" target="_blank">MapReduce JobHistory Server</a>
 
-After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and MapReduce Jobhistory Server:
+After use, enter the following commands to stop the HDFS daemons, the YARN daemons, and the MapReduce Jobhistory Server:
 
 ```shell
 $ mapred --daemon stop historyserver
@@ -760,6 +767,35 @@ $ stop-dfs.sh
 ```
 
 
+
+
+#### Side Note: Adding New Slave Nodes to the Running Cluster
+
+When you detect signs of insufficient resources in your running cluster, you don't have to stop your current HDFS and YARN daemons and then restart them to include new worker nodes. Instead, you can:
+
+First, add the new node's name (e.g., workerN) to the $HADOOP_CONF_DIR/slaves file on the master node (you still need to add the private IP of the new slave node into the /etc/hosts/ file of all nodes and ensure all necessary ssh connections can be established). Then log into the new worker node and execute:
+
+```shell
+$ hadoop-daemon.sh start datanode
+$ yarn-daemon.sh start nodemanager
+```
+
+#### Side Note: Stopping Running MapReduce Jobs
+
+Note that pressing <kdb>Ctrl</kdb>+<kdb>C</kdb> will not stop the job itself, but only kills the current process that is displaying the MapReduce jobs progress. The MapReduce job, once submitted to the Hadoop daemons, runs independently of any initiating process.
+In order to kill a job that's running, first list all the jobs and then use the jobID/applicationID in the appropriate command. Kill MapReduce jobs by sequentially typing:
+
+```shell
+$ mapred job -list
+$ mapred job -kill <jobId>
+```
+
+Similarly, we can kill yarn applications by typing:
+
+```shell
+$ yarn application -list
+$ yarn application -kill <ApplicationId>
+```
 
 
 ## Use of HDFS Web UI

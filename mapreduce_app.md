@@ -111,21 +111,25 @@ Once the download is finished, you can list the files in the directory with: `ls
 
 
 
-Compile WordCount.java:
+Compile WordCount.java
+
+
+Before the Java virtual machine (JVM) can run a Java program, the program's Java source code must be compiled into bytecode, which is a platform independent version of machine code. Use the **javac** compiler to compile **WordCount.java**:
+
 
 ```bash
  $ javac -cp `hadoop classpath` WordCount.java
  ```
 
 
- We can find three `.class` files produced by the Java compiler. They are **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**. Use the `jar` tool to bundle the bytecode class files into a Java Archive (JAR) file executable on the JVM<sup><a href="#footnote1">1</a></sup>:
+ We can find three `.class` files produced by the Java compiler (i.e., **WordCount.class**, **WordCount$IntSumReducer.class**, and **WordCount$TokenizerMapper.class**). Use the `jar` tool to bundle the bytecode class files into a Java Archive (JAR) file executable on the JVM<sup><a href="#footnote1">1</a></sup>:
 
 
  ```bash
 $ jar -cf wordcount.jar WordCount*.class
 ```
 
-We can use the following command to view the content of the wordcount.jar file:
+We can use the following command to view the content of the wordcount.jar file to make sure that the three .class files are in the root directory of the JAR file:
 
 ```bash
 $ jar -tf wordcount.jar
