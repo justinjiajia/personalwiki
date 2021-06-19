@@ -36,7 +36,7 @@ The Mapper outputs are partitioned per Reducer, and copied across the network to
 
 ## Source Code Details
 
-### TokenizerMapper
+### 1. TokenizerMapper
 
 
 ```java
@@ -57,7 +57,7 @@ The Mapper outputs are partitioned per Reducer, and copied across the network to
   }
 ```  
 
-The **Mapper class** is a generic type defined by **org.apache.hadoop.mapreduce.Mapper**. In the Java language, classes can be derived from other classes, thereby inheriting fields and methods from those classes. For more information, see [inheritance](https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html). For this word-count job, we define a subclass of the Mapper class with four formal type parameters that specify the types of the input key, input value, output key, and output value of a map task. The `extends` keyword declares that the **TokenizerMapper** class is the subclass of the **Mapper** class.
+The **Mapper class** ([Java source code](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Mapper.html) is a generic type defined by **org.apache.hadoop.mapreduce.Mapper**. In the Java language, classes can be derived from other classes, thereby inheriting fields and methods from those classes. For more information, see [inheritance](https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html). For this word-count job, we define a subclass of the Mapper class with four formal type parameters that specify the types of the input key, input value, output key, and output value of a map task. The `extends` keyword declares that the **TokenizerMapper** class is the subclass of the **Mapper** class.
 
 Because keys and values used in MapReduce need to be transmitted over the network and written to disks, the key and value objects have to be serializable. However, the standard Java method of serializing a Java object does not meet the requirements of Hadoop, asking Hadoop for its own set of basic types optimized for serialization<sup><a href="#footnote1">1</a></sup>. Specifically, objects marshaled to or from files and across the network in Hadoop must obey a particular [interface](https://docs.oracle.com/javase/tutorial/java/concepts/interface.html), called [**Writable**](https://hadoop.apache.org/docs/current/api/index.html). Hadoop provides several stock classes which implement Writable: Text (which stores String data), IntWritable, LongWritable, FloatWritable, BooleanWritable, and several others. The entire list is in the **org.apache.hadoop.io** package of the Hadoop source (see the [API reference](https://hadoop.apache.org/docs/current/api/index.html)).
 
@@ -73,7 +73,7 @@ public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritab
 }
 ```
 
-We declare two new fields in the **TokenizerMapper** class that are not in the **Mapper** class. We define word as a Text object (since we are just using it as a key), and one as an IntWritable object with 1 wrapped in it. The private modifier specifies that the two members of the TokenizerMapper class can only be accessed in this class.
+We declare two new fields in the **TokenizerMapper** class that are not in the **Mapper** class. We define word as a Text object (since we are just using it as a key), and one as an IntWritable object with 1 wrapped in it. The `private` modifier specifies that the two members of the **TokenizerMapper** class can only be accessed in this class.
 
 ```java
 private final static IntWritable one = new IntWritable(1);
@@ -83,6 +83,7 @@ private Text word = new Text();
 
 The `map()` method has to be overridden in the TokenizerMapper class for counting words. It will be called for each record (a.k.a. each input key/value pair) in an input split (i.e., one line as provided by TextInputFormat). A method call breaks a record into words and emits a new key/value pair of the word and 1. It also provides an instance of Context to write the output to.
 
+```java
 public void map(Object key, Text value, Context context) throws IOException, InterruptedException{
   StringTokenizer itr = new StringTokenizer(value.toString());
   while (itr.hasMoreTokens()) {
@@ -90,13 +91,202 @@ public void map(Object key, Text value, Context context) throws IOException, Int
     context.write(word, one);
     }
 }
+```
+
+The `public` modifier indicates that the `map()` method can be invoked by any class in addition to its owner. `void` indicates this method will not return any value. There is a `throws` clause going after the method name and argument list and before the brace that defines the scope of the method. It comprises the `throws` keyword followed by a comma-separated list of all the exceptions thrown by that method. It allows the method further up the call stack to handle exceptions possibly encountered within it.
 
 
+Within the method, `value.toString()` first converts the Text object value that contains the text of one line into a Java String. The StringTokenizer class defined by **java.util.StringTokenizer** allows us to break the string into tokens separated by whitespaces. `new StringTokenizer(value.toString())` first constructs a string tokenizer that uses the default delimiter set (including the space character, the tab character, the newline character, etc.) to tokenize the specified string. The `hasMoreTokens()` method is then used to test if there are more tokens available from this tokenizer’s string. `nextToken()` returns the next token from this string tokenizer. The returned token (which is of the Java String type) is then assigned to the Text word (by calling the `set()` method of the Text class). Then the intermediate key/value pair of the form <word, 1> is written to the Context object `context`<sup><a href="#footnote4">4</a></sup>. The Context object allows the Mapper/Reducer to interact with the rest of the Hadoop system. It includes configuration data for the job as well as interfaces which allow it to emit output.
+
+### 2. IntSumReducer
 
 
+```java
+  public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values, Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+```
+
+
+As another generic type in Hadoop, the [Reducer](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Reducer.html) class ([Java source code](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Reducer.html)) is defined by **org.apache.hadoop.mapreduce.Reducer**, The `extends` keyword declares that the **IntSumReducer** class is the subclass of the **Reducer** class. Again, four type parameters are used to specify the input and output types for a reduce task. The input types of the reduce task must match the output types of the map task: Text for key and IntWritable for value. In the meanwhile, the output types of the reduce function are also Text and IntWritable, for a word and its count, which we find by iterating through 1s and summing them up.
+
+```java
+ public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable>
+ {
+   ...
+ }
+```
+
+
+We declare result as an IntWritable object with the restricted access specified by the private modifier.
+
+```java
+private IntWritable result = new IntWritable();
+```
+
+
+We need to override the `reduce()` method of the IntSumReducer class to add up word counts. The `reduce()` method is called for each <key, (collection of values)> tuple in the sorted list. `Iterable<IntWritable>` returns a collection of elements of type IntWritable, and allows foreach-style iteration to be performed over the collection.
+
+```java
+    public void reduce(Text key, Iterable<IntWritable> values, Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+```
+
+To perform the aggregation of counts for a given word, we define an integer variable sum and initialize it with 0. The form of the for statement used here is a form designed for iteration through collections in Java. At each round of the iteration, the IntWritable object val holds the current element from the InWritable collection values, and add its integer value to sum. Once the InWritable elements in values are all processed, the sum is assigned to the IntWritable object result. At last, the key/value pair of the form <word, count> is written to the Context object `context`<sup><a href="#footnote5">5</a></sup>.
+
+
+### 3. `main()`
+
+
+There is one final component of a Hadoop MapReduce program, called the driver. The driver initializes the job and instructs the Hadoop platform to execute your code on a set of input files, and controls where the output files are placed. We implement the driver by defining a driver class, i.e., WordCount.
+
+```java
+public static void main(String[] args) throws Exception {
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    int numReducers = 1;
+    if (args.length > 2) {numReducers = Integer.parseInt(args[2]);}
+
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setNumReduceTasks(numReducers);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+
+  ```
+
+The method signature for the `main()` method contains three modifiers: `public` means that `main()` is accessible by any class in addition to its owner (the WordCount class); `static` indicates that it is not instance related but class related so that it can be accessed without creating the instance of a class; `void` indicates that it has no return value.
+
+A Java program starts by executing the main method of some class. The `main()` method of the driver class is searched by JVM as a starting point for an application. It initiates a job, and specifies various facets of the job, such as mapper/reducer types, input/output paths (passed via the command line), key/value types, input/output formats etc., in the Job. `String[] args` gives an array of Strings used as parameters to the method.
+
+
+The configuration information to run the job is captured in the [Configuration](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/conf/Configuration.html) object (the Configuration class is defined by **org.apache.hadoop.conf.Configuration**). A [Job](http://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Job.html) object `job` forms the specification of the job and gives you control over how the job is run (the Job class is defined by **org.apache.hadoop.mapreduce.Job**). `Job.getInstance(conf, "word count")` instantiates a job with the Configuration object conf and the name (i.e., "word count").
+
+When we run this job on a Hadoop cluster, we will package the code into a JAR file (which Hadoop will distribute around the cluster). Rather than explicitly specifying the name of the JAR file, we can pass a class in the Job's `setJarByClass()` method, which Hadoop will use to locate the relevant JAR file by looking for the JAR file containing this class.
+
+Having constructed a Job object, we specify the mapper and reducer types to use via the `setMapperClass()` and `setReducerClass()` methods. We can also optionally specify a combiner for optimization, via setCombinerClass(), to perform local aggregation of the intermediate outputs. It helps to reduce the amount of data transferred from the Mapper to the Reducer by combining each word into a single record. In this case, we can use the reducer class as the combiner directly. Hence, the output of each mapper is passed through local combiners (which are the same as the Reducer) for local aggregation, after being sorted on the keys. All intermediate values associated with a given output key are subsequently passed to a Reducer to determine the final output.
+
+The `setOutputKeyClass()` and `setOutputValueClass()` methods control the output types for the reduce function, and must match what the Reducer class produces. The map output types default to the same types, so they do not need to be set if the Mapper produces the same types as the Reducer (as it does in our case). However, if they are different, the map output types must be set using the `setMapOutputKeyClass()` and `setMapOutputValueClass()` methods. The `setNumReduceTasks()` method is used to set the number of reduce tasks for this job, which defaults to 1. Here we use the third element of the array args to pass the value from the command line. The `Integer.parseInt()` method is used to convert the String value to the corresponding integer value.
+
+Next, we specify the input and output paths. `new Path(args[0])` and `new Path(args[1])` construct two Path objects with the Strings passed by the array args as the names of directories (the [Path](http://hadoop.apache.org/docs/current/api/org/apache/hadoop/fs/Path.html) class is defined by org.apache.hadoop.fs.Path). An input path is specified by calling the `addInputPath()` method on [FileInputFormat](http://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/input/FileInputFormat.html) (defined by **org.apache.hadoop.mapreduce.lib.input.FileInputFormat**), and it can be a single file, a directory (in which case, the input comprises all the files in that directory), or a file pattern. As the name suggests, `addInputPath()` can be called more than once to use input from multiple paths. The output path (of which there is only one) is specified by the `setOutputPath()` method on [FileOutputFormat](http://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/output/FileOutputFormat.html) (defined by **org.apache.hadoop.mapreduce.lib.output.FileOutputFormat**). It specifies a directory where the output files from the reduce function are written. It will be created by Hadoop once the final result is ready to be written back to the Hadoop distributed file system (HDFS).
+
+At last, the `main()` method calls the `waitForCompletion()` method to submit the job and monitor its progress. The single argument to the method is a flag indicating whether verbose output is generated. When true, the job writes information about its progress to the console. The return value of the `waitForCompletion()` method is a Boolean indicating success (true) or failure (false), which we translate into the program's exit code of 0 or 1.
+
+
+Wrapping up all pieces discussed above gives us the full version of the Java source code used to accomplish our goal<sup><a href="#footnote6">6</a></sup><sup><a href="#footnote7">7</a></sup>:
+
+```java
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount {
+
+  public static class TokenizerMapper
+       extends Mapper<Object, Text, Text, IntWritable>{
+
+    private final static IntWritable one = new IntWritable(1);
+    private Text word = new Text();
+
+    public void map(Object key, Text value, Context context
+                    ) throws IOException, InterruptedException {
+      StringTokenizer itr = new StringTokenizer(value.toString());
+      while (itr.hasMoreTokens()) {
+        word.set(itr.nextToken());
+        context.write(word, one);
+      }
+    }
+  }
+
+  public static class IntSumReducer
+       extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    private IntWritable result = new IntWritable();
+
+    public void reduce(Text key, Iterable<IntWritable> values,
+                       Context context
+                       ) throws IOException, InterruptedException {
+      int sum = 0;
+      for (IntWritable val : values) {
+        sum += val.get();
+      }
+      result.set(sum);
+      context.write(key, result);
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    Configuration conf = new Configuration();
+    Job job = Job.getInstance(conf, "word count");
+    int numReducers = 1;
+    if (args.length > 2) {numReducers = Integer.parseInt(args[2]);}
+
+    job.setJarByClass(WordCount.class);
+    job.setMapperClass(TokenizerMapper.class);
+    job.setCombinerClass(IntSumReducer.class);
+    job.setReducerClass(IntSumReducer.class);
+    job.setNumReduceTasks(numReducers);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    System.exit(job.waitForCompletion(true) ? 0 : 1);
+  }
+}
+
+```
+
+## Footnote
 
 <sup>[1](#footnote1)</sup> Serialization is the process of converting structured objects into a binary stream and reconstructed later in the same or another computer environment. It is done basically for one, transmission over a network, and for the other, writing to persistent storage. When the resulting series of bits is reread according to the serialization format, it can be used to create a semantically identical clone of the original object. This opposite operation, extracting a data structure from a series of bytes, is deserialization.
 
-<sup>[2](#footnote2)</sup>We see two sequential keywords, i.e., `public static`, preceding the name of the TokenizerMapper class. Either word has its own meaning and purpose. `public` is a type of access modifiers. A class declared with this modifier is visible to all classes everywhere. `static` indicates that the TokenizerMapper class as an inner class of the WordCount class can be accessed without creating the instance of the class. For more information, see [nested classes](https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html) and [access control](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html).
+<sup>[2](#footnote2)</sup> We see two sequential keywords, i.e., `public static`, preceding the name of the TokenizerMapper class. Either word has its own meaning and purpose. `public` is a type of access modifiers. A class declared with this modifier is visible to all classes everywhere. `static` indicates that the TokenizerMapper class as an inner class of the WordCount class can be accessed without creating the instance of the class. For more information, see [nested classes](https://docs.oracle.com/javase/tutorial/java/javaOO/nested.html) and [access control](https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html).
 
-<sup>[3](#footnote3)</sup>The angular brackets `<>` after a class name are used to indicate [generics](http://docs.oracle.com/javase/tutorial/java/generics/index.html) in Java.  If we define `ArrayList<String>`, it means we can only add String type object to an ArrayList object.
+<sup>[3](#footnote3)</sup> The angular brackets `<>` after a class name are used to indicate [generics](http://docs.oracle.com/javase/tutorial/java/generics/index.html) in Java.  If we define `ArrayList<String>`, it means we can only add String type object to an ArrayList object.
+
+
+<sup>[4](#footnote4)</sup> The Context class is an internal [abstract class](http://docs.oracle.com/javase/tutorial/java/IandI/abstract.html) that implements the interface [**MapContext**](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/MapContext.html) in the [Mapper](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Mapper.html) class.
+
+
+<sup>[5](#footnote5)</sup> The Context class is an internal abstract class that implements the interface [**ReduceContext**](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/ReduceContext.html) in the [Reducer]（https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Reducer.html class.
+
+
+<sup>[6](#footnote6)</sup> A Java package is a mechanism for organizing Java classes into namespaces. Java packages can be stored in compressed files called JAR files. Programmers typically use packages to organize classes belonging to the same category or providing similar functionality.
+
+<sup>[7](#footnote7)</sup> The import keyword is a shorthand way to reference one or more classes in a Java package. The Java Virtual Machine’s class loader will locate and load class files following the import keyword when compiling the source code.
