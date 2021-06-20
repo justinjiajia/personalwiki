@@ -19,7 +19,7 @@ The technical setup of the fresh instance are as follows:
 
 - The default security rule allows only SSH connections to the instance.
 
-  
+
 
 
 ## 2. Install and Configure Hadoop on one EC2 instance
@@ -843,8 +843,8 @@ Once this local configuration is done, you can use the file upload icon to uploa
 
 
 
-
-
+[Hadoop Streaming](hadoop_streaming.md)
+[Build MapReduce Java Applications](mapreduce_app.md)
 
 
 
