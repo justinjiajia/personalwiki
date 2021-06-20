@@ -123,7 +123,11 @@ $ sudo chown -R hadoop hadoop
 
 ```
 
+
+
 ### 2.4 Configuring Environment of Hadoop Daemons
+
+
 
 We have successfully installed Hadoop. Now, we want to configure the Hadoop cluster.
 
@@ -233,9 +237,7 @@ Paste the following in the `<configuration>` tag. Save and exit the editor.
 <property>
   <name>fs.defaultFS</name>
   <value>hdfs://master:9000</value>
-  <description>NameNode URI. master is the hostname of the machine
-    running namenode. 9000 denotes port on which datanode will send
-    heartbeat to namenode.</description>
+  <description>NameNode URI. master is the hostname of the machine running namenode. 9000 denotes port on which datanode will send heartbeat to namenode.</description>
 </property>
 
 <property>
@@ -260,26 +262,22 @@ Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataN
 
 
 ```XML
-
 <property>
   <name>dfs.namenode.name.dir</name>
   <value>file://${hadoop.tmp.dir}/dfs/name</value>
-  <description> Path on the local filesystem where the NameNode stores
-    the name table (fsimage) and transactions logs persistently.</description>
+  <description> Path on the local filesystem where the NameNode stores the name table (fsimage) and transactions logs persistently.</description>
 </property>
 
 <property>
   <name>dfs.datanode.data.dir</name>
   <value>file://${hadoop.tmp.dir}/dfs/data</value>
-  <description> Comma separated list of paths on the local filesystem of
-    a DataNode where it should store its blocks.</description>
+  <description> Comma separated list of paths on the local filesystem of a DataNode where it should store its blocks.</description>
 </property>
 
 <property>
   <name>dfs.blocksize</name>
   <value>16m</value>
 </property>
-
 ```
 
 
