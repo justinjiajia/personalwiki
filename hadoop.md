@@ -33,7 +33,7 @@ $ sudo apt-get update && sudo apt-get dist-upgrade
 ### 2.1  Create a dedicated user
 
 
-When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply type the following in the command-line interface to create a *hadoop* group and add a user with the name *hadoop* in the group:
+When deploying a production environment, it is recommended to create a dedicated user for the express purpose of owning and running Hadoop tasks later. Simply create a *hadoop* group with `addgroup` and add a user named *hadoop* in this group with `adduser`:
 
 ```Shell
 $ sudo addgroup hadoop
@@ -46,13 +46,13 @@ Most of the commands here need to be prefaced with the *sudo* command. This allo
 It will prompt you to create the password for the newly-added user (providing your personal information is optional). To facilitate our successive configuration, use **bigdata** as the password (IMPORTANT!!!)<sup><a href="#footnote1">1</a></sup>.  
 
 
-Then, add the user into group *sudo* to allow root access with the following command
+Then, add the new user into group *sudo* to allow root access with the following command
 
 ```Shell
 $ sudo adduser hadoop sudo
 ```
 
-Now, switch to the new account:
+Now, switch to the new user account:
 
 ```Shell
 $ sudo su - hadoop
@@ -530,7 +530,7 @@ $ scp -i /path/key-pair.pem /path/file hadoop@PUBLIC_DNS:PATH
 
 ## 2. Creating an AMI for the Configured instance
 
-We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be consistent across all machines in a fully-distributed cluster. To make things easier, we will now just clone the EC2 instance to create an AMI. To do that:
+We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be replicated consistently across all machines in the cluster. To make things easier, we will now clone the EC2 instance to create an AMI. To do that:
 
 
 
@@ -773,7 +773,7 @@ $ stop-dfs.sh
 
 When you detect signs of insufficient resources in your running cluster, you don't have to stop your current HDFS and YARN daemons and then restart them to include new worker nodes. Instead, you can:
 
-First, add the new node's name (e.g., workerN) to the $HADOOP_CONF_DIR/slaves file on the master node (you still need to add the private IP of the new slave node into the /etc/hosts/ file of all nodes and ensure all necessary ssh connections can be established). Then log into the new worker node and execute:
+First, add the new worker's hostname (e.g., workerN) to the **$HADOOP_CONF_DIR/workers** file on the master node (you still need to add the private IP of the new slave node into the /etc/hosts/ file of all nodes and ensure all necessary ssh connections can be established). Then log into the new worker node and execute:
 
 ```shell
 $ hadoop-daemon.sh start datanode
