@@ -6,9 +6,7 @@
 
 
 
-
-
-[Hadoop streaming](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html) is a utility that comes with the Hadoop distribution. It allows us to create and run Map/Reduce jobs with any executable or script as the mapper and/or the reducer. For example, the mapper and reducer can be just normal Linux executables:
+[Hadoop streaming](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html) is a utility that comes with the Hadoop distribution. It allows us to create and run Map/Reduce jobs with any executable or script as the mapper and/or the reducer. For example, both the mapper and the reducer can be just normal Linux executables:
 
 ```bash
 $ mapred streaming \
@@ -18,9 +16,11 @@ $ mapred streaming \
 > -reducer /usr/bin/wc
 ```
 
-- Mapper: takes input stream from [standard input](http://en.wikipedia.org/wiki/Standard_streams); emit key-value pairs to [standard output](http://en.wikipedia.org/wiki/Standard_streams). Each key-value pair takes one line and is formatted as `'%s\t%s' % (key, value)`.
-- Reducer: takes input key-value pairs from STDIN; output key-value pairs to STDOUT.
+- The TextInputFormat is used as the default input format class. Since the TextInputFormat returns keys of LongWritable class, which are actually not part of the input data, the keys will be discarded; only the values will be piped to the streaming mapper.
+- Mapper: takes input stream from [standard input](http://en.wikipedia.org/wiki/Standard_streams); emit key-value pairs to [standard output](http://en.wikipedia.org/wiki/Standard_streams). Each key/value pair takes one line and is formatted as `'%s\t%s' % (key, value)`.
 - By default, the prefix of a line up to the first tab character  (`'\t'`) is the key and the rest of the line (excluding the tab character) will be the value. If there is no tab character in the line, then entire line is considered as key and the value is null. 
+- Reducer: takes input key-value pairs from STDIN; output key-value pairs to STDOUT.
+-  
 
 
 
@@ -109,7 +109,7 @@ $ chmod +x mapper.py reducer.py
 Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to use the following line of code to test the two Python scripts LOCALLY before submitting them to the cluster:
 
 ```shell
-$ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k 1,1 | ~/reducer.py
+$ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k1,1 | ~/reducer.py
 ```
 
 If exceptions are raised, use `nano mapper.py` and `nano reducer.py` to open the two .py files to examine whether all lines of the Python code are correctly indented.
@@ -140,7 +140,7 @@ $ mapred streaming \
 > -file reducer.py
 ```
 
--file is a command option
+`-file` is a command option
 
 ```shell
 $ mapred streaming \
@@ -152,8 +152,7 @@ $ mapred streaming \
 > -reducer reducer.py \
 ```
 
-We can also use the -files option to specify a comma-separated list of files (between any adjacent files, the name of the latter file must succeed that of the former without any space in between) to be copied to the cluster. These files will get copied onto the current working directory of mapper or reducer on all nodes.
-And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
+We can also use the `-files` option to specify a comma-separated list of files. There should be no space between any adjacent files. These files will get copied to the current working directory of mapper or reducer on all nodes. And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
 
 
 
@@ -168,14 +167,22 @@ import sys
 
 for line in sys.stdin:
     word, count = line.split()
-    print '%07d\t%s' % (int(count), word)
+    print('%07d\t%s' % (int(count), word))
 ```
 
 
 
 Notes: By default, shuffling stage performs a string sorting, not integer sorting. We played a trick, `%07d`, to pad leading zeros, so that string sorting and integer sorting are equivalent in this case.
 
-We don't need a reducer in this case. Run with Hadoop Streaming:
+We don't need a reducer in this case. 
+
+Again, you can use a Linix equivalent to test the Python script locally: 
+
+```bash
+$ cat combined | ~/swap.py | sort -k1,1 | tail -n20
+```
+
+Run with Hadoop Streaming:
 
 ```shell
 $ mapred streaming \
@@ -185,18 +192,36 @@ $ mapred streaming \
 > -mapper swap.py \
 ```
 
+or 
+
+```shell
+$ cat combined | sort -t -k2,2nr | head -n20
+```
 
 
-### Option 2
+
+```shell
+$ mapred streaming \
+> -D stream.num.map.output.key.fields=2 
+> -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator 
+> -D mapreduce.partition.keycomparator.options=-k2,2nr 
+> -input input_dir_on_HDFS \
+> -output output_dir_on_HDFS \  
+> -mapper /bin/cat
+```
+
+
+
+
 
 There are many parameters you can specify in the command line argument. Try the following command:
 
-```text
-hduser@master:~$ hadoop jar hadoop-streaming-2.7.1.jar \
-    -D stream.num.map.output.key.fields=2 \
-    -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
-    -D mapred.text.key.comparator.options=-k2,2nr \
-    -mapper cat -reducer cat -input /result -output /result_sorted2 \
+```bash
+$ mapred streaming \
+> -D stream.num.map.output.key.fields=2 \
+> -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
+> -D mapred.text.key.comparator.options=-k2,2nr \
+> -mapper cat -reducer cat -input /result -output /result_sorted2 \
 ```
 
 - `-D property=value`: Use value for given property
