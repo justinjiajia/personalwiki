@@ -5,6 +5,8 @@
 
 In this tutorial, we will cover how to set up a fully-distributed Hadoop cluster on Amazon EC2 from scratch.
 
+
+
 ## 1. Creating a fresh EC2 instance
 
 Log into the AWS Management Console, go to EC2, and click on **Launch instances**.
@@ -13,9 +15,11 @@ The technical setup of the fresh instance are as follows:
 
 - **Ubuntu Server 20.04 LTS (HVM), SSD Volume Type**
 
-- **t2.micro** – free tier
+- To support Hadoop 3.x, the minimum requirement may be 2GB memory and 1 core CPU (check this). **c4.large** is recommended.
 
 - The default security rule allows only SSH connections to the instance.
+
+  
 
 
 ## 2. Install and Configure Hadoop on one EC2 instance
@@ -93,10 +97,9 @@ $ ls
 - For huge files, we can put the download in background using wget option `-b`. We can always check the status of the download using `tail -f wget-log`. For example:
 
 
-```shell
+```bash
 $ wget -b http://apache.mirrors.tds.net/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz
 $ tail -f wget-log
-
 ```
 
 The background downloading process can be aborted by using:
@@ -161,7 +164,7 @@ export HADOOP_CLASSPATH=$JAVA_HOME/lib/tools.jar
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ```
 
-Press <kbd>Ctrl</kbd>+<kbd>X</kbd> (on Windows) or <kbd>Control</kbd>+<kbd>X</kbd> (on Mac) to exit the editing mode. Remember to enter **y** to save the change you just made to **.bashrc**.
+Press <kbd>Ctrl</kbd>+<kbd>X</kbd> (on Windows) or <kbd>Control</kbd>+<kbd>X</kbd> (on Mac) to exit the Edit mode. Remember to enter **y** to save the change you just made to **.bashrc**.
 
 Use *source* to reload the **.bashrc** profile into the current command prompt. To check whether the environment variables have been updated correctly, we can use *echo* to print their values to the prompt:
 
@@ -258,7 +261,7 @@ Paste the following in the `<configuration>` tag. Save and exit the editor.
 </property>
 ```
 
-Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataNode. Copy the following and paste it between the configuration tags in the nano editor, save and exit the editor.
+Next, edit **hdfs-site.xml** to configure NameNode, SecondaryNameNode, and DataNode. Copy the following and paste it between the configuration tags in the **nano** editor, save and exit the editor.
 
 
 ```XML
@@ -327,8 +330,7 @@ Copy the following and paste it between the configuration tags just like before.
 <property>
   <name>yarn.nodemanager.resource.detect-hardware-capabilities</name>
   <value>true</value>
-  <description>Enable auto-detection of node capabilities such as memory
-    and CPU. </description>
+  <description>Enable auto-detection of node capabilities such as memory and CPU. </description>
 </property>
 
 <property>
@@ -363,10 +365,7 @@ If you want to enable the timeline service and the generic history service, add 
 </property>
 
 <property>
-  <description>Indicate to clients whether to query generic application
-    data from timeline history-service or not. If not enabled then
-    application
-    data is queried only from Resource Manager.</description>
+  <description>Indicate to clients whether to query generic application data from timeline history-service or not. If not enabled then application data is queried only from Resource Manager.</description>
   <name>yarn.timeline-service.generic-application-history.enabled</name>
   <value>true</value>
 </property>
@@ -395,22 +394,19 @@ Copy and paste the following between the configuration tags<sup><a href="#footno
 <property>
   <name>yarn.app.mapreduce.am.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description>User added environment variables for the MR App Master
-    processes.</description>
+  <description>User added environment variables for the MR App Masterprocesses.</description>
 </property>
 
 <property>
   <name>mapreduce.map.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description> User added environment variables for the map task
-    processes.</description>
+  <description> User added environment variables for the map task processes.</description>
 </property>
 
 <property>
   <name>mapreduce.reduce.env</name>
   <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
-  <description> User added environment variables for the reduce task
-    processes.</description>
+  <description> User added environment variables for the reduce task processes.</description>
 </property>
 ```
 
@@ -423,7 +419,6 @@ If you want to enable the timeline service and the generic history service, add 
   <value>true</value>
   <description>Specifies if the Application Master should emit timeline data to the timeline server. Individual jobs can override this value. </description>
 </property>
-
 ```
 
 Save and exit the editor.
@@ -528,9 +523,7 @@ $ scp -i /path/key-pair.pem /path/file hadoop@PUBLIC_DNS:PATH
 
 ## 2. Creating an AMI for the Configured instance
 
-We have successfully set up Hadoop on one EC2 instance. Hadoop's configuration information should be replicated consistently across all machines in the cluster. To make things easier, we will now clone the EC2 instance to create an AMI. To do that:
-
-
+We have successfully set up Hadoop on 1 EC2 instance. Hadoop's configuration information should be replicated consistently across all machines in the cluster. To make things easier, we will now clone the configured instance to create an image and launch new instances with that image. In this way, we can save the effort of installing and configuring the single-node Hadoop on each EC2 instance:
 
 1.	Select the configured instance on the EC2 dashboard. Then, click on the **Actions** tab. Click **Image and templates** > **Create image**. Give you image a name (e.g., hadoop-your-ITSC-account). Your instance is rebooting, and your SSH connection is getting lost.
 
@@ -711,10 +704,6 @@ In the background scene, this script will ssh into each worker machine to start 
 
 
 
-
-
-
-
 Similarly, all of the YARN processes can be started with a utility script as well:
 
 ```bash
@@ -852,144 +841,6 @@ The default setting can be rolled back by removing these lines after you are don
 Once this local configuration is done, you can use the file upload icon to upload a file from your local computer to HDFS. You can download files from HDFS as well.
 
 
-## Hadoop Streaming
-
-
-Starting from Ubuntu 20.04, Python 3 is included in the base system installation.
-
-
-```bash
-which python3
-```
-
-You can run the following code to check the exact Python version installed:
-
-```shell
-$ python3 --version
-```
-
-For the word counting application, the Python code for the mapper can be specified as follows:
-
-```python
-#!/usr/bin/env python3
-
-import sys
-import re
-
-for line in sys.stdin:
-    line = line.strip().lower()
-    line = re.sub('[^A-Za-z\s]', '', line)
-    words = line.split()
-    for word in words:
-        print("%s\t%s" % (word, 1))
-
-```
-
-
-The easiest way to create a **.py** file and populate it with the code above is to use *nano*. Run the following code in the home directory:
-
-```shell
-$ nano mapper.py
-```
-
-Copy and paste the Python code into the opened file, and format it to make sure code lines are properly indented.
-
-
-
-After you finish editing, hit <kbd>Ctrl</kbd>+<kbd>X</kbd> to quit the **nano** editor.  Enter **y** to save the change.
-
-The Python code for the reducer can be specified as follows:
-
-```python
-#!/usr/bin/env python3
-
-import sys
-
-current_word, current_count = None, 0
-for line in sys.stdin:
-    line = line.strip()
-    word, count = line.split('\t', 1)
-    count = int(count)
-    if current_word == word:
-        current_count += count
-    else:
-        if current_word:
-            print("%s\t%s" % (current_word, current_count))
-        current_count = count
-        current_word = word
-
-if word == current_word: print("%s\t%s" % (current_word, current_count))
-
-```
-
-
-Run the following code in the home directory to create a .py file named reducer:
-
-```shell
-$ nano reducer.py
-```
-
-Again, copy and paste the Python code into the opened file and format it properly.
-
-
-
-
-
-Then quit nano. Remember to enter **y** to save the change.
-
-Now, we've created the **mapper.py** and **reducer.py** scripts. Next, grant them execution permission by running the following command:
-
-```shell
-$ chmod +x mapper.py reducer.py
-```
-
-Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to use the following line of code to test the two Python scripts LOCALLY before submitting them to the cluster:
-
-```shell
-$ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k 1,1 | ~/reducer.py
-```
-
-If exceptions are raised, use `nano mapper.py` and `nano reducer.py` to open the two .py files to examine whether all lines of the Python code are correctly indented.
-
-If you observe the following output, it means the code works properly:
-
-```
-bar     1
-foo     3
-lab     1
-quux    2
-```
-
-
-Now everything is ready. You can run the Python MapReduce job on your EMR cluster by typing:
-
-
-or:
-
-```shell
-$ mapred streaming \
--D mapreduce.job.reduces=2 \
--input input_dir_on_HDFS \
--output output_dir_on_HDFS \
--mapper mapper.py \
--reducer reducer.py \
--file mapper.py \
--file reducer.py
-```
--file is a command option
-
-```shell
-$ mapred streaming \
--D mapreduce.job.reduces=2 \
--files mapper.py,reducer.py \
--input input_dir_on_HDFS \
--output output_dir_on_HDFS \
--mapper mapper.py \
--reducer reducer.py \
-```
-
-We can also use the -files option to specify a comma-separated list of files (in an adjacent pair of files, the name of the latter file must succeed that of the former without any space in between) to be copied to the cluster. These files will get copied onto the current working directory of mapper or reducer on all nodes.
-And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
 
 
 

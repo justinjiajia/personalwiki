@@ -11,8 +11,6 @@ As explained in our lecture, WordCount is an application that counts the number 
 
 The MapReduce framework first divides the input to a MapReduce job into fixed-size pieces called input splits. To do so, the Job Client checks with the NameNode the meta information (block size, data length, block locations, etc.) for the data located in the input path on the HDFS, and computes input splits based on it. These computed input splits carry meta information (e.g., it could be represented by a <input-file-path, start, offset> tuple that provides the reference to data) to the tasks to compute on. Then the framework copies the resources needed to run the job, including the job JAR file, the configuration file, and the computed input splits, to the shared filesystem (HDFS). Then the MapReduce framework retrieves the input splits computed by the client from the shared file system and spawns one map task for each input split based on data-locality (first preference), rack-locality or resource availability (memory, CPU availability).
 
-
-
 Behind the scene, the InputFormat class defines how these input files are split up and read. While the input split defines a slice of work, it does not describe how to access the data. The RecordReader class actually loads the data from its source and converts it into (key, value) pairs suitable for reading by the Mapper. The RecordReader instance is also defined by the InputFormat. TextInputFormat is the default InputFormat for plain text files. It provides a LineRecordReader to break files into lines. Either line feed or carriage-return are used to signal end of line. Each record is a line of input. The key, a LongWritable, is the byte offset within the file of the beginning of the line (for simplicity, here we use the Object class which is the root of the class hierarchy). The value is the contents of the line, excluding any line terminators (e.g., newline or carriage return), and is packaged as a Text object. The RecordReader is invoke repeatedly on the input until the entire input split has been consumed. So, a file containing the following text:
 
 > On the top of the Crumpetty Tree
@@ -59,7 +57,7 @@ The Mapper outputs are partitioned per Reducer, and copied across the network to
       }
     }
   }
-```  
+```
 
 The **Mapper class** ([Java source code](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Mapper.html) is a generic type defined by **org.apache.hadoop.mapreduce.Mapper**. In the Java language, classes can be derived from other classes, thereby inheriting fields and methods from those classes. For more information, see [inheritance](https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html). For this word count job, we define a subclass of the Mapper class with four formal type parameters that specify the types of the input key, input value, output key, and output value of a map task. The `extends` keyword declares that the **TokenizerMapper** class is the subclass of the **Mapper** class.
 
@@ -131,10 +129,6 @@ Within the method, `value.toString()` first converts the Text object value that 
 
 As another generic type in Hadoop, the [Reducer](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Reducer.html) class ([Java source code](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/Reducer.html)) is defined by **org.apache.hadoop.mapreduce.Reducer**, The `extends` keyword declares that the **IntSumReducer** class is the subclass of the **Reducer** class. Again, four type parameters are used to specify the input and output types for a reduce task. The input types of the reduce task must match the output types of the map task: Text for key and IntWritable for value. In the meanwhile, the output types of the reduce function are also Text and IntWritable, for a word and its count, which we find by iterating through 1s and summing them up.
 
-
-
-
-
 ```java
  public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable>
  {
@@ -151,10 +145,6 @@ private IntWritable result = new IntWritable();
 
 
 We need to override the `reduce()` method of the IntSumReducer class to add up word counts. The `reduce()` method is called for each <key, (collection of values)> tuple in the sorted list. `Iterable<IntWritable>` returns a collection of elements of type IntWritable, and allows foreach-style iteration to be performed over the collection.
-
-
-
-
 
 ```java
     public void reduce(Text key, Iterable<IntWritable> values, Context context
@@ -197,7 +187,7 @@ public static void main(String[] args) throws Exception {
     System.exit(job.waitForCompletion(true) ? 0 : 1);
   }
 
-  ```
+```
 
 The method signature for the `main()` method contains three modifiers: `public` means that `main()` is accessible by any class in addition to its owner (the WordCount class); `static` indicates that it is not instance related but class related so that it can be accessed without creating the instance of a class; `void` indicates that it has no return value.
 
