@@ -16,11 +16,15 @@ $ mapred streaming \
 > -reducer /usr/bin/wc
 ```
 
-- The TextInputFormat is used as the default input format class. Since the TextInputFormat returns keys of LongWritable class, which are actually not part of the input data, the keys will be discarded; only the values will be piped to the streaming mapper.
-- Mapper: takes input stream from [standard input](http://en.wikipedia.org/wiki/Standard_streams); emit key-value pairs to [standard output](http://en.wikipedia.org/wiki/Standard_streams). Each key/value pair takes one line and is formatted as `'%s\t%s' % (key, value)`.
-- By default, the prefix of a line up to the first tab character  (`'\t'`) is the key and the rest of the line (excluding the tab character) will be the value. If there is no tab character in the line, then entire line is considered as key and the value is null. 
-- Reducer: takes input key-value pairs from STDIN; output key-value pairs to STDOUT.
--  
+- The [TextInputFormat](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/input/TextInputFormat.html) is used as the default input format class. Since the TextInputFormat returns keys of LongWritable class, which are actually not part of the input data, the keys will be discarded; only the values will be piped to the streaming mapper.
+
+- The streaming mapper takes input stream from [stdin](http://en.wikipedia.org/wiki/Standard_streams) and emit key-value pairs to [stdout](http://en.wikipedia.org/wiki/Standard_streams). 
+
+- When the Map/Reduce framework reads a line from the stdout of the streaming mapper,  it splits the line into a key/value pair. By default, the prefix of a line up to the first tab character  (`'\t'`) is the key and the rest of the line (excluding the tab character) will be the value. If there is no tab character in the line, then entire line is considered as key and the value is null. 
+
+- The streaming reducer takes input key-value pairs from stdin; output key-value pairs to stdout.
+
+  
 
 
 
@@ -37,7 +41,9 @@ You can run the following code to check the exact Python version installed:
 $ python3 --version
 ```
 
-For the word count application, the Python code for the mapper can be specified as follows:
+For the word count application, the Python code for the mapper can be specified as follows[^1]
+
+[^1]: `#!/usr/bin/env python3` must be included as the first line in the Python scripts, as it instructs the program loader of a Unix-like operating system which program should be loaded to run them.
 
 ```python
 #!/usr/bin/env python3
@@ -53,7 +59,18 @@ for line in sys.stdin:
 ```
 
 
-The easiest way to create a **.py** file and populate it with the code above is to use *nano*. Run the following code in the home directory:
+
+IMPORTANT NOTE: 
+
+```python
+
+```
+
+
+
+
+
+The easiest way to create a **.py** file and populate it with the code above is to use the **nano** editor. Run the following code in the home directory:
 
 ```shell
 $ nano mapper.py
@@ -106,13 +123,17 @@ Now, we've created the **mapper.py** and **reducer.py** scripts. Next, grant the
 $ chmod +x mapper.py reducer.py
 ```
 
-Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to use the following line of code to test the two Python scripts LOCALLY before submitting them to the cluster:
+Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to test the two Python scripts locally before submitting them to the cluster.  
+
+Our local testing takes the form that conforms to typical UNIX-style piping:
 
 ```shell
 $ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k1,1 | ~/reducer.py
 ```
 
-If exceptions are raised, use `nano mapper.py` and `nano reducer.py` to open the two .py files to examine whether all lines of the Python code are correctly indented.
+This emulates the same pipeline (in a non-distributed manner) that Hadoop will perform when streaming in a distributed way.
+
+If exceptions are raised,  open the two **.py** files to examine whether all lines of the Python code are correctly indented.
 
 If you observe the following output, it means the code works properly:
 
@@ -124,10 +145,10 @@ quux    2
 ```
 
 
+
 Now everything is ready. You can run the Python MapReduce job on your EMR cluster by typing:
 
 
-or:
 
 ```shell
 $ mapred streaming \
@@ -140,7 +161,13 @@ $ mapred streaming \
 > -file reducer.py
 ```
 
-`-file` is a command option
+
+
+The generic option`mapred.reduce.tasks` is used to specify the number of reducers.
+
+The executables do not pre-exist on the machines in the cluster. So we use the `-file` option to tell the framework to pack the executable files (**mapper.py** and **reducer.py**) as a part of job submission.  
+
+We can also use the `-files` option to specify a comma-separated list of files (there should be no space between any adjacent files). These files are then made available on all nodes that run the tasks . And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
 
 ```shell
 $ mapred streaming \
@@ -152,7 +179,27 @@ $ mapred streaming \
 > -reducer reducer.py \
 ```
 
-We can also use the `-files` option to specify a comma-separated list of files. There should be no space between any adjacent files. These files will get copied to the current working directory of mapper or reducer on all nodes. And because `-files` is a generic option (see `mapred streaming -help`), it comes before those command options.
+
+
+
+
+
+
+## Streaming  & Generic Command Options 
+
+
+
+Streaming supports both [streaming command]() options and [generic command options](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Generic_Command_Options). 
+
+The general command line syntax is shown below.
+
+```text
+mapred streaming [genericOptions] [streamingOptions]
+```
+
+Be sure to place the generic options before the streaming options, otherwise the command will fail. 
+
+
 
 
 
@@ -172,9 +219,9 @@ for line in sys.stdin:
 
 
 
-Notes: By default, shuffling stage performs a string sorting, not integer sorting. We played a trick, `%07d`, to pad leading zeros, so that string sorting and integer sorting are equivalent in this case.
+By default, shuffling stage performs a string sorting, not integer sorting. We played a trick, `%07d`, to pad leading zeros, so that string sorting and integer sorting are equivalent in this case.
 
-We don't need a reducer in this case. 
+We don't need a reducer in this case. To create a map-only Jobs, simply set `mapreduce.job.reduces` to zero
 
 Again, you can use a Linix equivalent to test the Python script locally: 
 
@@ -186,13 +233,20 @@ Run with Hadoop Streaming:
 
 ```shell
 $ mapred streaming \
+> -D mapreduce.job.reduces=0 \
 > -files swap.py \
 > -input input_dir_on_HDFS \
 > -output output_dir_on_HDFS \
 > -mapper swap.py \
 ```
 
-or 
+
+
+
+
+There are many options we can specify in the command line argument. Try the following command:
+
+
 
 ```shell
 $ cat combined | sort -t -k2,2nr | head -n20
@@ -205,37 +259,59 @@ $ mapred streaming \
 > -D stream.num.map.output.key.fields=2 
 > -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator 
 > -D mapreduce.partition.keycomparator.options=-k2,2nr 
-> -input input_dir_on_HDFS \
-> -output output_dir_on_HDFS \  
-> -mapper /bin/cat
+> -mapper /bin/cat -input input_dir_on_HDFS -output output_dir_on_HDFS
 ```
 
-
-
-
-
-There are many parameters you can specify in the command line argument. Try the following command:
+or
 
 ```bash
 $ mapred streaming \
 > -D stream.num.map.output.key.fields=2 \
 > -D mapred.output.key.comparator.class=org.apache.hadoop.mapred.lib.KeyFieldBasedComparator \
 > -D mapred.text.key.comparator.options=-k2,2nr \
-> -mapper cat -reducer cat -input /result -output /result_sorted2 \
+> -mapper /bin/cat -reducer cat -input input_dir_on_HDFS -output output_dir_on_HDFS
 ```
 
-- `-D property=value`: Use value for given property
-- `-D stream.num.map.output.key.fields`: Specify how many fields as the key
-- `-D mapred.output.key.comparator.class`: Use the library class, KeyFieldBasedComparator, as the comparator, allowing the Map/Reduce framework to compare the map outputs based on certain key fields, not the whole keys.
-- `-D mapred.text.key.comparator.options`: Specify the comparator rule -- `-k2,2` means sort the second field; `n` means in numerical order; `r` means reverse.
 
-## Other useful streaming command options
 
-- `-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`: Use the library class, KeyFieldBasedPartitioner, as the Partitioner, allowing the Map/Reduce framework to partition the map outputs based on certain key fields, not the whole keys. (What's the difference between partition and comparator?)
-- `-D mapred.text.key.partitioner.options`: Specify the rule to partition the intermediate tuples.
-- `-D stream.map.output.field.separator`: Specify your own separator between key and value.
-- `-D mapred.reduce.tasks`: Specify the number of reducers.
-- `-D mapred.map.tasks`: A hint to the number of mappers. If not work, you may want to change mapred.min.split.size in mapred-site.xml.
+
+
+## Other useful command options (both streaming and generic)
+
+- `-D <property>=<value>`: Specify additional configuration variables. See [details](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Specifying_Directories).
+
+- `-D stream.map.output.field.separator=<sep>`: Specify a field separator other than the tab character, `\t` (the default); used for separating the key from the value.
+
+- `-D stream.num.map.output.key.fields=<num>`: Specify the key to include the prefix up to the `<num>`-th field separator in a line (the rest of the line will be the value). If the separator has less occurrences than specified, then the whole line will be the key and the value will be an empty Text object (like the one created by `new Text("")`).
+
+-  `-D map.output.key.field.separator=<sep>` or `-D mapreduce.map.output.key.field.separator=<sep>`: Specify the field separator to further divide the key into fields for partitioning.
+
+- `-partitioner <Java class>`: Use the library class, [`org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapred/lib/KeyFieldBasedPartitioner.html), as the Partitioner, allowing the MapReduce framework to partition the map outputs based on certain key fields rathan than the whole keys. 
+
+-  `-D mapred.text.key.partitioner.options=-k<pos1.c>[,<pos2.c>]` or `-D mapreduce.partition.keypartitioner.options=-k<pos1.c>[,<pos2.c>]`: When used with `-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`, specify the key fields between `<pos1>` and `<pos2>` used for partitioning (both inclusive).  `<.c>` is the number of the 1st character from the beginning of the corresponding field.
+
+- `-D mapreduce.job.output.key.comparator.class=<Java class>` or `mapred.output.key.comparator.class=<Java class>`: Use the library class, KeyFieldBasedComparator, as the comparator, allowing the Map/Reduce framework to compare the map outputs based on certain key fields, not the whole keys. Can be set to either [`org.apache.hadoop.mapred.lib.KeyFieldBasedComparator`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapred/lib/KeyFieldBasedComparator.html) or [`org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/partition/KeyFieldBasedComparator.html).
+
+- `-D mapred.text.key.comparator.options=-k<pos1.c>[,<pos2.c>]` or `-D mapreduce.partition.keycomparator.options=-k<pos1.c>,<pos2.c>`: Specify the comparator rule. The `-n` option can be used to specify that the sorting is numerical sorting and the `-r` option can be used to specify that the result should be reversed.
+
+  
+
+- `-D mapred.map.tasks`: A hint to the number of mappers. If not work, you may want to `change mapred.min.split.size` in **mapred-site.xml**.
+
+
+
+---
+
+- Similarly, you can use `-D stream.reduce.output.field.separator=SEP` and `-D stream.num.reduce.output.fields=NUM` to specify the NUM-th field separator in a line of the reduce outputs as the separator between the key and the value.
+- Similarly, you can specify `stream.map.input.field.separator` and `stream.reduce.input.field.separator` as the input separator for Map/Reduce inputs (the default one is also `\t`).?? for streaming or 
+
+
+
+---
+
+
+
+
 
 
 
