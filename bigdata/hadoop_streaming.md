@@ -41,7 +41,7 @@ You can run the following code to check the exact Python version installed:
 $ python3 --version
 ```
 
-For the word count application, the Python code for the mapper can be specified as follows[^1]
+For the word count application, the Python code for the mapper can be specified as follows[^1]:
 
 [^1]: `#!/usr/bin/env python3` must be included as the first line in the Python scripts, as it instructs the program loader of a Unix-like operating system which program should be loaded to run them.
 
@@ -58,18 +58,6 @@ for line in sys.stdin:
         print("%s\t%s" % (word, 1))
 ```
 
-
-
-IMPORTANT NOTE: 
-
-```python
-
-```
-
-
-
-
-
 The easiest way to create a **.py** file and populate it with the code above is to use the **nano** editor. Run the following code in the home directory:
 
 ```shell
@@ -77,8 +65,6 @@ $ nano mapper.py
 ```
 
 Copy and paste the Python code into the opened file, and format it to make sure code lines are properly indented.
-
-
 
 After you finish editing, hit <kbd>Ctrl</kbd>+<kbd>X</kbd> to quit the **nano** editor.  Enter **y** to save the change.
 
