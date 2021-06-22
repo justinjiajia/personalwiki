@@ -878,3 +878,21 @@ Once this local configuration is done, you can use the file upload icon to uploa
 
 
 <sup>[10](#footnote10)</sup> The secondary NameNode merges the fsimage and the edits log files periodically and keeps edits log size within a limit. Its memory requirements are on the same order as the primary NameNode.
+
+
+
+
+
+## References
+
+
+[1] Microsoft Azure Tutorial
+https://azure.microsoft.com/en-us/get-started/
+[2] Google Compute Engine Tutorial:
+https://cloud.google.com/compute/docs/quickstart
+[3] AWS Tutorial:
+https://aws.amazon.com/getting-started
+[4] Single-Node Hadoop setup:
+https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoopcommon/SingleCluster.html
+[5] Hadoop cluster setup:
+https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoopcommon/ClusterSetup.html
