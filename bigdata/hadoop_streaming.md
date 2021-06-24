@@ -114,9 +114,37 @@ Now, we've created the **mapper.py** and **reducer.py** scripts. Next, grant the
 $ chmod +x mapper.py reducer.py
 ```
 
-Pasting the code directly into the nano editor may mess up the indentation. Therefore, it is recommended to test the two Python scripts locally before submitting them to the cluster.  
 
-Our local testing takes the form that conforms to typical UNIX-style piping:
+
+Be careful, as pasting the code directly into the nano editor may mess up the indentation. 
+
+
+
+Hadoop streaming may give non-informative exceptions when mappers’ or reducers’ scripts work incorrectly. For example[^2]
+
+[^2]: Kkeep in mind that if the error "PipeMapRed.waitOutputThreads()" appears after "map 100% reduce 0%", the actual error is inside a reducer; if the error appears after "map 0% reduce 0%", the actual error is inside a mapper.
+
+
+
+```text
+Error: java.lang.RuntimeException: PipeMapRed.waitOutputThreads(): subprocess failed with code 1
+```
+
+
+
+You can spend a lot of time by iterating on:
+
+1. write code.
+2. submit your application to a cluster and wait for the result
+3. investigate logs, if unsuccessful go to step 1.
+
+You can safe a lot of time, by debugging your applications locally. 
+
+Therefore, it is recommended to test the two Python scripts locally before submitting them to the cluster.  
+
+
+
+Our local testing simply uses bash and takes the form that conforms to typical UNIX-style piping:
 
 ```shell
 $ echo "foo FOO2 quux. lab foo Ba1r Quux" | ~/mapper.py | sort -k1,1 | ~/reducer.py
@@ -191,7 +219,7 @@ abasements      1
 
 
 
-Streaming supports both [streaming command]() options and [generic command options](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Generic_Command_Options). 
+Streaming supports both [streaming command options](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Streaming_Command_Options) and [generic command options](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Generic_Command_Options). 
 
 The general command line syntax is shown below.
 
@@ -203,9 +231,7 @@ Be sure to place the generic options before the streaming options, otherwise the
 
 
 
-
-
-Following up the previous word count example, how can we get the most frequent words using MapReduce? 
+To set a stage for the use of these options, let's consider a problem that follows up the previous word count example: how can we get the most frequent words using MapReduce? 
 
 We know Hadoop will sort the intermediate results by the key. Let's leverage this property and design our mapper as (`swap.py`):
 
@@ -280,13 +306,23 @@ $ mapred streaming \
 ## Useful Command Options (both streaming and generic)
 
 - `-D <property>=<value>`: Specify additional configuration variables. See [details](https://hadoop.apache.org/docs/current/hadoop-streaming/HadoopStreaming.html#Specifying_Directories).
+
 - `-D stream.map.output.field.separator=<sep>`: Specify a field separator (other than the default one,  `\t`) to be used for separating the key from the value when the MapReduce framework reads a line from the stdout of the streaming mapper.
+
 - `-D stream.num.map.output.key.fields=<num>`: Specify the key to include the prefix up to the `<num>`-th field separator in a line (the rest of the line will be the value). If the separator has less occurrences than specified, then the whole line will be the key and the value will be an empty Text object (like the one created by `new Text("")`).
--  `-D map.output.key.field.separator=<sep>` or `-D mapreduce.map.output.key.field.separator=<sep>`: Specify the field separator to further divide the key into fields logically (no actual breakup) so as to condition partitioning and sorting on different fields. It has nothing to do with key-value separation and removal of separators. All resulting fields are still concatenated with the separator.
-- `-partitioner <Java class>`: Use the library class, [`org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapred/lib/KeyFieldBasedPartitioner.html), as the Partitioner, allowing the MapReduce framework to partition the map outputs based on certain key fields rathan than the whole keys. 
--  `-D mapred.text.key.partitioner.options=-k<pos1.c>[,<pos2.c>]` or `-D mapreduce.partition.keypartitioner.options=-k<pos1.c>[,<pos2.c>]`: When used with `-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`, specify the key fields between `<pos1>` and `<pos2>` used for partitioning (both inclusive).  `<.c>` is the number of the 1st character from the beginning of the corresponding field.
+
+- `-D map.output.key.field.separator=<sep>` or `-D mapreduce.map.output.key.field.separator=<sep>`: Specify the field separator to further divide the key into fields logically (no actual breakup) so as to condition partitioning and sorting on different fields. It has nothing to do with key-value separation and removal of separators. All resulting fields are still concatenated with the separator.
+
+- `-partitioner <Java class>`: Partitionality is only possible to do with Java. You can write your own Java class to do partitioning. But there is already a collection of library classes that you can use to tune your stream in MapReduce application. 
+
+  For example, use the library class, [`org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapred/lib/KeyFieldBasedPartitioner.html), as the Partitioner, allowing the MapReduce framework to partition the map outputs based on certain key fields rathan than the whole keys. From my personal experience, knowing how to work with this one will be enough for the large amount of streaming applications that you will write.
+
+- `-D mapred.text.key.partitioner.options=-k<pos1.c>[,<pos2.c>]` or `-D mapreduce.partition.keypartitioner.options=-k<pos1.c>[,<pos2.c>]`: When used with `-partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner`, specify the key fields between `<pos1>` and `<pos2>` used for partitioning (both inclusive).  `<.c>` is the number of the 1st character from the beginning of the corresponding field.
+
 - `-D mapreduce.job.output.key.comparator.class=<Java class>` or `mapred.output.key.comparator.class=<Java class>`: Use the library class, **KeyFieldBasedComparator**, as the comparator, allowing the MapReduce framework to compare the map outputs based on certain key fields, not the whole keys. Can be set to either [`org.apache.hadoop.mapred.lib.KeyFieldBasedComparator`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapred/lib/KeyFieldBasedComparator.html) or [`org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator`](https://hadoop.apache.org/docs/current/api/org/apache/hadoop/mapreduce/lib/partition/KeyFieldBasedComparator.html).
+
 - `-D mapred.text.key.comparator.options=-k<pos1.c>[,<pos2.c>]` or `-D mapreduce.partition.keycomparator.options=-k<pos1.c>,<pos2.c>`: Specify the comparator rule. The `-n` option can be used to specify that the sorting is numerical sorting and the `-r` option can be used to specify that the result should be reversed.
+
 - `-D mapred.map.tasks`: A hint to the number of mappers. If not work, you may want to `change mapred.min.split.size` in **mapred-site.xml**.
 
 - Similarly, you can set `-D stream.reduce.output.field.separator=<sep>` , ``-D stream.map.input.field.separator=<sep>`, and `stream.reduce.input.field.separator=<sep> `. For example, if you want to generate an output like the following for the word count example:
@@ -359,8 +395,7 @@ $ mapred streaming \
 
 
 - `-D stream.num.reduce.output.fields=<num>`: Specify the `<num>`-th field separator in a line of the reduce outputs as the separator between the key and the value.
-
-  
+- `-combiner=<executable> or <Java class>`: Specify Combiner executable for map output
 
 
 
