@@ -68,35 +68,36 @@ Note: US West (Oregon)
 ```bash
 export AWS_DEFAULT_REGION=us-west-2
 ```
-Note: You will modify this User Data script again to use your Amazon S3 bucket  in a later lab. For now, just leave the ${SUB_PHOTOS_BUCKET} in the script.
 
-Choose Next: Add Storage. Choose Next: Add Tags.
+Note: You will modify this User Data script again to use your Amazon S3 bucket  in a later lab. For now, just leave the `${SUB_PHOTOS_BUCKET}` in the script.
 
-Choose Add Tag. Under Key paste in Name. Under Value paste in employee-directory-app.
+9. Choose Next: Add Storage. Choose Next: Add Tags.
 
-Choose Next: Configure Security Group. For Security group name: paste in app-sg.
+10. Choose Add Tag. Under Key paste in Name. Under Value paste in employee-directory-app.
 
-Choose Add Rule. For Type choose HTTP. For Source change to Anywhere. Then, next to the SSH rule, choose the X at the right to remove it as you will not need SSH access to the instance.
+11. Choose Next: Configure Security Group. For Security group name: paste in app-sg.
 
-Note: You may get a warning that you will no longer be able to SSH into your instance. This is fine - as you won't need that functionality for this course.
+12. Choose Add Rule. For Type choose HTTP. For Source change to Anywhere. Then, next to the SSH rule, choose the X at the right to remove it as you will not need SSH access to the instance.
 
-Choose Review and Launch. Choose Launch. Choose Create a new key pair. Under Key pair name paste in app-key-pair. Choose Download Key Pair. Finally choose Launch instances.
+> Note: You may get a warning that you will no longer be able to SSH into your instance. This is fine - as you won't need that functionality for this course.
 
-Scroll down, and choose View Instances. The instance should now show up under Instances. Wait for the Instance state to change to Running and the Status check to change to 2/2 checks passed.
+13. Choose Review and Launch. Choose Launch. Choose Create a new key pair. Under Key pair name paste in app-key-pair. Choose Download Key Pair. Finally choose Launch instances.
 
-Note: Often, the status checks update and the UI does not. Feel free to refresh the page after a few minutes to minimize waiting.  
+14. Scroll down, and choose View Instances. The instance should now show up under Instances. Wait for the Instance state to change to Running and the Status check to change to 2/2 checks passed.
 
-Next to Name, choose the checkbox to select the instance.  Under the Details tab, copy down the Public IPv4 address.
+> Note: Often, the status checks update and the UI does not. Feel free to refresh the page after a few minutes to minimize waiting.  
 
-Note: do not click the link to open the IPv4 address. Simply just copy the address and paste it into a new tab.
+15. Next to Name, choose the checkbox to select the instance.  Under the Details tab, copy down the Public IPv4 address.
 
-Paste it into a new browser tab/window. You should see a Employee Directory placeholder. Right now you will not be able to interact with it as it's not currently connected to our DynamoDB database.
+> Note: do not click the link to open the IPv4 address. Simply just copy the address and paste it into a new tab.
+
+16. Paste it into a new browser tab/window. You should see a Employee Directory placeholder. Right now you will not be able to interact with it as it's not currently connected to our DynamoDB database.
 
 Congrats! You've successfully created an EC2 instance hosting the employee directory application. After you've finished looking around, it's time to stop and terminate your instance, so that you don't incur future costs.
 
-Back in the AWS Management Console, the employee-directory-app should still be selected. Now, choose Instance state at the top and choose Stop instance. Choose Stop. The Instance state will eventually go into the Stopped state.
+17. Back in the AWS Management Console, the employee-directory-app should still be selected. Now, choose Instance state at the top and choose Stop instance. Choose Stop. The Instance state will eventually go into the Stopped state.
 
-Next, you will terminate the instance. Again, select the checkbox next to the instance Name. Choose Instance state and choose Terminate instance. Choose Terminate.
+18. Next, you will terminate the instance. Again, select the checkbox next to the instance Name. Choose Instance state and choose Terminate instance. Choose Terminate.
 
 Lab Complete
 	 Congratulations! You have completed the lab.
