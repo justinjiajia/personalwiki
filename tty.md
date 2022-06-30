@@ -14,6 +14,8 @@ https://developpaper.com/overview-of-linux-tty-pts-differences/
 
 https://blog.csdn.net/leshami/article/details/77101939
 
+https://www.howtogeek.com/727213/what-are-teletypes-and-why-were-they-used-with-computers/
+
 
 TTY history
 

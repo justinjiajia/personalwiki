@@ -1,0 +1,744 @@
+Differentiation
+===============
+
+The Derivative of a Real Function
+---------------------------------
+
+
+
+**5.1 Definition** Let $f: [a, b] \to \R$. Then for any $x \in [a, b]$, define
+$$\phi(t) = \frac{f(t) - f(x)}{t - x}   \quad (a<t<b, t\ne x),$$ 
+
+and define
+
+$$f'(x) = \lim_{t \to x} \phi(t) = \lim_{t \to x} \frac{f(t) - f(x)}{t - x}.$$
+
+provided the limit exists.
+
+
+
+We thus associate with the function $f$ a function  $f'$ whose domain is exactly the set of points $x$ at which the above limit exists; $f'$ is called the **derivative** of $f$.
+
+If $f'$ is defined at $x$, we say $f$ is **differentiable** at $x$.
+
+If $f$ is differentiable at every point of a set $E \subseteq [a, b]$, we say $f$ is differentiable on $E$.
+
+Extending the above limit definition with left-hand and right-hand limits, we get the left-hand and right-hand derivatives, respectively.
+
+Notice thus that $f'$ is not defined on the endpoints $a$ nor $b$.
+
+Let $f : [a, b] \to \R$ be differentiable at $x \in (a, b)$. Then $f$ is
+continuous at $x$.
+
+As $t \to x$, we have
+$$f(t) - f(x) = \frac{f(t) - f(x)}{t - x} \cdot (t - x) \to f'(x) \cdot 0 = 0.$$
+
+Notice that the converse is not true: consider $f(x) = |x|$ on
+$[-1, 1]$.
+
+Suppose $f, g$ are defined on $[a, b]$ and differentiable at
+$x \in [a, b]$. Then $f + g, fg, f / g$ are differentiable at $x$, and
+
+(a) $(f + g)'(x) = f'(x) + g'(x)$;
+
+(b) $(fg)'(x) = f'(x) g(x) + f(x) g'(x)$;
+
+(c) $(f/g)'(x) = \frac{f'(x) g(x) - f(x) g'(x)} {g^2(x)}$.
+
+(a) follows from properties of limits. (b) follows from writing
+$$\frac{(fg)(t) - (fg)(x)}{t - x} = \frac{f(t) [g(t) - g(x)] + [f(t) - f(x)] g(x)}{t - x} \to f(x) g'(x) + f'(x) g(x).$$
+Similarly, (c) follows from writing
+$$\frac{(f/g)(t) - (f/g)(x)} = \frac{1}{g(t) g(x)} \left[g(x) \frac{f(t) - f(x)}{t - x} - f(x) \frac{g(t) - g(x)}{t - x} \right] \to \frac{f'(x) g(x) - f(x) g'(x)} {g^2(x)}.$$
+
+It can be shown inductively that polynomials are differentiable, and
+that $(x^n)' = nx^{n-1}$. Also, 5.3(c) shows that rational functions are
+differentiable, except at points where the denominator is zero.
+
+Suppose $f: [a, b] \to \R$ is continuous on $[a, b]$ and differentiable
+at $x \in [a, b]$. Also, suppose $g$ is defined on an interval $I$
+containing the range of $f$ and differentiable at $f(x)$. Then,
+$(g \circ f)'(x) = g'(f(x)) f'(x)$.
+
+We have
+$$\frac{h(t) - h(x)}{t - x} = \frac{g(f(t)) - g(f(x))}{t - x} = \frac{g(f(t)) - g(f(x))}{f(t) - f(x)} \cdot \frac{f(t) - f(x)}{t - x} \to g'(f(x)) f'(x)$$
+where the first term converges since $f(t) \to f(x)$ as $f$ is
+continuous.
+
+Mean Value Theorems
+-------------------
+
+Let $f$ be a real-valued function on a metric space $X$. We say $f$ has
+a **local maximum** at a point $p \in X$ when there exists $\delta > 0$
+such that $f(q) \le f(p)$ for all $q \in N_\delta(p)$. A **local
+minimum** is defined similarly.
+
+Let $f: [a, b] \to \R$ with a local maximum at $x \in (a, b)$. If
+$f'(x)$ exists, then $f'(x) = 0$.
+
+Define $f$ and $x$ as above, and suppose $f'(x)$ exists. If
+$f'(x) = c > 0$, then there must exist some $y > x$ sufficiently close
+(say, at most $\delta$ away) from $x$ such that $\phi(y) > 0$ but this
+implies $f(y) > f(x)$, a contradiction. The argument against $f'(x) < 0$
+is symmetric.
+
+[Cauchy’s MVT] If $f, g$ are continuous real functions on $[a, b]$ which
+are differentiable on $(a, b)$, then there is a point $x \in (a, b)$ at
+which $$[f(b) - f(a)] g'(x) = [g(b) - g(a)] f'(x).$$ Notice that
+differentiability is not required at the endpoints.
+
+Let $h(x) = [f(b) - f(a)] g(x) - [g(b) - g(a)] f(x)$. It suffices to
+show that $h'(x) = 0$ for some $x \in (a, b)$. Notice that
+$h(a) = h(b)$. If $h$ is constant on $[a, b]$, then $h'(x) = 0$
+everywhere. Otherwise, $h$ admits a local extremum, and thus has
+derivative $0$ at that extremum, completing the proof.
+
+[Mean Value Theorem] If $f: [a, b] \to \R$ is differentiable on
+$(a, b)$, then $$f(b) - f(a) = (b - a) f'(x)$$ for some $x \in (a, b)$.
+
+Take $g(x) = x$.
+
+Suppose $f$ is differentiable in $(a, b)$.
+
+(a) If $f' \ge 0$ on $(a, b)$, then $f$ is monotonically non-decreasing.
+
+(b) If $f' = 0$ on $(a, b)$, then $f$ is constant.
+
+(c) If $f' \le 0$ on $(a, b)$, then $f$ is monotonically non-increasing.
+
+For any pair $a \le x < y \le b$, there exists some $z \in (x, y)$ such
+that $f'(z) (y - x) = f(y) - f(x)$, so each result follows trivially.
+
+The Continuity of Derivatives
+-----------------------------
+
+We have seen that derivatives need not be continuous, but the following
+theorem states they still have the intermediate value property:
+
+[Darboux property of derivatives] Suppose $f: [a, b] \to \R$ is
+differentiable and $f'(a) < \lambda < f'(b)$. Then, there exists a point
+$x \in (a, b)$ such that $f'(x) = \lambda$.
+
+Let $h(t) = f(t) - \lambda t$, and notice that
+$h'(a) = f'(a) - \lambda < 0$ and similarly $h'(b) > 0$. Then there
+exist $a < s < t < b$ such that $h(s) < h(a)$ and $h(t) < h(b)$. Then
+$h$ is continuous on the compact interval $[s, t]$ and thus attains a
+minimum at $u \in (s, t)$. Then $h'(u) = 0$ so $f'(u) = \lambda$ as
+required.
+
+If $f$ is differentiable on $[a, b]$, then $f'$ has no simple
+discontinuities on $[a, b]$. (Discontinuities of the second kind as
+still possible)
+
+L’Hopital’s Rule
+----------------
+
+[L’Hopital’s Rule] Suppose $f, g$ are real and differentiable in
+$(a, b)$ and $g'(x) \ne 0$ for all $x \in (a, b)$ with
+$-\infty \le a < b \le +\infty$. Suppose $f'(x) / g'(x) \to A$ as
+$x \to a$.
+
+If $f(x) \to 0$ and $g(x) \to 0$ as $x \to a$, OR $g(x) \to +\infty$ as
+$x \to a$, then $f(x) / g(x) \to A$ as $x \to a$.
+
+If $A < r < q < +\infty$, then we find $c_2$ such that $f(x) / g(x) < q$
+for all $x \in (a, c_2)$. Repeating the argument to find $c_3$ such that
+$p < f(x) / g(x)$ for $x \in (a, c_3)$ completes the argument.
+
+Notice that since $f'(x) / g'(x) \to A$, we can find $c$ sufficiently
+close to $a$ such that $f'(x) / g'(x) < r$ for $x \in (a, c)$.
+Furthermore,
+$$\frac{f(x) - f(y)}{g(x) - g(y)} = \frac{f'(t)}{g'(t)} < r$$ for some
+$t \in (x, y) \subseteq (a, c)$ if $a < x < y < c$. If
+$f(x), g(x) \to 0$, then the previous expression becomes
+$f'(t) / g'(t) < r$ for all $t \in (a, c)$. Otherwise, if
+$g(x) \to +\infty$, then we can find $a < c_1 < y$ such that
+$g(x) > g(y)$ and $g(x) > 0$ whenever $x \in (a, c_1)$. Multiplying the
+previous expression by $[g(x) - g(y)] / g(x)$, we obtain
+$$\frac{f(x)}{g(x)} < r - r\frac{g(y)}{g(x)} + \frac{f(y)}{g(x)},\ x \in (a, c_1).$$
+If we let $x \to a$, then we can find $c_2$ such that
+$f(x) / g(x) \le r < q$ whenever $x \in (a, c_2)$, as required. This
+completes the proof.
+
+Derivatives of Higher Order
+---------------------------
+
+If $f$ has a derivative $f'$ on aninterval, and $f'$ is itself
+differentiable, then we denote the derivative of $f'$ as $f''$ and call
+$f''$ the **second derivative** of $f$. Proceeding this way, we can
+define $$f, f', f'', f^{(3)}, \dotsc, f^{(n)},$$ each of which is the
+derivative of the preceding one. $f^{(n)}$ is called the **$n$-th
+derivative**, or the **derivative of order $n$**, of $f$.
+
+Taylor’s Theorem
+----------------
+
+[Taylor’s Theorem] Suppose $f: [a, b] \to \R$, $n \in \N$, $f^{n-1}$ is
+continuous on $[a, b]$, $f^{(n)}$ exists for every $t \in (a, b)$. Let
+$\alpha, \beta$ be distinct points of $[a, b]$ and define
+$$P(t) = \sum_{k=0}^{n-1} \frac{f^{(k)}(\alpha)}{k!} (t - \alpha)^k.$$
+Then there exists a point $x$ between $\alpha$ and $\beta$ such that
+$$f(\beta) = P(\beta) + \frac{f^{(n)}(x)}{n!} (\beta - \alpha)^n.$$
+
+Notice that $n = 1$ is the Mean Value Theorem, and in general that $f$
+can be approximated by a polynomial of degree $n - 1$, and that we can
+estimate the error given we can bound $|f^{(n)}(x)|$.
+
+Let $M \in \R$ such that $f(\beta) = P(\beta) + M(\beta - \alpha)^n$,
+and take $g(t) = f(t) - P(t) - M(t - \alpha)^n$. Then, since $P(t)$ is a
+polynomial of degree $n - 1 < n$, $$g^{(n)}(t) = f^{(n)}(t) - n! M.$$
+But now $g(\alpha) = g'(\alpha) = \dotsb = g^{(n-1)}(\alpha)$ from the
+definition of $g$ and $P$, and also $g(\beta) = 0$ by our definition of
+$M$. Thus, by the Mean Value Theorem, $g'(x_1) = 0$ for some
+$x_1 \in (\alpha, \beta)$. Similarly, $g^{(i)}(x_i) = 0$ for some
+$x_i \in (\alpha, x_{i-1})$. Thus, $g^{(n)}(x_n) = 0$ for some
+$x_n \in (\alpha, x_{n-1}) \subseteq (\alpha, \beta)$, so in particular,
+$$M = \frac{f^{(n)}(x_n)}{n!},$$ as required.
+
+Differentiation of Vector-Valued Functions
+------------------------------------------
+
+To extend our definition of differentiation to vector-valued functions,
+we write
+$$\textbf{f}'(x) = \lim_{t \to x} \frac{\textbf{f}(t) - \textbf{f}(x)}{t - x} \in \R^k,$$
+where the limit is taken with the norm in $\R^k$.
+
+If $f_1, \dotsc, f_k$ are the components of $\textbf{f}$, then
+$\textbf{f}' = (f_1', f_2', \dotsc, f_k')$, and $\textbf{f}$ is
+differentiable at a point $x$ iff each component is differentiable at
+$x$.
+
+Also,
+$$(\textbf{f} \cdot \textbf{g})'(x) = \textbf{f}'(x) \cdot \textbf{g}(x) + \textbf{f}(x) \cdot \textbf{g}'(x).$$
+ie. the product rule works with the multiplies replaced with dot
+products.
+
+Notice that the mean value theorem no longer holds in general: consider
+$f(x) = e^{ix}$, where $f(0) = f(2\pi)$, but $f'(x) = ie^{ix} \ne 0$ for
+$x \in \R$.
+
+Also, L’Hopital’s rule fails: define $f(x) = x$ and
+$g(x) = x + x^2 e^{i/x^2}$. Then $\lim_{x \to 0} f(x)/g(x) = 1$ but
+$\lim_{x \to 0} f'(x) / g'(x) = 0 \ne 1$.
+
+However, there is a consequence of the mean value theorem which is
+almost as useful as Theorem 5.10:
+
+Suppose $\textbf{f}: [a, b] \to \R^k$ is continuous on $[a, b]$ and
+differentiable in $(a, b)$. Then, there exists $x \in (a, b)$ such that
+$$|\textbf{f}(b) - \textbf{f}(a)| \le (b - a) |\textbf{f}'(x)|.$$
+
+Let $\textbf{z} = \textbf{f}(b) - \textbf{f}(a)$ and
+$\phi(t) = \textbf{z} \cdot \textbf{f}(t)$. Then $\phi$ is continuous on
+$[a, b]$ and differentiable on $(a, b)$. Then, the Mean Value Theorem
+tells us that
+$$|\textbf{z}|^2 = \phi(b) - \phi(a) = (b - a) \phi'(x) = (b - a) \textbf{z} \cdot \textbf{f}'(x),$$
+for some $x \in (a, b)$. Then Cauchy-Schwartz yields
+$$|\textbf{z}|^2 = (b - a) |\textbf{z} \cdot \textbf{f'}(x)| \le (b - a) |\textbf{z}| |\textbf{f}'(x)|$$
+and the result follows.
+
+Exercises
+---------
+
+1.  Let $f: \R \to \R$ and $|f(x) - f(y)| \le (x - y)^2$ for all
+    $x, y \in \R$. Prove that $f$ is constant.
+
+    Let $x \in \R$ be arbitrary. Then, we can find a sequence of
+    rational numbers $p_n/q_n$ converging to $x$ such that
+    $(p_n-1)/q_n \le x < p_n/q_n$ for each $n$. Without loss of
+    generality (multiplying $p_n$ and $q_n$ by some positive integer
+    otherwise), suppose that $q_n$ is a strictly increasing sequence.
+    However,
+
+    $$\begin{aligned}
+            |f(x) - f(0)| &\overset{\Delta}{\le} \left|f(x) - f\left(\frac{p_n}{q_n}\right)\right| + \left|f\left(\frac{p_n}{q_n}\right) - f\left(\frac{p_n-1}{q_n}\right)\right| + \dotsb + \left|f\left(\frac{1}{q_n}\right) - f(0)\right| \\
+                &\le 1/q_n^2 + \underbrace{1/q_n^2 + \dotsc + 1/q_n^2}_{p_n \text{ times}} \\
+                &= \frac{1}{q_n} \left(\left(\frac{p_n}{q_n}\right) + \frac{1}{q_n} \right) \le \frac{1}{q_n} \left(x + \frac{2}{q_n}\right) \le \frac{1}{n} \left(x + \frac{2}{n} \right) \to 0.
+        \end{aligned}$$
+
+    so taking the limit yields $|f(x) - f(0)| = 0$ so $f$ is constant,
+    as required.
+
+2.  Suppose $f'(x) > 0$ in $(a, b)$. Prove that $f$ is strictly
+    increasing in $(a, b)$, and let $g$ be its inverse function. Prove
+    that $g$ is differentiable, and that
+    $$g'(f(x)) = \frac{1}{f'(x)},\ x \in (a, b).$$
+
+    Take $x < y$ in $(a, b)$. Then, by the mean value theorem, there
+    exists some $z \in (x, y)$ such that
+    $$\frac{f(y) - f(x)}{y - x} = f'(z) > 0,$$ so $f(y) > f(x)$, so $f$
+    is strictly increasing. Thus, $f$ is continuous and strictly
+    increasing, so it has an inverse $g$. Then $g(f(x)) = x$ so applying
+    the chain rule yields $$1 = (g \circ f)'(x) = g'(f(x)) \cdot f'(x)$$
+    and thus the result.
+
+3.  Suppose $g: \R \to \R$ has bounded derivative, say $|g'| \le M$. Fix
+    $\epsilon > 0$ and define $f(x) = x + \epsilon g(x)$. Prove that $f$
+    is one-to-one for sufficiently small $\epsilon$.
+
+    If $M = 0$, this is trivial. Otherwise, choose $\epsilon < 1/M$ so
+    that $f'(x) = 1 + \epsilon g'(x) \ge 1 + \epsilon (-M) > 0$, and
+    thus $f$ is strictly increasing and thus one-to-one.
+
+4.  If
+    $$C_0 + \frac{C_1}{2} + \dotsc + \frac{C_{n-1}}{n} + \frac{C_n}{n + 1} = 0,$$
+    prove that the polynomial $f(x) = \sum_{i=0}^{n} C_ix^i$ has at
+    least one real root between 0 and 1.
+
+    Let $$g(x) = \sum_{i=0}^{n} \frac{C_i}{i+1} x^{i+1}$$ and notice
+    that $g'(x) = f(x)$. Then, the identity gives $g(0) = g(1) = 0$, so
+    the result follows by the mean value theorem.
+
+5.  Suppose $f$ is defined and differentiable for every $x > 0$, and
+    $f'(x) \to 0$ as $x \to +\infty$. Define $g(x) = f(x + 1) - f(x)$.
+    Prove that $g(x) \to 0$ as $x \to +\infty$.
+
+    Let $x_n$ such that $|f'(x)| \le 1/n$ for all $x \ge x_n$, since
+    $f'(x) \to 0$. Then, by the mean value theorem, we can find
+    $z \in (y, y + 1) \subseteq (x_n, +\infty)$ such that
+    $$1/n \ge |f'(z)| = \left|\frac{f(y + 1) - f(y)}{y + 1 - y}\right| = |g(y)|$$
+    so $|g(y)| \le 1/n$ for all $y > x_n$, proving the result.
+
+6.  Suppose $f$ is continuous for $x \ge 0$ and differentiable for
+    $x > 0$, $f(0) = 0$ and $f'$ is monotonically increasing. Put
+    $g(x) = f(x) / x$ for $x > 0$ and prove that $g$ is monotonically
+    increasing.
+
+7.  Suppose $f'(x), g'(x)$ exist, $g'(x) \ne 0$, and $f(x) = g(x) = 0$.
+    Prove that
+    $$\lim_{t \to x} \frac{f(t)}{g(t)} = \frac{f'(x)}{g'(x)}.$$
+
+8.  Suppose $f'$ is continuous on $[a, b]$ and $\epsilon > 0$. Prove
+    that there exists $\delta > 0$ such that
+    $$\left| \frac{f(t) - f(x)}{t - x} - f'(x) \right| < \epsilon$$
+    whenever $0 < |t - x| < \epsilon$ and $x, t \in [a, b]$. Does this
+    hold for vector-valued functions too?
+
+    Notice that $f'$ is continuous on a compact domain and thus
+    uniformly continous. Then, we can select $\delta > 0$ such that
+    $|f'(y) - f'(x)| < \epsilon$ whenever $|x - y| < \delta$. Let
+    $x, t \in [a, b]$ such that $|t - x| < \delta$. Then, for some $z$
+    between $x$ and $t$, we have
+    $$\left|\frac{f(t) - f(x)}{t - x} - f'(x) \right| = \left|f'(z) - f'(z) \right| < \epsilon$$
+    since $z$ is between $t$ and $x$ and thus at most as close to $x$ as
+    $t$ is, ie. $\delta$ away. This proves the result. If $f$ is
+    vector-valued, applying the above result to each component and
+    recombining iyields the result for vector-valued functions.
+
+9.  Let $f: \R \to \R$ be continuous everywhere and differentiable for
+    $x \ne 0$, and that $f'(x) \to 3$ as $x \to 0$. Does it follow that
+    $f'(0)$ exists?
+
+    Yes, by L’Hopital’s, we have
+    $$f'(0) = \lim_{x \to 0} \frac{f(x) - f(0)}{x - 0} = \lim_{x \to 0} f'(x) = 3.$$
+
+10. Suppose $f, g$ are complex differentiable functions on $(0, 1)$, and
+    that $f(x) \to 0$, $g(x) \to 0$ $f'(x) \to A$ and $g'(x) \to B$ as
+    $x \to 0$, where $A, B \in \C$, and $B \ne 0$. Prove that
+    $$\lim_{x \to 0} \frac{f(x)}{g(x)} = \frac{A}{B}.$$
+
+    From L’Hopital’s rule, we have
+    $$\lim_{x \to 0} \frac{f(x)}{x} = \lim_{x \to 0} f'(x) = A,$$ and
+    the similar statement with $x/g(x) \to 1/B$, so
+    $$\frac{f(x)}{g(x)} = \left( \frac{f(x)}{x} - A \right) \cdot \frac{x}{g(x)} + A \cdot \frac{x}{g(x)} \to 0 \cdot \frac{1}{B} + A \cdot \frac{1}{B}$$
+    and thus we are done.
+
+11. Suppose $f$ is defined in a neighbourhood of $x$ and $f''(x)$
+    exists. Show that
+    $$\lim_{h \to 0} \frac{f(x + h) + f(x - h) - 2f(x)}{h^2} = f''(x).$$
+
+    $f$ is (twice) differentiable at $x$ and thus continuous. Thus the
+    numerator tends to 0 as $h \to 0$. Applying L’Hopital’s yields
+
+    $$\begin{aligned}
+                \lim_{h \to 0} \frac{f(x + h) + f(x - h) - 2f(x)}{h^2}
+                    &= \lim_{h \to 0} \frac{f'(x + h) + f'(x - h) - 2f'(x)}{2h} \\
+                    &= \lim_{h \to 0} \frac{f'(x + h) - f'(x)}{2h} - \frac{f'(x) - f'(x - h)}{2h} \\
+                    &= f''(x)
+            \end{aligned}$$
+
+    so we are done.
+
+12. If $f(x) = |x|^3$, compute $f'(x)$, $f''(x)$ for all real $x$ and
+    show that $f^{(3)}(0)$ does not exist.
+
+    If $x > 0$, then $f(x) = x^3$ in any sufficiently small
+    neighbourhood of $x$, so $f'(x) = 3x^2, f''(x) = 6x$. If $x < 0$,
+    then $f(x) = -x^3$ in any sufficiently small neighbourhood of $x$,
+    so $f'(x) = -3x^2, f''(x) = -6x$. At $x = 0$, we have
+    $$f'(0) = \lim_{h \to 0} \frac{|h|^3 - 0}{h} = 0,$$ and
+    $$f''(0) = \lim_{h \to 0} \frac{f'(h) - f'(0)}{h} \sim \lim_{h \to 0} \frac{\pm3 h^2}{h} = 0.$$
+    Now, $f^{(3)}(0)$ does not exist, since the left-hand derivative of
+    $f''$ at 0 is $-6$ while the right-hand derivative is $6$.
+
+13. Suppose $a, c \in \R$ $c > 0$ and $f$ is defined on $[-1, 1]$ such
+    that $f(x) = x^a \sin(|x|^{-c})$ whenever $x \ne 0$ and $0$
+    otherwise. Prove that:
+
+    (a) $f$ is continuous iff $a > 0$.
+
+        This follows immediately from the fact that $x^a$ is continuous
+        (specifically at $x = 0$) iff $a > 0$.
+
+    (b) $f'(0)$ exists iff $a > 1$.
+
+        We have $$f'(0) = \lim_{h \to 0} \frac{h^a \sin(|h|^{-c})}{h}$$
+        which is $0$ by the Squeeze theorem if $a > 1$. Otherwise, the
+        limit does not exist.
+
+    (c) $f'$ is bounded iff $a \ge 1 + c$.
+
+        If $x > 0$, then
+        $$|f'(x)| = |ax^{a - 1} \sin (x^{-c}) + x^a \cos(x^{-c}) \cdot -cx^{-c-1}| \le a |x|^{a-1} + c |x|^{a-c-1}$$
+        which is bounded iff $a \ge 1 + c$.
+
+    (d) $f'$ is continuous iff $a > 1 + c$.
+
+        From the above formulation of $f'$, the derivative is continuous
+        at $0$ iff $a-c-1 > 0$, so $a > 1 + c$ as required.
+
+    (e) $f''(0)$ exists iff $a > 2 + c$.
+
+        We have
+        $$f''(0) = \lim_{h \to 0} [ ah^{a-2} \sin(h^{-c}) - ch^{a-c-2} \cos(h^{-c}) ]$$
+        which exists iff $a - c - 2 > 0$, so $a > 2 + c$.
+
+    (f) $f''$ is bounded iff $a \ge 2 + 2c$.
+
+        Bash the product rule and find the largest term.
+
+    (g) $f''$ is continuous iff $a > 2 + 2c$.
+
+        See above.
+
+14. Let $f$ be differentiable on $(a, b)$. Prove that $f$ is convex iff
+    $f'$ is monotonically increasing. Assume next that $f''(x)$ exists
+    for every $x \in (a, b)$, and prove that $f$ is convex iff
+    $f''(x) \ge 0$ for all $x \in (a, b)$.
+
+    If $f'$ is not monotonically increasing, there exist points
+    $x, y \in (a, b)$ such that $x < y$ and $f'(x) > f'(y)$. Then, for
+    some $\delta > 0$ sufficiently small, $f(x+\delta)$ is above the
+    secant formed between $(x, f(x))$ and $(y, f(y))$. Conversely, if
+    $f'$ is monotonically increasing, but not convex, then for some
+    $x, y \in (a, b)$, there exists $z = \lambda x + (1 - \lambda)y$
+    such that $f(z) > \lambda f(x) + (1 - \lambda) f(y)$. Then applying
+    the mean value theorem to the intervals $(x, z)$ and $(z, y)$ yields
+    $w_1 < w_2$ such that $f'(w_1) > f'(w_2)$, a contradiction, proving
+    the first result.
+
+    We know that if $f''(x) \ge 0$, then $f'$ is strictly increasing and
+    thus $f$ is convex. Conversely, if $f''(x) < 0$, then for
+    $\delta > 0$ sufficiently small, we have
+    $$f(x) \ge \frac{1}{2} \left( f(x-\delta) + f(x+\delta) \right)$$ so
+    $f$ is not convex, as required.
+
+15. Suppose $a \in \R$ and $f: (a, +\infty)$ is twice-differentiable,
+    and $M_0, M_1, M_2$ are the least upper bounds of
+    $|f(x)|, |f'(x)|, |f''(x)|$ respectively on $(a, +\infty)$. Prove
+    that $M_1^2 \le 4M_0M_2$.
+
+    If $h > 0$, setting $(\alpha, \beta, n) = (x, x+2h, 2)$ in Taylor’s
+    theorem shows that for some $\xi \in (x, x+2h)$,
+    $$f(x+2h) = f(x) + 2h f'(x) + \frac{(2h)^2}{2!} f''(\xi)$$ and thus
+    $$f'(x) = \frac{1}{2h} [f(x+2h) - f(x)] - h f''(\xi)$$ so
+    $$|f'(x)| \le M_1 \le \frac{1}{h} M_0 + hM_2.$$ Now the right side
+    attains its minimum by AM-GM at
+    $$\frac{1}{h} M_0 + hM_2 \ge 2 \sqrt{\frac{1}{h} M_0 \cdot h M_2} = 2\sqrt{M_0M_2},$$
+    so $M_1 \le 2\sqrt{M_0M_2}$ and the result follows.
+
+16. Suppose $f$ is twice-differentiable on $(0, \infty)$, $f''$ is
+    bounded on $(0, \infty)$ and $f(x) \to 0$ as $x \to \infty$. Prove
+    that $f'(x) \to 0$ as $x \to \infty$.
+
+    Let $M_2$ be the least upper bound of $f''$ and $\epsilon > 0$ be
+    arbitrary. Then, since $f(x) \to 0$ as $x \to \infty$, we can choose
+    $x_0$ such that $|f(x)| \le \epsilon^2/(4M_2)$ for all $x \ge x_0$.
+    Then taking $a = x_0$ in Exercise 15, we have
+    $$f'(x) \le \sup_{x \ge x_0} |f'(x)| \le 2\sqrt{M_0M_2} < 2\sqrt{\epsilon^2/4} = \epsilon,$$
+    for all $x \ge x_0$ as required.
+
+17. Suppose $f$ is real and thrice-differentiable on $[-1, 1]$, such
+    that $f(-1) = 0$, $f(0) = 0$, $f(1) = 1$ and $f'(0) = 0$. Prove that
+    $f^{(3)}(x) \ge 3$ for some $x \in (-1, 1)$.
+
+    Applying Taylor’s theorem, we have
+    $$f(1) = f(0) + f'(0) \cdot 1 + \frac{1}{2} f''(0) \cdot 1^2 + \frac{1}{6} f^{(3)}(t) \cdot 1^3$$
+    for some $t \in (0, 1)$ and
+    $$f(-1) = f(0) + f'(0) \cdot (-1) + \frac{1}{2} f''(0) \cdot (-1)^2 + \frac{1}{6} f^{(3)}(s) \cdot (-1)^3$$
+    for some $s \in (-1, 0)$ so adding these, substituting known values,
+    and rearranging yields $f^{(3)}(s) + f^{(3)}(t) = 6$ for some
+    $s, t$, yielding the result.
+
+18. Suppose $f$ is a real function on $[a, b]$, $n$ is a positive
+    integer, and $f^{(n-1)}$ exists for every $t \in [a, b]$. Let
+    $\alpha, \beta, P$ be as in Taylor’s theorem. Define
+    $$Q(t) = \frac{f(t) - f(\beta)}{t - \beta}$$ for $t \in [a, b]$ and
+    $t \ne \beta$, differentiate $n - 1$ times at $t = \alpha$ and
+    derive the following version of Taylor’s theorem:
+    $$f(\beta) = P(\beta) + \frac{Q^{(n-1)}(\alpha)}{(n-1)!} (\beta - \alpha)^n.$$
+
+    Take $f(t) - f(\beta) = (t - \beta)Q(t)$ and differentiate at
+    $\alpha$ to get
+    $$f^{(k)}(\alpha) = kQ^{(k-1)} (\alpha) - (\beta - \alpha) Q^{(k)}(\alpha),$$
+    so
+    $$\frac{f^{(k)}(\alpha)}{k!} (\beta - \alpha)^k = \frac{Q^{(k-1)}(\alpha)}{(k-1)!}(\beta - \alpha)^k - \frac{Q^{(k)} (\alpha)} {k!} (\beta - \alpha)^{k+1}.$$
+    Then,
+
+    $$\begin{aligned}
+                P(\alpha) &= f(\alpha) + \sum_{k=1}^{n-1} \frac{f^{(k)} (\alpha)}{k!} (\beta - \alpha)^k \\
+                    &= f(\alpha) + \sum_{k=1}^{n-1} \left(\frac{Q^{(k-1)}(\alpha)}{(k-1)!}(\beta - \alpha)^k - \frac{Q^{(k)} (\alpha)} {k!} (\beta - \alpha)^{k+1} \right) \\
+                    &= f(\alpha) + Q(\alpha) (\beta - \alpha) - \frac{Q^{(n-1)} (\alpha)} {(n-1)!} (\beta - \alpha)^{n} \\
+                    &= f(\beta) - \frac{Q^{(n-1)}(\alpha)}{(n-1)!} (\beta - \alpha)^n,
+            \end{aligned}$$
+
+    and thus the result.
+
+19. Suppose $f$ is defined in $(-1, 1)$ and $f'(0)$ exists. Suppose
+    $-1 < \alpha_n < \beta_n < 1$, with $\alpha_n \to 0$,
+    $\beta_n \to 0$ as $n \to \infty$. Define the difference quotients
+    $$D_n = \frac{f(\beta_n) - f(\alpha_n)}{\beta_n - \alpha_n}.$$ Prove
+    the following statements:
+
+    1.  If $\alpha_n < 0 < \beta_n$, then $D_n \to f'(0)$.
+
+        Suppose without loss of generality that $f(0) = 0$, by
+        subtracting any necessary constants. Then, let
+        $\gamma_n \in (\alpha_n, \beta_n)$ by the mean value theorem
+        such that
+        $f'(\gamma_n) = \frac{f(\beta_n) - f(\alpha_n)}{\beta_n - \alpha_n}$.
+        Then, $\gamma_n \to 0$, so applying L’Hopital’s rule,
+        $$\lim_{n \to \infty} D_n = \lim_{n \to \infty} f'(\gamma_n) = \lim_{n \to \infty} \frac{f(\gamma_n) - f(0)}{\gamma_n - 0} = f'(0),$$
+        as required.
+
+    2.  If $0 < \alpha_n < \beta_n$ and
+        $\{\beta_n/(\beta_n - \alpha_n)\}$ is bounded, then
+        $D_n \to f'(0)$.
+
+        Let $\epsilon > 0$ be arbitrary and
+        $\lambda_n = \beta_n/(\beta_n - \alpha_n)$. Also, let $M$ such
+        that $|\lambda_n| \le M$ for all $n$, so that
+
+        $$\begin{aligned}
+                        D_n &= \frac{f(\beta_n) - f(\alpha_n)}{\beta_n - \alpha_n} \\
+                            &= \frac{f(\beta_n) - f(0) + f(0) - f(\alpha_n)}{\beta_n - \alpha_n} \\
+                            &= \frac{\beta_n}{\beta_n - \alpha_n} \cdot \frac{f(\beta_n) - f(0)}{\beta_n - 0} - \frac{\alpha_n}{\beta_n - \alpha_n} \cdot \frac{f(\alpha_n) - f(0)}{\alpha_n - 0} \\
+                            &= \lambda_n \frac{f(\beta_n) - f(0)}{\beta_n - 0} + (1 - \lambda_n) \frac{f(\alpha_n) - f(0)}{\alpha_n - 0}
+                    \end{aligned}$$
+
+        so choosing $N$ sufficiently large and letting $n \ge N$, we
+        have
+
+        $$\begin{aligned}
+                        |D_n - f'(0)| &\le \left| \lambda_n \frac{f(\beta_n) - f(0)}{\beta_n - 0} + (1 - \lambda_n) \frac{f(\alpha_n) - f(0)}{\alpha_n - 0} - f'(0) \right| \\
+                            &\overset{\Delta}{\le} \lambda_n \left| \frac{f(\beta_n) - f(0)}{\beta_n} - f'(0) \right| + |1 + \lambda_n| \cdot \left| \frac{f(\alpha_n) - f(0)}{\alpha_n} - f'(0) \right| \\
+                            &\le (1 + 2M)\epsilon
+                    \end{aligned}$$
+
+        completing the proof.
+
+    3.  If $f'$ is continuous in $(-1, 1)$, then $D_n \to f'(0)$.
+
+        Constructing $\gamma_n$ as in part (a), we have
+        $$\lim_{n \to \infty} D_n = \lim_{n \to \infty} f'(\gamma_n) = f'(0),$$
+        since $f'$ is continuous, as required.
+
+    Give an example in which $f$ is differentiable in $(-1, 1)$ (but
+    $f'$ is not continous at $0$), and in which $\alpha_n, \beta_n$ tend
+    to $0$ in a way that $\lim D_n$ exists but is different from
+    $f'(0)$.
+
+20. Formulate and prove an inequality which follows from Taylor’s
+    theorem and which remains valid for vector-valued functions.
+
+    If $\textbf{f}: [a, b] \to \R^m$ is $n$-times differentiable and
+    $\textbf{f}^{(n-1)}$ is continuous on $[a, b]$, and
+    $\alpha < a < b < \beta$ and
+    $$\textbf{P}(t) = \sum_{k=0}^{n-1} \frac{\textbf{f}^{(k)}(\alpha)}{k!} (t - \alpha)^k,$$
+    then there exists $x \in (\alpha, \beta)$ such that
+    $$|\textbf{f}(\beta) - \textbf{P}(\beta)| \le \frac{(\beta-\alpha)^n}{n!} |\textbf{f}^{(n)}(x)|$$
+    and notice that if $n = 1$, this is the vector-valued version of
+    Theorem 5.19.
+
+21. Let $E$ be a closed subset of $\R$. We saw in Exercise 4.22 that
+    there is a real continuous function $f$ on $\R$ whose zero set is
+    $E$. Is it possible, for each closed set $E$ to find such an $f$
+    which is differentiable on $\R$, or one which is $n$ times
+    differentiable, or even one which has derivatives of all orders on
+    $\R$?
+
+    Take $n \in \N$. Then, define
+    $$f_n(t) = \frac{t^n}{t^n + (1-t)^n},  g(x) = f(\rho_E(x)),$$ for
+    $x \in \R$. Then, $g(x) = 0$ iff $x \in E$, and since $f_n$ has the
+    property that its first $n-1$ derivatives are 0 at $t=0$ and $1$,
+    $g$ is $n$-times differentiable on $E$ and thus on $\R$.
+
+    For the infiitely differentiable case, it is possible to define a
+    similar function. This depends largely on the fact that $\R$ is
+    separable.
+
+22. Suppose $f$ is a real function on $\R$. Call $x$ a **fixed point**
+    of $f$ is $f(x) = x$.
+
+    (a) If $f$ is differentiable and $f'(t) \ne 1$ for every real $t$,
+        prove that $f$ has at most one fixed point.
+
+        If there were more than one, then applying mean value theorem
+        with the fixed points as endpoints would give you some point
+        between them with derivative 1, contrary to the assumption.
+
+    (b) Show that the function $f$ defined by
+        $$f(t) = t + (1 + e^t)^{-1}$$ has no fixed point, although
+        $0 < f'(t) < 1$ for all $t \in \R$.
+
+        Clearly $f$ has no fixed points. However,
+        $$f'(t) = 1 - (1 + e^t)^{-2} \cdot e^t \in (0, 1)$$ since
+        $x/(1+x^2) \in (0, 1)$ for all $x > 0$.
+
+    (c) However, if there is a constant $A < 1$ such that
+        $|f'(t)| \le A$ for all $t \in \R$, then prove that a fixed
+        point $x$ of $f$ exists, and that $x = \lim x_n$ where $x_1$ is
+        an arbitrary real number, and $x_{n+1} = f(x_n)$.
+
+        Yes, let $C = |f(x_1) - x_1|$, so that for arbitrary $n$, we
+        have some $t_n$ between $x_n$ and $x_{n+1}$ by the mean value
+        theorem such that
+        $$\frac{| f(x_{n+1} - f(x_n) |}{| x_{n+1} - x_n |} = f'(t_n) \le A,$$
+        so inductively, $$|x_{n+1} - x_n| \le A^{n-1} C,$$ so for $m$
+        and $n$ sufficiently large
+        $$|x_m - x_n| \overset{\Delta}{\le} \sum_{k=n}^{m-1} |x_{k+1} - x_k| \le C\sum_{k=n}^{\infty} A^{k-1} = CA^{k-1}/(1 - A),$$
+        which can be made arbitrarily small. Thus, $\{x_n\}$ is Cauchy
+        in $\R$ and thus convergent since $\R$ is complete.
+        
+        Then, we have
+        $$x := \lim_{n \to \infty} x_n = \lim_{n \to \infty} f(x_{n-1}) = f(x)$$
+        since $f$ is differentiable and thus continuous, so
+        $x = \lim x_n$ is a fixed point of $f$.
+
+    (d) Show that the process described in (c) can be visualized by the
+        zig-zag path
+        $$(x_1, x_2) \to (x_2, x_2) \to (x_2, x_3) \to (x_3, x_3) \to \dotsb.$$
+
+        It just can, draw it!
+
+23. The function $f(x) = (x^3 + 1)/3$ has three fixed points
+    $$-2 < \alpha < -1, 0 < \beta < 1 < \gamma < 2.$$ For arbitrary
+    chosen $x_1$, define $\{x_n\}$ by setting $x_{n+1} = f(x_n)$.
+
+    (a) If $x_1 < \alpha$, prove that $x_n \to -\infty$ as
+        $n \to \infty$.
+
+        We can find inductively that
+        $x_n < x_{n-1} < \dotsc < x_1 < \alpha$. It cannot converge, as
+        then the limit would tend to a fixed point of $f$, but it is
+        strictly smaller than any of the three. Thus it must diverge to
+        $-\infty$.
+
+    (b) If $\alpha < x_1 < \gamma$, prove that $x_n \to \beta$ as
+        $n \to \infty$.
+
+        We can find that $x_n$ approaches $\beta$ monotonically, but is
+        bounded by $\beta$, and thus converges. The limit point must be
+        a fixed point of $f$, and only $\beta$ fits, completing the
+        proof.
+
+    (c) If $\gamma < x_1$, prove that $x_n \to +\infty$ as
+        $n \to \infty$.
+
+        The proof is similar to part (a).
+
+    Thus only $\beta$ can be located using this method.
+
+24. The process described in part (c) of Exercise 22 can of course also
+    be applied to functions that map $(0, \infty)$ to $(0, \infty)$. Fix
+    some $\alpha > 1$ and put
+    $$f(x) = \frac{1}{2} \left( x + \alpha/x \right), g(x) = \frac{\alpha + x}{1 + x}.$$
+    Both $f$ and $g$ have $\sqrt{\alpha}$ as their only fixed point in
+    $(0, \infty)$. Try to explain, on the basis of properties of $f$ and
+    $g$ why the convergence in Exercise 3.16 is so much more rapid than
+    it is in Exercise 17. Do the same when $0 < \alpha < 1$.
+
+    Consider the derivatives of $f$ and $g$ at their fixed point. We
+    have $$f'(x) = \frac12 (1 - \alpha/x^2),\ f'(\sqrt{\alpha}) = 0$$
+    and
+    $$g'(x) = \frac{1-\alpha}{(1+x)^2},\ g'(\sqrt{\alpha}) = \frac{1+\sqrt{\alpha}}{1-\sqrt{\alpha}} < 0$$
+    so intuitively, for $x_n$ sufficiently close to $\sqrt{\alpha}$, the
+    horizontal lines for $f$ in the zigzag path take the $x_n$ much
+    closer to $y=\sqrt{\alpha}$ than the corresponding paths in $g$.
+
+25. Suppose $f$ is twice-differentiable on $[a, b]$, $f(a) < 0$,
+    $f(b) > 0$, $f'(x) \ge \delta > 0$, and $0 \le f''(x) \le M$ for all
+    $x \in [a, b]$. Let $\xi$ be the unique point in $(a, b)$ at which
+    $f(\xi) = 0$.
+
+    Complete the details in the following outline of **Newton’s method**
+    for computing $\xi$.
+
+    (a) Choose $x_1 \in (\xi, b)$ and define $\{x_n\}$ by
+        $x_{n+1} = x_n - f(x_n) / f'(x_n)$. Interpret this
+        geometrically, in terms of a tangent to the graph of $f$.
+
+        $x_{n+1}$ is the x-coordinate of the point at which the tangent
+        of $f$ at $(x_n, f(x_n))$ intersects the x-axis.
+
+    (b) Prove that $x_{n+1} < x_n$ and that $x_n \to \xi$.
+
+        We claim inductively that $\xi \le x_{n+1} < x_n$. If
+        $x_{n+1} < \xi$, then choosing the point $t \in (\xi, x_n)$ such
+        that $$f'(t) = \frac{f(x_n)-f(\xi)}{x_n - \xi} > f'(x_n),$$
+        contradicting the fact that $f'$ is increasing. Also, since
+        $\xi \le x_n$ inductively, $f(x_n) > 0$ so
+        $f(x_n) / f'(x_n) > 0$, proving the first result.
+        
+        Then, the sequence converges by the monotone convergence
+        theorem. If the sequence converged to $y > \xi$, then
+        $f'(y) > 0$ would imply a contradiction. Thus, we must have
+        $x_n \to \xi$.
+
+    (c) Use Taylor’s theorem to show that
+        $$x_{n+1} - \xi = \frac{f''(t_n)}{2f'(x_n)} (x_n - \xi)^2,$$ for
+        some $t \in (\xi, x_n)$.
+
+    (d) If $A = M/2\delta$, deduce that
+        $$0 \le x_{n+1} - \xi \le 1/A [A(x_1 - \xi)]^{2^n}.$$
+
+    (e) Show that Newton’s method amounts to finding a fixed point of
+        the function $g(x) = x - f(x)/f'(x)$. How does $g'(x)$ behave
+        for $x$ near $\xi$?
+
+    (f) Put $f(x) = x^{1/3}$ on $\R$ and try Newton’s method. What
+        happens?
+
+26. Suppose $f$ is differentiable on $[a, b]$, $f(a) = 0$, and there is
+    a real number $A$ such that $|f'(x)| \le A|f(x)|$ on $[a, b]$. Prove
+    that $f(x) = 0$ for all $x \in [a, b]$.
+
+27. Let $\phi$ be a real function defined on a rectangle $R$ on the
+    plane, given by $a \le x \le b$, $\alpha \le y \le \beta$. A
+    **solution** of the initial-value problem
+    $$f' = \phi(x, y),\ y(a) = c,\ (\alpha \le c \le \beta)$$ is, by
+    definition, a differentiable function $f$ on $[a, b]$ such that
+    $f(a) = c$, for $c \in [\alpha, \beta]$, and $f'(x) = \phi(x, f(x))$
+    for $x \in [a, b]$.
+
+    Prove that such a problem has at most one solution if there is a
+    constant $A$ such that
+    $$\left| \phi(x, y_2) - \phi(x, y_1) \right| \le A |y_2 - y_1|$$
+    whenever $(x, y_1)$ and $(x, y_2)$ are both in $R$.
+
+28. Formulate and prove an analogous uniqueness theorem for systems of
+    differential equations of the form
+    $$y'_j = \phi_j(x, y_!, y_2, \dotsc, y_k),\ y_j(a) = c_j,\ j \in [k].$$
+    Note that this can be rewritten $\textbf{y}' = \Phi(x, \textbf{y})$,
+    $\textbf{y}(a) = \textbf{c}$, where $\textbf{y}$ ranges over a
+    $k$-cell, and $\Phi$ is a mapping of a $(k+1)$-cell into $\R^k$
+    whose components are the functions $\phi_i$ and
+    $\textbf{c} = (c_1, \dotsc, c_k)$.
+
+29. Specialize Exercise 28 by considering the system
+    $$y_j' = y_{j+1},\ j \in [k-1],\ y_k' = f(x) - \sum_{j=1}^{k} g_j(x)y_j,$$
+    where $f, g_1, \dotsc, g_k$ are continuous real functions on
+    $[a, b]$ and derive a uniqueness theorem for solutions of the
+    equation
+    $$y^{(k)} + g_k(x)y^{k-1} + \dotsc + g_2(x) y' + g_1(x)y = f(x),$$
+    subject to the initial conditions
+    $$y(a) = c_1, y'(a) = c_2, \dotsc, y^{(k-1)}(a) = c_k.$$

@@ -1,5 +1,7 @@
 
+https://blog.csdn.net/yangang1223/article/details/105412103
 
+https://blog.csdn.net/mukvintt/article/details/120152854
 Hive is a data warehousing (not designed for online transaction processing) infrastructure based on Apache Hadoop. Hadoop provides massive scale out and fault tolerance capabilities for data storage and processing on commodity hardware.
 
 Hive is designed to enable easy data summarization, ad-hoc querying and analysis of large volumes of data. It provides SQL which enables users to do ad-hoc querying, summarization and data analysis easily. At the same time, Hive's SQL gives users multiple places to integrate their own functionality to do custom analysis, such as User Defined Functions (UDFs).  
@@ -218,7 +220,18 @@ $ mysql -u hive --password="bigdata"
 
 
 
-hive-site.xml 和 hive-default.xml.template
+
+hive-site.xml and hive-default.xml.template
+
+hive-default.xml.template contains the default values for various configuration variables that come prepackaged in a Hive distribution. In order to override any of the values, create hive-site.xml instead and set the value in that file as shown above.
+
+hive-default.xml.template is located in the conf directory in your installation root, and hive-site.xml should also be created in the same directory.
+
+Please note that the template file hive-default.xml.template is not used by Hive at all (as of Hive 0.9.0) – the canonical list of configuration options is only managed in the HiveConf java class. The template file has the formatting needed for hive-site.xml, so you can paste configuration variables from the template file into hive-site.xml and then change their values to the desired configuration.
+
+In Hive releases 0.9.0 through 0.13.1, the template file does not necessarily contain all configuration options found in HiveConf.java and some of its values and descriptions might be out of date or out of sync with the actual values and descriptions. However, as of Hive 0.14.0 the template file is generated directly from HiveConf.java and therefore it is a reliable source for configuration variables and their defaults.
+
+
 hive-default.xml.template 包含预先打包在 Hive 发行版中的各种配置变量的默认值。为了覆盖任何值，请改为创建hive-site.xml并在该文件中设置该值，
 
 

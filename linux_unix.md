@@ -1,5 +1,6 @@
 
 
+https://homepages.uc.edu/~thomam/Intro_Unix_Text/TOC.html
 
 ## The Startup Sequence
 
@@ -23,7 +24,7 @@ When a Unix machine comes to life, a particular sequence of events takes place. 
     prompt at its assigned terminal and wait for someone to type in something. The *getty* process then waits (sleeps) for a user to enter their username.
 
 
-5. as a user enters begins to enter a username, the *getty* process wakes up and is overwritten (exec’d) by the *login* program, which then begins execution. The *login* process displays the
+5. as a user enters begins to enter a username, the *getty* process wakes up and is overwritten (exec'd) by the *login* program, which then begins execution. The *login* process displays the
 
 >	Password:  
 
@@ -48,7 +49,7 @@ Since most terminal-like connections don’t involve an actual hardware terminal
 
 
 The *init* program runs programs similar to *getty* for networked
-connections. For example, *sshd*, *telnetd*, and *rlogind* answer connection requests via *ssh*, *telnet*, and *rlogin*, respectively. Instead of being tied directly to a specific, physical terminal or modem line, these programs connect users' shells to *pseudo-ttys* or *PTY* (a pseudo-terminal). 
+connections. For example, *sshd*, *telnetd*, and *rlogind* answer connection requests via *ssh*, *telnet*, and *rlogin*, respectively. Instead of being tied directly to a specific, physical terminal or modem line, these programs connect users' shells to *pseudo-ttys* or *PTY* (a pseudo-terminal).
 
   That’s why when you typed in *who* you saw entries like ptty3 or pty1. In both instances, there is the program that reads your account and password information, and the program that validates it and invokes whatever login programs are needed for you to “log in” if everything checks out and is correct. As soon as someone types in some characters followed by the Enter key, the login program finishes the process of logging in
 

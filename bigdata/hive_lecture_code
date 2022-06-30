@@ -1,0 +1,196 @@
+
+
+
+```bash
+> nano visits.csv
+
+
+Amy,cnn.com,30
+Amy,bbc.com,20
+Amy,flickr.com,15
+Fred,cnn.com,15
+
+> nano users.csv
+
+Amy,female,30k
+Fred,male,24k
+
+
+> nano urls.csv
+
+cnn.com,news,0.8
+bbc.com,news,0.9
+flickr.com,photos,0.7
+espn.com,sports,0.9
+```
+
+
+
+----- script.sh
+
+#!/bin/bash
+
+
+
+mkdir visits
+mkdir users
+mkdir urls
+mkdir tmp        # used for store temporary files when hive choose to runs MR jobs locally
+
+head -n 2 visits.csv > visits/part-1
+tail -n 2 visits.csv > visits/part-2
+head -n 1 users.csv > users/part-1
+tail -n 1 users.csv > users/part-2
+head -n 2 urls.csv > urls/part-1
+tail -n 2 urls.csv > urls/part-2
+
+
+# load the data to the default warehouse directory in HDFS
+hadoop fs -mkdir -p /user/bigdata/project
+hdfs dfs -put visits /user/bigdata/project/
+hdfs dfs -put users /user/bigdata/project/
+hdfs dfs -put urls /user/bigdata/project/
+hdfs dfs -cat /user/bigdata/project/visits/*
+hdfs dfs -cat /user/bigdata/project/users/*
+hdfs dfs -cat /user/bigdata/project/urls/*
+
+------------
+
+You can run the hadoop dfs ... commands from within the hive CLI; just drop the
+hadoop word from the command and add the semicolon at the end:
+
+This method of accessing hadoop commands is actually more efficient than using the
+hadoop dfs ... equivalent at the bash shell, because the latter starts up a new JVM
+instance each time, whereas Hive just runs the same code in its current process.
+You can see a full listing of help on the options supported by dfs using this command:
+hive> dfs -help;
+
+
+$ hive  # to address space issue when running locally $ hive -hiveconf mapreduce.cluster.local.dir=/home/hadoop/tmp
+
+hive> ! pwd
+hive> dfs -ls /;    # Hadoop dfs Commands from Inside Hive
+Found 4 items
+drwxr-xr-x   - hdfs hdfsadmingroup          0 2022-04-21 14:53 /apps
+drwxrwxrwt   - hdfs hdfsadmingroup          0 2022-04-21 14:54 /tmp
+drwxr-xr-x   - hdfs hdfsadmingroup          0 2022-04-21 14:54 /user
+drwxr-xr-x   - hdfs hdfsadmingroup          0 2022-04-21 14:53 /var
+
+
+hive> create external table visits (`user` string, url string, `time` int)
+row format delimited fields terminated by ','
+location '/user/bigdata/project/visits';
+OK
+Time taken: 1.184 seconds
+
+
+
+create external table users (`user` string, gender string, income string)
+row format delimited fields terminated by ','
+location '/user/bigdata/project/users';
+
+
+create external table urls (url string, category string, pr float)
+row format delimited fields terminated by ','
+location '/user/bigdata/project/urls';
+
+# if just '/user/bigdata/project/', can create table but it returns nothing when applying select
+# so the definition is just inserted to the rdbms, but is enforced when the data is read off the file system
+
+select * from visits;
+
+describe formatted visits;
+
+
+# local mode; how to set the temp file write permission for intermediate data
+https://stackoverflow.com/questions/45156722/failed-execution-error-return-code-1-from-org-apache-hadoop-hive-ql-exec-mr-ma
+
+hive> select count(*) from visits;
+Automatically selecting local only mode for query
+Query ID = hadoop_20220418061830_4501721a-72b6-447b-9a41-36c3b8653876
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+ set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+ set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+ set mapreduce.job.reduces=<number>
+org.apache.hadoop.util.DiskChecker$DiskErrorException: No space available in any of the local directories.
+...
+Job Submission failed with exception 'org.apache.hadoop.util.DiskChecker$DiskErrorException(No space available in any of the local directories.)'
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.mr.MapRedTask. No space available in any of the local directories.
+
+
+# Hive can leverage the lighter weight of the local mode to
+# perform all the tasks for the job on a single machine and sometimes in the same process.
+
+# https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/mapred-default.xml
+
+hive> set mapreduce.cluster.local.dir=/home/hadoop/tmp;   # set this everytime restart hive shell
+
+
+
+hive> select t1.*, t2.* from visits t1 join users t2 on t1.`user`=t2.`user`;
+Automatically selecting local only mode for query
+Query ID = hadoop_20220421082856_ee89b9f9-a7d7-4c75-9431-3a894f933820
+Total jobs = 1
+
+2022-04-21 08:29:05     Dump the side-table for tag: 1 with group count: 2 into file: file:/mnt/tmp/hadoop/d308b656-ff7b-4c9c-944e-69a0ec817adc/hive_2022-04-21_08-28-56_116_5650077306598646212-1/-local-10004/HashTable-Stage-3/MapJoin-mapfile01--.hashtable
+2022-04-21 08:29:05     End of local task; Time Taken: 1.727 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 1 out of 1
+Number of reduce tasks is set to 0 since there's no reduce operator
+Job running in-process (local Hadoop)
+2022-04-21 08:29:08,054 Stage-3 map = 100%,  reduce = 0%
+Ended Job = job_local1828771591_0002
+MapReduce Jobs Launched:
+Stage-Stage-3:  HDFS Read: 229 HDFS Write: 359 SUCCESS
+Total MapReduce CPU Time Spent: 0 msec
+OK
+Amy     cnn.com 30      Amy     female  30k
+Amy     bbc.com 20      Amy     female  30k
+Amy     flickr.com      15      Amy     female  30k
+Fred    cnn.com 15      Fred    male    24k
+Time taken: 11.973 seconds, Fetched: 4 row(s)
+
+
+
+hive>
+
+select sum(`time`), category from visits t1 join users t2 on t1.`user`=t2.`user`
+join urls t3 on t1.url=t3.url
+where gender='female' group by category;
+
+hive> select sum(`time`), category from visits t1 join users t2 on t1.`user`=t2.`user`
+   > join urls t3 on t1.url=t3.url
+   > where gender='female' group by category;
+No Stats for default@visits, Columns: time, user, url
+No Stats for default@users, Columns: gender, user
+No Stats for default@urls, Columns: category, url
+Automatically selecting local only mode for query
+Query ID = hadoop_20220421084723_7caeaa90-7ede-4f0d-a99b-6980c8e87ecb
+Total jobs = 1
+
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+ set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+ set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+ set mapreduce.job.reduces=<number>
+Job running in-process (local Hadoop)
+2022-04-21 08:47:35,357 Stage-3 map = 100%,  reduce = 100%
+Ended Job = job_local509002316_0007
+MapReduce Jobs Launched:
+Stage-Stage-3:  HDFS Read: 1672 HDFS Write: 1161 SUCCESS
+Total MapReduce CPU Time Spent: 0 msec
+OK
+50      news
+15      photos
+Time taken: 11.573 seconds, Fetched: 2 row(s)
